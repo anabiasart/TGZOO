@@ -18,12 +18,17 @@
            transition-all duration-200 ease-in-out;
   }
 
-  .btn-primary {
+  .btn-third {
     @apply bg-indigo-600 text-white 
            hover:bg-indigo-700 hover:scale-105 
            active:bg-indigo-800 active:scale-95;
   }
-
+  
+  .btn-primary{
+@apply bg-emerald-600 text-white 
+           hover:bg-emerald-700 hover:scale-105 
+           active:bg-emerald-800 active:scale-95;
+  }
   .btn-lilas {
     @apply bg-purple-500 text-white 
            hover:bg-purple-600 hover:scale-105 

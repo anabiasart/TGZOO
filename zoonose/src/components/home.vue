@@ -59,8 +59,14 @@ function ver() {
     <div class="content">
 
     <div class = "hero-text">
-        <h2>Adote um Amigo</h2> 
-      <button class="btn btn-outline" @click="acessarDetalhes">ACESSE AQUI</button>  
+        <!--
+Fonte menor/maior → text-sm, text-lg, etc.
+
+Botão menor/maior → ajuste px-* e py-*.
+
+Botão fixo ou cheio → use w-* ou w-full.-->
+
+      <button class="btn btn-outline text-xt border-1 rounded-md px-2 py-1" @click="acessarDetalhes">Adote um Amigo</button>  
     </div>
 
   <div class = "template2">
@@ -68,21 +74,21 @@ function ver() {
       <div class="service">
         <h3>Vacine o seu Pet</h3>
         <p>Garanta a saúde dos seus amigos peludos...</p>
-          <button class="btn btn-outline" @click="abrirVacina">CONSULTAR DATAS</button>
+          <button class="btn btn-secondary text-xt border-1 rounded-md px-1 py-1" @click="abrirVacina">CONSULTAR </button>
 
   </div>
 
       <div class="service">
         <h3>Faça login</h3>
         <p>Receba dicas dos nossos veterinários...</p>
-          <button class="btn btn-primary" @click="login">LOGIN</button>
+          <button class="btn btn-secondary text-xt border-1 rounded-md px-1 py-1" @click="login">LOGIN</button>
 
 </div>
       <div class="service">
         <h3>Agende uma Consulta</h3>
         <p>Receba atendimento especializado...</p>
 
-          <button class="btn btn-secondary" @click="agendar">AGENDAR</button>
+          <button class="btn btn-secondary text-xt border-1 rounded-md px-1 py-1" @click="agendar">AGENDAR</button>
 </div>
     </aside>
 
@@ -96,7 +102,7 @@ function ver() {
       </section>
 
       <section><div class="card"> <h3>📢 Últimas Notícias & Editais</h3> <div v-if="noticias.length"> <div v-for="(noticia, i) in noticias" :key="i" class="mb-2"> <strong>{{ noticia.titulo }}</strong> <p>{{ noticia.resumo }}</p> </div> </div> <div v-else> <p>Carregando notícias...</p> </div> 
-            <button class="btn btn-outline" @click="ver">VEJA MAIS</button>
+            <button class="btn btn-secondary text-xt border-1 rounded-md px-1 py-1" @click="ver">VEJA MAIS</button>
      </div> </section>
     </main>
 
@@ -217,12 +223,11 @@ function ver() {
 
 /* HERO TEXT */
 .hero-text {
-  position: fixed;
-  top: 10px;
+  position:fixed;
+  top: 5px;
   left: 2px;
-  text-align: center;
-  background-color: rgba(255, 255, 255, 0.85);
-  width: 215px;
+  text-align:justify;
+  width: 115px;
   padding: 0px;
   border-radius: 10px;
   box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
@@ -243,13 +248,13 @@ function ver() {
   display: flex;
   flex-direction: column;
   gap: 10px;
- height: 20px;           /* define altura fixa  */
+ height: 0px;           /* define altura fixa  */
   width: 65%;
 
 }
 .service {
   background-color: rgba(255, 255, 255, 0.85);
-  padding: 37px;
+  padding: 17px;
   text-align: center;
   border-radius: 12px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
@@ -276,7 +281,7 @@ function ver() {
 .card {
   background-color: rgba(245, 243, 243, 0.85);
   padding: 40px;
-  width: 500px;
+  width: 700px;
   min-height: 35vh;
   text-align: center;
   border-radius: 50px;
@@ -285,7 +290,7 @@ function ver() {
   display: grid;
   justify-content: center;
   margin: 20px auto;
-  font-size: 20px;
+  font-size: 15px;
 }
 
 

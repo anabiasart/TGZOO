@@ -6,8 +6,8 @@
     <div class="font mb-4">
       <p class="text-blue-600/25 dark:text-sky-400/25">Cuide-se bem...</p>
     </div>
-    <h1 class="text-3xl font-bold mb-2">Login</h1>
-    <h2 class="text-xl mb-4">Bem-vindo</h2>
+    <h1 class="text-3xl font-medium mb-3">Login</h1>
+    <h2 class="text-xl mb-3">Bem-vindo</h2>
 
     <input
       type="text"
@@ -22,7 +22,7 @@
       class="border rounded p-2 mb-4 w-64 focus:outline-none focus:ring-2 focus:ring-purple-400"
     />
 
-    <button @click="login()" class="bg-lilas-500 text-white p-4 rounded">Entrar</button>
+    <button @click="login()" class="btn btn-primary">Entrar</button>
 
     <p class="mensagem text-red-500 mt-2">{{ mensagem }}</p>
   </div>
@@ -60,7 +60,7 @@ function login() {
 
  .login-page {
       font-family: Arial, sans-serif;
-      background-color:#cae853;
+      background-color:#afc9f4;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -73,7 +73,7 @@ function login() {
     .container {
       
     background-color: rgba(255, 255, 255, 0.85); /* fundo claro e suave */
-    padding:30px;
+    padding:100px;
     display:flex;
    flex-direction: column;
     align-items: center;
@@ -82,7 +82,9 @@ function login() {
     transition: transform 0.2s ease, box-shadow 0.2s ease;
     /*gap: 20px;  espaçamento entre os cards */
     flex-wrap: wrap; /* quebra em linha nova no celular */
-    width: 450px;
+    width: 550px;
+  min-height: 50vh;
+  padding: 20px;
     }
 
 
@@ -95,8 +97,6 @@ function login() {
       margin: 8px 0;
       border: 1px solid #ccc;
       border-radius: 10px;
-      font-size: 12px;
-      font-style:oblique;
       
       
     }
