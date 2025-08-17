@@ -44,8 +44,8 @@ function login() {
   router.push('/login') 
 }
 function agendar() {
-  window.location.href = '../src/usuario/login.html'
-  }
+router.push('/login') 
+ }
 function ver() {
   window.location.href = 'user/edital.html'
 }
@@ -69,7 +69,6 @@ function ver() {
         <h3>Vacine o seu Pet</h3>
         <p>Garanta a saúde dos seus amigos peludos...</p>
           <button class="btn btn-outline" @click="abrirVacina">CONSULTAR DATAS</button>
-<button class="btn btn-primary">Clique Aqui</button>
 
   </div>
 

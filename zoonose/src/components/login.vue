@@ -22,7 +22,7 @@
       class="border rounded p-2 mb-4 w-64 focus:outline-none focus:ring-2 focus:ring-purple-400"
     />
 
-    <button @click="login()" class="bg-lilas-500 text-white p-4 rounded"">Entrar</button>
+    <button @click="login()" class="bg-lilas-500 text-white p-4 rounded">Entrar</button>
 
     <p class="mensagem text-red-500 mt-2">{{ mensagem }}</p>
   </div>
