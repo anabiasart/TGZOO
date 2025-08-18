@@ -164,7 +164,7 @@ Botão fixo ou cheio → use w-* ou w-full.-->
   display: grid;
   grid-template-columns: 1fr 2fr 1fr; /* 3 colunas: esq, centro, dir */
   gap: 20px;
-  width: 100%;
+  width: 90%;
   min-height: 100vh;
   padding: 20px;
 }
@@ -175,14 +175,15 @@ Botão fixo ou cheio → use w-* ou w-full.-->
 .col-central {
   display: flex;
   flex-direction: column;
-  gap: 30px;
+  gap: 150px;
 }
 
 .texto-zoonoses {
   background: rgba(255, 255, 255, 0.9);
   padding: 30px;
-  border-radius: 16px;
+  border-radius: 15px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+
 }
 
 /* Notícias já herda estilo do .card */
@@ -192,10 +193,10 @@ Botão fixo ou cheio → use w-* ou w-full.-->
 
 /* Coluna direita */
 .col-direita {
-  display: flex;
+  display:grid;
   flex-direction: column;
-  gap: 20px;
-  justify-content: flex-start;
+  gap: 50px;
+  justify-content:right;
   align-items: center;
 }
 
