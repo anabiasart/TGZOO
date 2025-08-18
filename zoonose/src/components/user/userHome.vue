@@ -1,11 +1,14 @@
 <template>
   <div class="user-home">
     <!-- Cabeçalho -->
+    <header class="header">
       <h1>Painel do Usuário</h1>
       <p>Bem-vindo(a), {{ usuario }}!</p>
+    </header>
 
     <!-- Área principal -->
     <main class="conteudo">
+      <!-- Atalhos -->
       <section class="atalhos">
         <h2>Suas Ações</h2>
         <div class="cards">
@@ -24,6 +27,7 @@
         </div>
       </section>
 
+      <!-- Notícias -->
       <section class="noticias">
         <h2>Últimas Notícias</h2>
         <ul>
@@ -63,55 +67,55 @@ export default {
 }
 </script>
 
-    <!---<style scoped>
-    .user-home {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-    }
+<style scoped>
+.user-home {
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
 
-    .header {
-    background: #2563eb; /* azul */
-    color: white;
-    padding: 1rem;
-    border-radius: 8px;
-    margin-bottom: 20px;
-    }
+.header {
+  background: #3b82f6; /* azul mais claro que admin */
+  color: white;
+  padding: 1rem;
+  border-radius: 8px;
+  margin-bottom: 20px;
+}
 
-    .atalhos, .noticias {
-    margin-top: 20px;
-    }
+.atalhos, .noticias {
+  margin-top: 20px;
+}
 
-    .cards {
-    display: flex;
-    gap: 15px;
-    flex-wrap: wrap;
-    }
+.cards {
+  display: flex;
+  gap: 15px;
+  flex-wrap: wrap;
+}
 
-    .card {
-    background: #f9f9f9;
-    border: 1px solid #ddd;
-    padding: 15px;
-    border-radius: 10px;
-    width: 200px;
-    text-align: center;
-    transition: 0.2s;
-    }
+.card {
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  padding: 15px;
+  border-radius: 10px;
+  width: 200px;
+  text-align: center;
+  transition: 0.2s;
+}
 
-    .card:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
+.card:hover {
+  box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
 
-    button {
-    margin-top: 10px;
-    padding: 8px 12px;
-    border: none;
-    background: #2563eb;
-    color: white;
-    border-radius: 6px;
-    cursor: pointer;
-    }
+button {
+  margin-top: 10px;
+  padding: 8px 12px;
+  border: none;
+  background: #3b82f6;
+  color: white;
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-    button:hover {
-    background: #1e40af;
-    }
-</style>--->
+button:hover {
+  background: #1e40af;
+}
+</style>

@@ -20,8 +20,8 @@
           <li><a href="EspecieListar.html">Espécies</a></li>
           <li><a href="ProtocoloListar.html">Protocolo</a></li>
           <li><a href="AtendimentoListar.html">Atendimento</a></li>
-          <li><a href="AgendaListar.html">Agenda</a></li>
-        </ul>
+        <li><router-link to="/agenda">Agenda</router-link></li>        
+    </ul>
       </nav>
     </div>
   </header>

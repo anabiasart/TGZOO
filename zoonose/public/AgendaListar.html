@@ -1,193 +1,126 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <title>Agenda</title>
-    <link rel="stylesheet" href="css/style.css">
+  <meta charset="UTF-8">
+  <title>Agenda Semanal</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0; padding: 0;
+      background: #f9f9f9;
+    }
+    header {
+      background: linear-gradient(90deg, #2563eb, #1e40af);
+      color: white;
+      padding: 15px;
+      text-align: center;
+    }
+    .agenda-container {
+      display: grid;
+      grid-template-columns: 80px repeat(7, 1fr);
+      border: 1px solid #ddd;
+      background: white;
+    }
+    .agenda-header {
+      background: #f0f0f0;
+      padding: 10px;
+      text-align: center;
+      border-bottom: 1px solid #ddd;
+      font-weight: bold;
+    }
+    .hora {
+      border-right: 1px solid #ddd;
+      text-align: center;
+      padding: 10px 5px;
+      font-size: 0.9em;
+      background: #fafafa;
+    }
+    .slot {
+      border: 1px solid #eee;
+      height: 60px;
+      position: relative;
+    }
+    .evento {
+      position: absolute;
+      top: 5px;
+      left: 5px;
+      right: 5px;
+      background: #e1f5fe;
+      border: 1px solid #81d4fa;
+      border-radius: 6px;
+      padding: 5px;
+      font-size: 0.85em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+  </style>
 </head>
 <body>
-<main>
-    <ul id="listaAgenda"></ul>
-</main>
-
-
-<head>
-    <title>Agenda Semanal</title>
-    <style>
-        /* CSS básico para tabela de calendário */
-        table { border-collapse: collapse; width: 100%; }
-        th, td { border: 1px solid #ccc; vertical-align: top; padding: 10px; height: 150px; }
-        th { background-color: #f0f0f0; }
-        .event {
-            background-color: #e1f5fe;
-            margin: 5px 0;
-            padding: 5px;
-            border: 1px solid #81d4fa;
-            border-radius: 3px;
-            font-size: 0.9em;
-        }
-        
-        /* Estilo do menu */
-       .header {
-    position: sticky; /* fixa no topo */
-    top: 0;
-    z-index: 1000;
-    background: linear-gradient(90deg, #f8f8f8, #eaeaea);
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-    border-bottom: 3px solid #ff6600;
-}
-
-.logo h1 a {
-    text-decoration: none;
-    color: #333;
-}
-
-.nav ul {
-    list-style: none;
-    padding: 0;
-    margin: 10px 0 0;
-    display: flex;
-    justify-content: center;
-    gap: 20px;
-}
-
-.nav a {
-    color: #333;
-    text-decoration: none;
-    font-weight: bold;
-    transition: color 0.2s ease, border-bottom 0.2s ease;
-}
-
-.nav a:hover {
-    color: #ff6600;
-    border-bottom: 2px solid #ff6600;
-}
-
-    </style>
-</head>
-<body>
+  <header>
     <h1>Agenda Semanal</h1>
-    <div>
-        <button id="prevWeek">Semana Anterior</button>
-        <button id="nextWeek">Próxima Semana</button>
-    </div>
-    <br>
-    <table id="calendario">
-        <thead>
-            <tr id="headerDias">
-                <!-- Cabeçalho: preenchido dinamicamente -->
-            </tr>
-        </thead>
-        <tbody>
-            <tr>
-                <!-- Linha única: cada célula representa um dia da semana -->
-                <td id="dia1"></td>
-                <td id="dia2"></td>
-                <td id="dia3"></td>
-                <td id="dia4"></td>
-                <td id="dia5"></td>
-                <td id="dia6"></td>
-                <td id="dia7"></td>
-            </tr>
-        </tbody>
-    </table>
+    <button id="prevWeek">← Semana Anterior</button>
+    <button id="nextWeek">Próxima Semana →</button>
+  </header>
 
-<script src="js/menu.js"></script>
-<script src="js/api.js"></script>
-<script src="js/agenda.js"></script>
-<script>
-        // Variável para controlar a semana (data do início da semana)
-        let dataInicioSemana = new Date(); // data atual
+  <div class="agenda-container" id="agenda">
+    <!-- Cabeçalho dos dias -->
+    <div></div>
+    <div class="agenda-header">Seg 19/08</div>
+    <div class="agenda-header">Ter 20/08</div>
+    <div class="agenda-header">Qua 21/08</div>
+    <div class="agenda-header">Qui 22/08</div>
+    <div class="agenda-header">Sex 23/08</div>
+    <div class="agenda-header">Sáb 24/08</div>
+    <div class="agenda-header">Dom 25/08</div>
 
-        // Função para calcular a segunda-feira da semana atual
-        function getInicioSemana(data) {
-            let dia = data.getDay(); // 0 (Domingo) a 6 (Sábado)
-            let diff = data.getDate() - dia + (dia === 0 ? -6 : 1); // Se domingo, volta 6 dias
-            return new Date(data.setDate(diff));
-        }
+    <!-- Horários -->
+    <div class="hora">08h</div>
+    <div class="slot" id="d1h8"></div>
+    <div class="slot" id="d2h8"></div>
+    <div class="slot" id="d3h8"></div>
+    <div class="slot" id="d4h8"></div>
+    <div class="slot" id="d5h8"></div>
+    <div class="slot" id="d6h8"></div>
+    <div class="slot" id="d7h8"></div>
 
-        // Inicializa a dataInicioSemana para a segunda-feira da semana atual
-        dataInicioSemana = getInicioSemana(new Date());
+    <div class="hora">09h</div>
+    <div class="slot" id="d1h9"></div>
+    <div class="slot" id="d2h9"></div>
+    <div class="slot" id="d3h9"></div>
+    <div class="slot" id="d4h9"></div>
+    <div class="slot" id="d5h9"></div>
+    <div class="slot" id="d6h9"></div>
+    <div class="slot" id="d7h9"></div>
 
-        // Formata a data no formato yyyy-mm-dd para enviar ao servlet
-        function formatDate(d) {
-            let month = '' + (d.getMonth() + 1),
-                day = '' + d.getDate(),
-                year = d.getFullYear();
-            if (month.length < 2) month = '0' + month;
-            if (day.length < 2) day = '0' + day;
-            return [year, month, day].join('-');
-        }
+    <div class="hora">10h</div>
+    <div class="slot" id="d1h10"></div>
+    <div class="slot" id="d2h10"></div>
+    <div class="slot" id="d3h10"></div>
+    <div class="slot" id="d4h10"></div>
+    <div class="slot" id="d5h10"></div>
+    <div class="slot" id="d6h10"></div>
+    <div class="slot" id="d7h10"></div>
 
-        // Atualiza o cabeçalho da tabela com as datas da semana
-        function atualizaCabecalho() {
-            let header = document.getElementById("headerDias");
-            header.innerHTML = "";
-            for (let i = 0; i < 7; i++) {
-                let d = new Date(dataInicioSemana);
-                d.setDate(d.getDate() + i);
-                let th = document.createElement("th");
-                th.innerHTML = d.toLocaleDateString("pt-BR", { weekday: 'long', day: 'numeric', month: 'numeric' });
-                header.appendChild(th);
-            }
-        }
+    <!-- continua até 18h, por exemplo -->
+  </div>
 
-        // Limpa os eventos dos dias
-        function limpaEventos() {
-            for (let i = 1; i <= 7; i++) {
-                document.getElementById("dia" + i).innerHTML = "";
-            }
-        }
+  <script>
+    // Exemplo de eventos "mockados"
+    const eventos = [
+      { dia: 1, hora: 8, cliente: "João", tipo: "Consulta" },
+      { dia: 3, hora: 9, cliente: "Maria", tipo: "Vacinação" },
+      { dia: 5, hora: 10, cliente: "Carlos", tipo: "Retorno" }
+    ];
 
-        // Carrega os eventos chamando o servlet via AJAX (fetch API)
-        function carregaEventos() {
-            // Define a data de início da semana formatada
-            let dataInicioStr = formatDate(dataInicioSemana);
-
-            fetch("AgendaCarregar?dataInicio=" + dataInicioStr)
-                .then(response => response.json())
-                .then(data => {
-                    limpaEventos();
-                    // Para cada evento retornado, insere no dia correspondente
-                    data.forEach(evento => {
-                        let dataEvento = new Date(evento.data); // Certifique-se de que o formato seja compatível
-                        // Calcula a diferença de dias entre o evento e o início da semana
-                        let diffDias = Math.floor((dataEvento - dataInicioSemana) / (1000 * 60 * 60 * 24));
-                        if (diffDias >= 0 && diffDias < 7) {
-                            let td = document.getElementById("dia" + (diffDias + 1));
-                            // Cria um elemento para o evento
-                            let divEvento = document.createElement("div");
-                            divEvento.className = "event";
-                            divEvento.innerHTML = "<strong>" + evento.cliente + "</strong><br>" + evento.tipoAtendimento;
-                            td.appendChild(divEvento);
-                        }
-                    });
-                })
-                .catch(error => console.error("Erro ao carregar eventos: ", error));
-        }
-
-        // Função para atualizar o calendário (cabeçalho e eventos)
-        function atualizaCalendario() {
-            atualizaCabecalho();
-            carregaEventos();
-        }
-
-        // Eventos para navegar entre as semanas
-        document.getElementById("prevWeek").addEventListener("click", function(){
-            dataInicioSemana.setDate(dataInicioSemana.getDate() - 7);
-            atualizaCalendario();
-        });
-
-        document.getElementById("nextWeek").addEventListener("click", function(){
-            dataInicioSemana.setDate(dataInicioSemana.getDate() + 7);
-            atualizaCalendario();
-        });
-
-        // Inicializa o calendário
-        atualizaCalendario();
-    </script>
-
-    </body>
+    eventos.forEach(ev => {
+      const slot = document.getElementById(`d${ev.dia}h${ev.hora}`);
+      if (slot) {
+        const div = document.createElement("div");
+        div.className = "evento";
+        div.innerHTML = `<b>${ev.cliente}</b><br>${ev.tipo}`;
+        slot.appendChild(div);
+      }
+    });
+  </script>
+</body>
 </html>

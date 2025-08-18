@@ -10,12 +10,16 @@ import Home from '../components/home.vue'
 import Login from '../components/login.vue'
 import adminHome from '../components/admin/adminHome.vue'
 import userHome from '../components/user/userHome.vue'
+import Agendar from '../components/admin/Agenda.vue'
+
 
 const routes = [
   { path: '/', component: Home },   // Home vai ser a página inicial
   { path: '/login', component: Login },
   { path: '/admin', component: adminHome },
   { path: '/user', component: userHome },
+  { path: '/agenda', component: Agendar },
+
 ]
 
 const router = createRouter({
