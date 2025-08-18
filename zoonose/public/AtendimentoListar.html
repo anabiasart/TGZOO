@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Atendimento</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<main>
+    <h2>Lista de Atendimentos</h2>
+    <ul id="listaAtendimentos"></ul>
+</main>
+
+<style>
+    
+        /* Estilo do menu */
+        .header {
+    position: sticky; /* fixa no topo */
+    top: 0;
+    z-index: 1000;
+    background: linear-gradient(90deg, #f8f8f8, #eaeaea);
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    border-bottom: 3px solid #ff6600;
+}
+
+.logo h1 a {
+    text-decoration: none;
+    color: #333;
+}
+
+.nav ul {
+    list-style: none;
+    padding: 0;
+    margin: 10px 0 0;
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+}
+
+.nav a {
+    color: #333;
+    text-decoration: none;
+    font-weight: bold;
+    transition: color 0.2s ease, border-bottom 0.2s ease;
+}
+
+.nav a:hover {
+    color: #ff6600;
+    border-bottom: 2px solid #ff6600;
+}
+
+</style>
+<script src="js/menu.js"></script>
+<script src="js/api.js"></script>
+<script src="js/atendimento.js"></script>
+</body>
+</html>

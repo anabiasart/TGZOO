@@ -8,10 +8,14 @@ aop pressionar login a logica é ele ir para o login.vue */
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../components/home.vue'
 import Login from '../components/login.vue'
+import adminHome from '../components/admin/adminHome.vue'
+import userHome from '../components/user/userHome.vue'
 
 const routes = [
   { path: '/', component: Home },   // Home vai ser a página inicial
-  { path: '/login', component: Login }
+  { path: '/login', component: Login },
+  { path: '/admin', component: adminHome },
+  { path: '/user', component: userHome },
 ]
 
 const router = createRouter({

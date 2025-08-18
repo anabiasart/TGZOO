@@ -43,9 +43,12 @@ const router = useRouter();
 function login() {
   // Exemplo simples de validação
   if (usuario.value === 'admin' && senha.value === '12345') {
-    mensagem.value = '';
-    // Redireciona para a página inicial
-    router.push('/App'); 
+    mensagem.value = ''
+
+    router.push('/admin') //vai para 
+  }else if (usuario.value === 'user' && senha.value === '12345'){
+    mensagem.value = ''
+    router.push('/user')
   } else {
     mensagem.value = 'Usuário ou senha incorretos!';
   }

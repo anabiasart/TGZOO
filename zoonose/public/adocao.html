@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Adoção</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .grid-animais {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 10px;
+            padding: 10px;
+            text-align: center;
+            background-color: #fafafa;
+        }
+
+        .card img {
+            max-width: 100%;
+            border-radius: 8px;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 8px 12px;
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+
+        .btn:hover {
+            background-color: #45a049;
+        }
+        
+        /* Estilo do menu */
+        .header {
+            background-color: #f5f5f5;
+            padding: 10px;
+            text-align: center;
+        }
+        .header .logo h1 {
+            margin: 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<main>
+    <h2>Animais para Adoção</h2>
+    <div class="grid-animais" id="listaAdocao"></div>
+</main>
+
+<script src="js/menu.js"></script>
+<script src="js/api.js"></script>
+<script src="js/adocao.js"></script>
+</body>
+</html>
