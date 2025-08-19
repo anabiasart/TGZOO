@@ -67,14 +67,16 @@ export default {
     abrirUsuarios() {
       console.log("Abrir usuários")
     },
-    abrirAtendimentos() {
-      console.log("Abrir atendimentos")
-    },
+
     abrirConfiguracoes() {
       console.log("Abrir configurações")
     }
   }
 }
+
+   function abrirAtendimentos() {
+      router.push('/atendimento')
+    }
 </script>
 
 <style scoped>

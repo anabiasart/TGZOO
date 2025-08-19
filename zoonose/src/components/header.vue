@@ -15,11 +15,11 @@
 
       <nav class="nav">
         <ul>
-          <li><a href="index.html">Página Inicial</a></li>
-          <li><a href="AnimalListar.html">Animais</a></li>
-          <li><a href="EspecieListar.html">Espécies</a></li>
-          <li><a href="ProtocoloListar.html">Protocolo</a></li>
-          <li><a href="AtendimentoListar.html">Atendimento</a></li>
+          <li><a href="/">Página Inicial</a></li>
+          <li><a href="/animal">Animais</a></li>
+          <li><a href="/especie">Espécies</a></li>
+          <li><a href="/protocolo">Protocolo</a></li>
+          <li><a href="/atendimento">Atendimento</a></li>
         <li><router-link to="/agenda">Agenda</router-link></li>        
     </ul>
       </nav>

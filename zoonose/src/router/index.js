@@ -11,7 +11,10 @@ import Login from '../components/login.vue'
 import adminHome from '../components/admin/adminHome.vue'
 import userHome from '../components/user/userHome.vue'
 import Agendar from '../components/admin/Agenda.vue'
-
+import Animal from '../components/admin/Animal.vue'
+import Especie from '../components/admin/Especie.vue'
+import Protocolo from '../components/admin/Protocolo.vue'
+import Atendimento from '../components/admin/Atendimento.vue'
 
 const routes = [
   { path: '/', component: Home },   // Home vai ser a página inicial
@@ -19,6 +22,13 @@ const routes = [
   { path: '/admin', component: adminHome },
   { path: '/user', component: userHome },
   { path: '/agenda', component: Agendar },
+  { path: '/animal', component: Animal },
+  { path: '/especie', component: Especie},
+  { path: '/protocolo', component: Protocolo },
+  { path: '/atendimento', component: Atendimento },
+
+
+
 
 ]
 
