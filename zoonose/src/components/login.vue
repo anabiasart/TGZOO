@@ -63,7 +63,7 @@ function login() {
 
  .login-page {
       font-family: Arial, sans-serif;
-      background-color:#afc9f4;
+      background-color:#ade0db;
       display: flex;
       flex-direction: column;
       align-items: center;

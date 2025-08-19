@@ -42,8 +42,8 @@ export default {
 <style scoped>
 /* Container do header */
 .header {
-  background: linear-gradient(135deg, #3b82f6, #2563eb); /* azul bonito */
-  color: white;
+  background: linear-gradient(135deg, #abe2bc, #5c906e); /* azul bonito */
+  color: #14140f;
   border-radius: 0 0 12px 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
 }
@@ -84,7 +84,7 @@ export default {
 
 .logo a {
   text-decoration: none;
-  color: white;
+  color: #92965c;
   font-weight: bold;
 }
 
@@ -92,6 +92,7 @@ export default {
   margin: 0;
   font-size: 0.85rem;
   opacity: 0.9;
+  color:#92965c;
 }
 
 /* Menu */

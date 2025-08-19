@@ -74,29 +74,30 @@ export default {
 }
 
 .header {
-  background: #3b82f6; /* azul mais claro que admin */
-  color: white;
+ background: linear-gradient(135deg, #abe2bc, #5c906e); /* azul mais claro que admin */
+  color: rgb(26, 24, 24);
   padding: 1rem;
   border-radius: 8px;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .atalhos, .noticias {
-  margin-top: 20px;
+  margin-top: 10px;
 }
 
 .cards {
   display: flex;
-  gap: 15px;
+  gap: 5px;
   flex-wrap: wrap;
+  padding: 0px;
+
 }
 
 .card {
   background: #f9f9f9;
-  border: 1px solid #ddd;
-  padding: 15px;
-  border-radius: 10px;
-  width: 200px;
+  border: 0px solid #ddd;
+  padding: 55px;
+  border-radius: 5px;
   text-align: center;
   transition: 0.2s;
 }
@@ -107,15 +108,15 @@ export default {
 
 button {
   margin-top: 10px;
-  padding: 8px 12px;
+  padding: 10px 22px;
   border: none;
-  background: #3b82f6;
-  color: white;
+  background: #abe2bc;
+  color: #5c906e;
   border-radius: 6px;
   cursor: pointer;
 }
 
 button:hover {
-  background: #1e40af;
+  background: #e9ebff;
 }
 </style>

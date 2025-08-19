@@ -93,7 +93,7 @@ export default {
 h2 {
   margin-bottom: 1rem;
   font-size: 1.5rem;
-  color: #2563eb;
+  color: #5c906e;
 }
 
 /* Cards */
@@ -119,7 +119,7 @@ h2 {
 
 .card i {
   font-size: 2rem;
-  color: #2563eb;
+  color: #5c906e;
   margin-bottom: 0.5rem;
 }
 
@@ -131,7 +131,7 @@ h2 {
 }
 
 .stat {
-  background: #2563eb;
+  background: #5c906e;
   color: white;
   padding: 1.5rem;
   border-radius: 12px;
