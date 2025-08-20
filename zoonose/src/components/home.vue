@@ -102,7 +102,7 @@ Botão fixo ou cheio → use w-* ou w-full.-->
       </section>
 
       <section><div class="card"> <h3>📢 Últimas Notícias & Editais</h3> <div v-if="noticias.length"> <div v-for="(noticia, i) in noticias" :key="i" class="mb-2"> <strong>{{ noticia.titulo }}</strong> <p>{{ noticia.resumo }}</p> </div> </div> <div v-else> <p>Carregando notícias...</p> </div> 
-            <button class="btn btn-lilas text-xt border-1 rounded-md px-1 py-1" @click="ver">VEJA MAIS</button>
+            <button class="btn btn-third text-xt border-1 rounded-md px-1 py-1" @click="ver">VEJA MAIS</button>
      </div> </section>
     </main>
 
@@ -171,8 +171,8 @@ Botão fixo ou cheio → use w-* ou w-full.-->
 
 /* Coluna central */
 .col-central {
-  display: grid;
-  flex-direction: 1fr;
+  display:inline;
+  flex-direction:row;
   gap: 20px;
 }
 
