@@ -37,7 +37,7 @@ function acessarDetalhes() {
   window.location.href = 'detalhes.html'
 }
 function abrirVacina() {
-  alert("Mostrando datas de vacinação...")
+  window.location.href = 'user/edital.html'
 }
   
 function login() {
