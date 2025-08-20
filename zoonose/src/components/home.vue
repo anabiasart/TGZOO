@@ -34,7 +34,7 @@ onMounted(async () => {
 })
 
 function acessarDetalhes() {
-  window.location.href = 'detalhes.html'
+  window.location.href = 'user/detalhes.html'
 }
 function abrirVacina() {
   window.location.href = 'user/edital.html'
@@ -74,21 +74,21 @@ Botão fixo ou cheio → use w-* ou w-full.-->
       <div class="service">
         <h3>Vacine o seu Pet</h3>
         <p>Garanta a saúde dos seus amigos peludos...</p>
-          <button class="btn btn-lilas text-xt border-1 rounded-md px-1 py-1" @click="abrirVacina">CONSULTAR </button>
+          <button class="btn btn-emerald text-xt border-1 rounded-md px-1 py-1" @click="abrirVacina">CONSULTAR </button>
 
   </div>
 
       <div class="service">
         <h3>Faça login</h3>
         <p>Receba dicas dos nossos veterinários...</p>
-          <button class="btn btn-lilas text-xt border-1 rounded-md px-1 py-1" @click="login">LOGIN</button>
+          <button class="btn btn-emerald text-xt border-1 rounded-md px-1 py-1" @click="login">LOGIN</button>
 
 </div>
       <div class="service">
         <h3>Agende uma Consulta</h3>
         <p>Receba atendimento especializado...</p>
 
-          <button class="btn btn-lilas text-xt border-1 rounded-md px-1 py-1" @click="agendar">AGENDAR</button>
+          <button class="btn btn-emerald text-xt border-1 rounded-md px-1 py-1" @click="agendar">AGENDAR</button>
 </div>
     </aside>
 
@@ -123,7 +123,7 @@ Botão fixo ou cheio → use w-* ou w-full.-->
   min-height: 100vh;          /* garante ocupar toda a tela */
   width: 100%;
   position: relative;         /* necessário pro overlay */
-  background-color: #ade0db;
+  background-color: #abe2bc;
   background-size: cover;     /* cobre toda a área */
 }
 
