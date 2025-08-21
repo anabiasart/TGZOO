@@ -26,9 +26,9 @@ const routes = [
   { path: '/especie', component: Especie},
   { path: '/protocolo', component: Protocolo },
   { path: '/atendimento', component: Atendimento },
-
-
-
+  { path: '/edital',name: 'Edital',
+  component: () => import('../components/edital.vue')
+},
 
 ]
 

@@ -1,12 +1,38 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-
+import { Syringe, User, Calendar } from 'lucide-vue-next'
+import { noticiasData } from './edital.vue'
 
 
 const noticias = ref([])
 const router = useRouter()
 
+const servicos = [
+  { 
+    titulo: "Vacine o seu Pet", 
+    desc: "Garanta a saúde dos seus amigos peludos...", 
+    label: "CONSULTAR", 
+    icon: Syringe, 
+    acao: () => router.push('/edital') 
+  },
+  { 
+    titulo: "Faça login", 
+    desc: "Receba dicas dos nossos veterinários...", 
+    label: "LOGIN", 
+    icon: User, 
+    acao: () => router.push('/login') 
+  },
+  { 
+    titulo: "Agende uma Consulta", 
+    desc: "Receba atendimento especializado...", 
+    label: "AGENDAR", 
+    icon: Calendar, 
+    acao: () => router.push('/login') 
+  }
+]
+
+// Carregar notícias automaticamente
 function cortarTexto(texto, limite) {
   if (!texto) return ''
   texto = texto.replace(/\s+/g, ' ').trim()
@@ -17,287 +43,211 @@ function cortarTexto(texto, limite) {
   return cortado.slice(0, ultimoEspaco) + '…'
 }
 
-onMounted(async () => {
-  try {
-    const res = await fetch('/user/edital.html')
-    const html = await res.text()
-    const parser = new DOMParser()
-    const doc = parser.parseFromString(html, 'text/html')
-    const cards = doc.querySelectorAll('main .card')
-    noticias.value = Array.from(cards).slice(0, 3).map(card => ({
-      titulo: card.querySelector('h2')?.textContent.trim() || 'Sem título',
-      resumo: cortarTexto(card.querySelector('p')?.textContent.trim() || '', 60)
-    }))
-  } catch (err) {
-    console.error('Erro ao carregar notícias:', err)
-  }
-})
 
-function acessarDetalhes() {
-  window.location.href = 'user/detalhes.html'
-}
-function abrirVacina() {
-  window.location.href = 'user/edital.html'
-}
-  
-function login() {
-  router.push('/login') 
-}
-function agendar() {
-router.push('/login') 
- }
-function ver() {
-  window.location.href = 'user/edital.html'
-}
+onMounted(() => {
+  noticias.value = noticiasData.slice(0, 3).map(n => ({
+    titulo: n.titulo,
+    resumo: cortarTexto(n.resumo, 60)
+  }))
+})
 </script>
 
 <template>
-    
-    <!--criado outra div para separar esse background da imagem, da tela de login-->
-    <div class = "home-page">
-  <!----  <div class="overlay"></div>-->
+  <div class="home-page">
     <div class="content">
 
-    <div class = "hero-text">
-        <!--
-Fonte menor/maior → text-sm, text-lg, etc.
+      <!-- Botão fixo "Adote um Amigo" -->
+      <div class="hero-text">
+        <button class="btn-adote" @click="router.push('/detalhes')">Adote um Amigo</button>
+      </div>
 
-Botão menor/maior → ajuste px-* e py-*.
+      <div class="template2">
 
-Botão fixo ou cheio → use w-* ou w-full.-->
+        <!-- Serviços -->
+        <aside class="col-esquerda">
+          <div v-for="(s, i) in servicos" :key="i" class="service">
+            <component :is="s.icon" class="icon"/>
+            <h3>{{ s.titulo }}</h3>
+            <p>{{ s.desc }}</p>
+            <button class="btn-action" @click="s.acao">{{ s.label }}</button>
+          </div>
+        </aside>
 
-      <button class="btn btn-outline text-xt border-1 rounded-md px-2 py-1" @click="acessarDetalhes">Adote um Amigo</button>  
+        <!-- Conteúdo central -->
+        <main class="col-central">
+          <section class="texto-zoonoses">
+            <h2>Sobre as Zoonoses</h2>
+            <p>
+              Zoonoses são doenças que podem ser transmitidas de animais para humanos.
+              É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
+            </p>
+          </section>
+
+          <section>
+            <div class="card">
+              <h3>📢 Últimas Notícias & Editais</h3>
+              <div v-if="noticias.length">
+                <div v-for="(noticia, i) in noticias" :key="i" class="mb-2">
+                  <strong>{{ noticia.titulo }}</strong>
+                  <p>{{ noticia.resumo }}</p>
+                </div>
+              </div>
+              <div v-else>
+                <p>Carregando notícias...</p>
+              </div>
+              <button class="btn-ver" @click="router.push('/edital')">VEJA MAIS</button>
+            </div>
+          </section>
+        </main>
+
+        <!-- Banners -->
+        <aside class="col-direita">
+          <img src="@/assets/img/vete.jpg" alt="Banner destaque" />
+          <img src="@/assets/img/pata.jpg" alt="Banner destaque"/>
+        </aside>
+
+      </div>
     </div>
-
-  <div class = "template2">
-    <aside class="col-esquerda">
-      <div class="service">
-        <h3>Vacine o seu Pet</h3>
-        <p>Garanta a saúde dos seus amigos peludos...</p>
-          <button class="btn btn-emerald text-xt border-1 rounded-md px-1 py-1" @click="abrirVacina">CONSULTAR </button>
-
   </div>
-
-      <div class="service">
-        <h3>Faça login</h3>
-        <p>Receba dicas dos nossos veterinários...</p>
-          <button class="btn btn-emerald text-xt border-1 rounded-md px-1 py-1" @click="login">LOGIN</button>
-
-</div>
-      <div class="service">
-        <h3>Agende uma Consulta</h3>
-        <p>Receba atendimento especializado...</p>
-
-          <button class="btn btn-emerald text-xt border-1 rounded-md px-1 py-1" @click="agendar">AGENDAR</button>
-</div>
-    </aside>
-
-    <main class="col-central">
-      <section class="texto-zoonoses">
-        <h2>Sobre as Zoonoses</h2>
-        <p>
-          Zoonoses são doenças que podem ser transmitidas de animais para humanos.
-          É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
-        </p>
-      </section>
-
-      <section><div class="card"> <h3>📢 Últimas Notícias & Editais</h3> <div v-if="noticias.length"> <div v-for="(noticia, i) in noticias" :key="i" class="mb-2"> <strong>{{ noticia.titulo }}</strong> <p>{{ noticia.resumo }}</p> </div> </div> <div v-else> <p>Carregando notícias...</p> </div> 
-            <button class="btn btn-third text-xt border-1 rounded-md px-1 py-1" @click="ver">VEJA MAIS</button>
-     </div> </section>
-    </main>
-
-    <aside class="col-direita">
-      <img src="@/assets/img/vete.jpg" alt="Banner destaque" />
-      <img src="@/assets/img/pata.jpg" alt="Banner destaque"/>
-    </aside>
-  </div>
-</div>
-</div>
 </template>
-<!----------------------------------------------------------CSS-->
+
 <style>
 /* Fundo geral */
 .home-page {
   margin: 0;
   display: flex;
-  min-height: 100vh;          /* garante ocupar toda a tela */
+  min-height: 100vh;
   width: 100%;
-  position: relative;         /* necessário pro overlay */
   background-color: #abe2bc;
-  background-size: cover;     /* cobre toda a área */
 }
 
-/* camada amarela híbrida 
-.overlay {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;               
-  background: 
-    radial-gradient(
-      circle at center, 
-      rgba(255, 230, 0, 0.5) 0%,    
-      rgba(255, 230, 0, 0.2) 60%,  
-      rgba(255, 230, 0, 0) 100%    
-    ),
-    linear-gradient(
-      to bottom,
-      rgba(255, 255, 0, 0.25) 0%,   
-      rgba(255, 255, 0, 0) 60%      
-    );
-  z-index: 1;
-}
-*/
-
-
+/* Container */
 .content {
   position: relative;
-  z-index: 2; /* fica acima do overlay */
   display: flex;
   justify-content: center;
-  align-items: center;
+  align-items: flex-start;
   padding: 2rem;
+  width: 100%;
 }
 
-/* Template: lado a lado */
+/* Layout responsivo */
 .template2 {
   display: grid;
-  grid-template-columns: 1fr 2fr 1fr; /* direita maior */
+  grid-template-columns: 1fr 2fr 1fr;
   gap: 20px;
-  width: 90%;
-  min-height: 100vh;
-  padding: 10px;
-}
-
-/* Coluna central */
-.col-central {
-  display:inline;
-  flex-direction:row;
-  gap: 20px;
-}
-
-.texto-zoonoses {
-  background: rgba(255, 255, 255, 0.9);
-  padding: 10px;
-  
-  border-radius: 15px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.15);
-
-}
-
-/* Notícias já herda estilo do .card */
-.noticias {
-  margin-top: auto;
-}
-
-/* Coluna direita */
-.col-direita {
-  display: grid;
-  grid-template-columns: 2fr;
-  gap: 10px;
-}
-.col-direita img {
-  width: 200%;
-  height: 250px;      /* maior destaque */
-  object-fit: cover;
-  border-radius: 20px;
-  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
-  transition: transform 0.3s ease, box-shadow 0.3s ease;
-}.col-direita img:hover {
-  transform: scale(1.05);
-  box-shadow: 0 12px 25px rgba(0,0,0,0.35);
-}
-
-/* Main à esquerda */
-.main {
-  flex: 1;
-  padding: 20px;
-}
-
-.banner img {
   width: 100%;
-  height: auto;
-  border-radius: 12px;
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.25);
+}
+@media (max-width: 768px) {
+  .template2 {
+    grid-template-columns: 1fr;
+  }
+  .col-direita img {
+    width: 100%;
+    height: auto;
+  }
 }
 
-/* HERO TEXT */
+/* Botão fixo */
 .hero-text {
-  position:fixed;
-  top: 5px;
-  left: 2px;
-  text-align:justify;
-  width: 115px;
-  padding: 0px;
-  border-radius: 10px;
-  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
-  font-size: 12px;
+  position: fixed;
+  top: 10px;
+  left: 10px;
+}
+.btn-adote {
+  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
+  color: white;
+  font-weight: bold;
+  padding: 6px 12px;
+  border-radius: 8px;
+  transition: transform 0.3s ease;
+}
+.btn-adote:hover {
+  transform: scale(1.05);
 }
 
-.hero-text label:hover {
-  background: #007bff;
-}
-
-.hero-text h2 {
-  margin-bottom: 0px;
-  font-size: 18px;
-}
-
-/* Coluna esquerda */
+/* Serviços */
 .col-esquerda {
   display: flex;
   flex-direction: column;
-  gap: 10px;
- height: 0px;           /* define altura fixa  */
-  width: 65%;
-
+  gap: 15px;
 }
 .service {
-  background-color: rgba(255, 255, 255, 0.85);
-  padding: 17px;
+  background: white;
+  padding: 20px;
   text-align: center;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease;
 }
-
 .service:hover {
   transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
 }
-
 .service h3 {
-  /* color: #333; */
-  margin-bottom: 10px;
-  font-size: 28px;
+  font-size: 20px;
+  margin: 10px 0;
 }
-
 .service p {
-  font-size: 16px;
-  margin-bottom: 15px;
+  font-size: 14px;
+  color: #555;
+}
+.icon {
+  width: 32px;
+  height: 32px;
+  margin: auto;
+  color: #059669;
+}
+.btn-action {
+  background: #059669;
+  color: white;
+  padding: 6px 12px;
+  border-radius: 6px;
+  transition: transform 0.2s ease;
+}
+.btn-action:hover {
+  transform: scale(1.05);
 }
 
-/* CARDS */
+/* Central */
+.texto-zoonoses {
+  background: white;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
 .card {
-  background-color: rgba(245, 243, 243, 0.85);
-  padding: 40px;
-  width: 700px;
-  min-height: 35vh;
+  background: #f8fafc;
+  padding: 25px;
+  border-radius: 20px;
+  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
   text-align: center;
-  border-radius: 50px;
-  box-shadow: 0 20px 15px rgba(0, 0, 0, 0.15);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
-  display: grid;
-  justify-content: center;
-  margin: 20px auto;
-  font-size: 15px;
+}
+.btn-ver {
+  margin-top: 10px;
+  background: #6366f1;
+  color: white;
+  padding: 8px 16px;
+  border-radius: 6px;
+  transition: transform 0.2s ease;
+}
+.btn-ver:hover {
+  transform: scale(1.05);
 }
 
-
-
-.card:hover {
-  transform: translateY(-10px);
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.25);
+/* Banners */
+.col-direita {
+  display: grid;
+  gap: 10px;
+}
+.col-direita img {
+  width: 100%;
+  height: 220px;
+  object-fit: cover;
+  border-radius: 12px;
+  transition: transform 0.3s ease;
+}
+.col-direita img:hover {
+  transform: scale(1.05);
 }
 </style>
-
