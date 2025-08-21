@@ -4,7 +4,8 @@ import { noticiasData } from "data/noticiasData.js"
 <template>
   <div class="edital-page">
     <header>
-      <h1>📢 Últimas Notícias & Editais</h1>
+      <h1>📑 Edital nº 01/2025 – Campanhas e Informativos</h1>
+      <p class="orgao">Prefeitura Municipal • Secretaria de Saúde • Centro Veterinário</p>
       <p class="data">Atualizado em: 13/08/2025</p>
     </header>
 
@@ -12,28 +13,73 @@ import { noticiasData } from "data/noticiasData.js"
       <div v-for="(n, i) in noticiasData" :key="i" class="card">
         <h2>{{ n.titulo }}</h2>
         <p>{{ n.resumo }}</p>
+
+        <ul v-if="n.detalhes">
+          <li><strong>Data:</strong> {{ n.detalhes.data }}</li>
+          <li><strong>Horário:</strong> {{ n.detalhes.horario }}</li>
+          <li><strong>Local:</strong> {{ n.detalhes.local }}</li>
+          <li><strong>Público:</strong> {{ n.detalhes.publico }}</li>
+          <li><strong>Contato:</strong> {{ n.detalhes.contato }}</li>
+        </ul>
       </div>
     </main>
+
+    <footer>
+      <p>Secretaria Municipal de Saúde</p>
+      <p>Publicado em: 13 de agosto de 2025</p>
+    </footer>
   </div>
 </template>
 
 <script setup>
-
- const noticiasData = [
+const noticiasData = [
   {
     titulo: "Campanha de Vacinação Gratuita",
-    resumo: "A partir do dia 20 de agosto, todos os pets cadastrados poderão receber vacinas gratuitamente no centro veterinário municipal."
+    resumo: "Todos os pets cadastrados poderão receber vacinas gratuitamente.",
+    detalhes: {
+      data: "20/08/2025 a 30/08/2025",
+      horario: "08h às 17h",
+      local: "Centro Veterinário Municipal",
+      publico: "Pets previamente cadastrados",
+      contato: "(11) 99999-0000"
+    }
   },
   {
     titulo: "Mutirão de Adoção",
-    resumo: "No dia 25 de agosto teremos um evento especial para adoção de cães e gatos. Traga sua família e venha conhecer nossos amiguinhos."
+    resumo: "Evento especial para adoção de cães e gatos.",
+    detalhes: {
+      data: "25/08/2025",
+      horario: "09h às 16h",
+      local: "Praça Central",
+      publico: "Aberto à comunidade",
+      contato: "(11) 98888-1111"
+    }
   },
   {
     titulo: "Novos Horários de Atendimento",
-    resumo: "A partir de setembro, nosso atendimento será ampliado para os sábados, das 8h às 12h."
+    resumo: "Atendimento ampliado para os sábados.",
+    detalhes: {
+      data: "A partir de 01/09/2025",
+      horario: "Sábados, das 08h às 12h",
+      local: "Centro Veterinário Municipal",
+      publico: "População em geral",
+      contato: "(11) 97777-2222"
+    }
+  },
+  {
+    titulo: "SEJA UM VOLUNTÁRIO - Ajude a comunidade!",
+    resumo: "Se torne parte da nossa causa.",
+    detalhes: {
+      data: "A partir de 01/09/2025",
+      horario: "Sábados, das 08h às 12h",
+      local: "Centro Veterinário Municipal",
+      publico: "População em geral",
+      contato: "(11) 97777-2222"
+    }
   }
 ]
 </script>
+
 
 
 <style scoped>

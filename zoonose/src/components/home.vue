@@ -45,11 +45,21 @@ function cortarTexto(texto, limite) {
 
 
 onMounted(() => {
-  noticias.value = noticiasData.slice(0, 3).map(n => ({
+  noticias.value = noticiasData.slice(0, 4).map(n => ({
     titulo: n.titulo,
     resumo: cortarTexto(n.resumo, 60)
   }))
 })
+// FAQ
+const faq = ref([
+  { pergunta: "Como faço para cadastrar meu pet?", resposta: "Basta acessar a área de login, criar sua conta e cadastrar os dados do seu pet.", aberto: false },
+  { pergunta: "As vacinas são gratuitas?", resposta: "Sim, as campanhas de vacinação promovidas pela prefeitura são gratuitas.", aberto: false },
+  { pergunta: "Onde acontecem os mutirões de adoção?", resposta: "Normalmente na Praça Central ou no Centro Veterinário Municipal. Confira no edital.", aberto: false }
+])
+
+function toggleFaq(index) {
+  faq.value[index].aberto = !faq.value[index].aberto
+}
 </script>
 
 <template>
@@ -58,7 +68,7 @@ onMounted(() => {
 
       <!-- Botão fixo "Adote um Amigo" -->
       <div class="hero-text">
-        <button class="btn-adote" @click="router.push('/detalhes')">Adote um Amigo</button>
+        <button class="btn-adote" @click="router.push('public/user/detalhes.html')">Adote um Amigo</button>
       </div>
 
       <div class="template2">
@@ -96,6 +106,17 @@ onMounted(() => {
                 <p>Carregando notícias...</p>
               </div>
               <button class="btn-ver" @click="router.push('/edital')">VEJA MAIS</button>
+            </div>
+          </section>
+           <!-- FAQ -->
+          <section class="faq">
+            <h3>❓ Dúvidas Frequentes</h3>
+            <div v-for="(item, i) in faq" :key="i" class="faq-item">
+              <button class="faq-question" @click="toggleFaq(i)">
+                {{ item.pergunta }}
+                <span>{{ item.aberto ? '−' : '+' }}</span>
+              </button>
+              <p v-if="item.aberto" class="faq-answer">{{ item.resposta }}</p>
             </div>
           </section>
         </main>
@@ -213,18 +234,19 @@ onMounted(() => {
   background: white;
   padding: 15px;
   border-radius: 12px;
-  margin-bottom: 20px;
+  margin-bottom: 50px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
 .card {
   background: #f8fafc;
   padding: 25px;
   border-radius: 20px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.15);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.15);
   text-align: center;
+  
 }
 .btn-ver {
-  margin-top: 10px;
+  margin-top: 20px;
   background: #6366f1;
   color: white;
   padding: 8px 16px;
@@ -249,5 +271,42 @@ onMounted(() => {
 }
 .col-direita img:hover {
   transform: scale(1.05);
+}
+/* FAQ */
+.faq {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  margin-top: 40px;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.15);
+}
+.faq h3 {
+  margin-bottom: 15px;
+  color: #059669;
+  text-align: left;
+}
+.faq-item {
+  margin-bottom: 10px;
+}
+.faq-question {
+  width: 100%;
+  text-align: left;
+  background: #f1f5f9;
+  padding: 10px;
+  border-radius: 8px;
+  font-weight: bold;
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+.faq-question:hover {
+  background: #e2e8f0;
+}
+.faq-answer {
+  margin-top: 8px;
+  font-size: 14px;
+  color: #444;
+  padding-left: 5px;
 }
 </style>
