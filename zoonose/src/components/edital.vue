@@ -1,4 +1,6 @@
 
+import { noticiasData } from "data/noticiasData.js"
+
 <template>
   <div class="edital-page">
     <header>
@@ -16,6 +18,7 @@
 </template>
 
 <script setup>
+
  const noticiasData = [
   {
     titulo: "Campanha de Vacinação Gratuita",

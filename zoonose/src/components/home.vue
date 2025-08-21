@@ -2,7 +2,7 @@
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { Syringe, User, Calendar } from 'lucide-vue-next'
-import { noticiasData } from './edital.vue'
+import { noticiasData } from "@/data/noticiasData.js"
 
 
 const noticias = ref([])
