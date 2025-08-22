@@ -28,7 +28,12 @@
             <th class="p-2">Ações</th>
           </tr>
         </thead>
-        <tbody>
+          <transition-group
+          name="fade"
+          tag="tbody"
+        >
+
+
           <tr v-for="e in especiesFiltradas" :key="e.id" class="border-b hover:bg-gray-50">
             <td class="p-2">{{ e.nome }}</td>
             <td class="p-2">{{ e.descricao }}</td>
@@ -41,7 +46,7 @@
           <tr v-if="especiesFiltradas.length === 0">
             <td colspan="4" class="p-4 text-center text-gray-500">Nenhuma espécie encontrada</td>
           </tr>
-        </tbody>
+          </transition-group>
       </table>
     </div>
   </div>
@@ -74,3 +79,15 @@ function excluirEspecie(e) {
   }
 }
 </script>
+<style>
+/* Transição simples */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>

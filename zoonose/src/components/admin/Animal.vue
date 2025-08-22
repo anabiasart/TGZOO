@@ -25,6 +25,7 @@
     <div class="overflow-x-auto bg-white rounded shadow">
       <table class="w-full text-sm">
         <thead class="bg-gray-100 text-left">
+
           <tr>
             <th class="p-2">Nome</th>
             <th class="p-2">Tutor</th>
@@ -35,8 +36,12 @@
             <th class="p-2">Ações</th>
           </tr>
         </thead>
-        <tbody>
+        <transition-group
+        name="fade"
+        tag="tbody"
+        >
           <tr v-for="animal in animaisFiltrados" :key="animal.id" class="border-b hover:bg-gray-50">
+
             <td class="p-2">{{ animal.nome }}</td>
             <td class="p-2">{{ animal.tutor }}</td>
             <td class="p-2">{{ animal.especie }}</td>
@@ -52,7 +57,7 @@
           <tr v-if="animaisFiltrados.length === 0">
             <td colspan="7" class="p-4 text-center text-gray-500">Nenhum animal encontrado</td>
           </tr>
-        </tbody>
+        </transition-group>
       </table>
     </div>
   </div>
@@ -104,3 +109,16 @@ function abrirHistorico(animal) {
   alert("Abrir histórico de atendimentos de " + animal.nome)
 }
 </script>
+
+<style>
+/* Transição simples */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>

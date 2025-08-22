@@ -37,8 +37,12 @@
             <th class="p-2">Ações</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="a in atendimentosFiltrados" :key="a.id" class="border-b hover:bg-gray-50">
+
+        <transition-group
+        name="fade"
+        tag="tbody">
+
+        <tr v-for="a in atendimentosFiltrados" :key="a.id" class="border-b hover:bg-gray-50">
             <td class="p-2">{{ a.data }}</td>
             <td class="p-2">{{ a.animal }}</td>
             <td class="p-2">{{ a.tutor }}</td>
@@ -51,10 +55,13 @@
               <button class="text-green-600 hover:underline" @click="verDetalhes(a)">Detalhes</button>
             </td>
           </tr>
-          <tr v-if="atendimentosFiltrados.length === 0">
+           <tr
+            v-if="atendimentosFiltrados.length === 0"
+            key="empty"
+          >
             <td colspan="7" class="p-4 text-center text-gray-500">Nenhum atendimento encontrado</td>
           </tr>
-        </tbody>
+          </transition-group>
       </table>
     </div>
   </div>
@@ -97,3 +104,16 @@ function verDetalhes(a) {
   alert("Abrir detalhes do atendimento de " + a.animal)
 }
 </script>
+
+<style>
+/* Transição simples */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>

@@ -1,6 +1,7 @@
 <template>
   <div class="p-4">
     <!-- Cabeçalho -->
+
     <div class="flex items-center justify-between mb-4">
       <div class="flex items-center gap-2">
         <button @click="voltar" class="px-2 py-1 border rounded">⬅</button>
@@ -105,6 +106,10 @@
 <script setup>
 import { ref, computed } from "vue"
 import { addDays, startOfWeek, addWeeks, addMonths, startOfMonth, endOfMonth, eachDayOfInterval } from "date-fns"
+
+
+
+
 
 const modo = ref("semana")
 const dataAtual = ref(new Date())
