@@ -56,7 +56,7 @@ const faq = ref([
   { pergunta: "As vacinas são gratuitas?", resposta: "Sim, as campanhas de vacinação promovidas pela prefeitura são gratuitas.", aberto: false },
   { pergunta: "Onde acontecem os mutirões de adoção?", resposta: "Normalmente na Praça Central ou no Centro Veterinário Municipal. Confira no edital.", aberto: false }
 ])
-
+//funcao para alternar (abrir e fechar)
 function toggleFaq(index) {
   faq.value[index].aberto = !faq.value[index].aberto
 }
@@ -99,7 +99,6 @@ function toggleFaq(index) {
               <div v-if="noticias.length">
                 <div v-for="(noticia, i) in noticias" :key="i" class="mb-2">
                   <strong>{{ noticia.titulo }}</strong>
-                  <p>{{ noticia.resumo }}</p>
                 </div>
               </div>
               <div v-else>

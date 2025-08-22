@@ -2,7 +2,10 @@
   <div class="p-6">
     <div class="flex justify-between items-center mb-4">
       <h1 class="text-xl font-semibold">💉 Protocolos</h1>
-      <button class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700" @click="novoProtocolo">
+      <button
+        class="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+        @click="novoProtocolo"
+      >
         ➕ Cadastrar Protocolo
       </button>
     </div>
@@ -29,8 +32,16 @@
             <th class="p-2">Ações</th>
           </tr>
         </thead>
-        <tbody>
-          <tr v-for="p in protocolosFiltrados" :key="p.id" class="border-b hover:bg-gray-50">
+
+        <transition-group
+          name="fade"
+          tag="tbody"
+        >
+          <tr
+            v-for="p in protocolosFiltrados"
+            :key="p.id"
+            class="border-b hover:bg-gray-50"
+          >
             <td class="p-2">{{ p.nome }}</td>
             <td class="p-2">{{ p.tipo }}</td>
             <td class="p-2">{{ p.frequencia }}</td>
@@ -40,10 +51,16 @@
               <button class="text-red-600 hover:underline" @click="excluirProtocolo(p)">Excluir</button>
             </td>
           </tr>
-          <tr v-if="protocolosFiltrados.length === 0">
-            <td colspan="5" class="p-4 text-center text-gray-500">Nenhum protocolo encontrado</td>
+
+          <tr
+            v-if="protocolosFiltrados.length === 0"
+            key="empty"
+          >
+            <td colspan="5" class="p-4 text-center text-gray-500">
+              Nenhum protocolo encontrado
+            </td>
           </tr>
-        </tbody>
+        </transition-group>
       </table>
     </div>
   </div>
@@ -75,3 +92,16 @@ function excluirProtocolo(p) {
   }
 }
 </script>
+
+<style>
+/* Transição simples */
+.fade-enter-active,
+.fade-leave-active {
+  transition: all 0.3s ease;
+}
+.fade-enter-from,
+.fade-leave-to {
+  opacity: 0;
+  transform: translateY(10px);
+}
+</style>
