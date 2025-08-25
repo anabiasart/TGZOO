@@ -121,7 +121,7 @@ function toggleFaq(index) {
         </main>
 
         <!-- Banners -->
-        <aside class="col-direita">
+        <aside class="col-direita ">
           <img src="@/assets/img/vete.jpg" alt="Banner destaque" />
           <img src="@/assets/img/pata.jpg" alt="Banner destaque"/>
         </aside>
@@ -138,7 +138,7 @@ function toggleFaq(index) {
   display: flex;
   min-height: 100vh;
   width: 100%;
-  background-color: #abe2bc;
+  background: linear-gradient(135deg, #a1e6f4, #57ecd1, #a1e6f4,#00c39f ); 
 }
 
 /* Container */
