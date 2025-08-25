@@ -58,12 +58,12 @@ export default {
 }
 
 .painel {
-  font-size: 1rem;
-  font-weight: bold;
+  font-size: 1.9rem;
+  opacity: 0.9;
 }
 
 .bemvindo {
-  font-size: 0.9rem;
+  font-size: 1.9rem;
   opacity: 0.9;
 }
 

@@ -82,7 +82,7 @@ export default {
 <style scoped>
 .admin-home {
   padding: 2rem;
-  font-family: Arial, sans-serif;
+  font-family: font-mono;
 }
 
 /* Seções */

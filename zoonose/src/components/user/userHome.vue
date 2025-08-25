@@ -1,9 +1,19 @@
+
+
 <template>
   <div class="user-home">
     <!-- Cabeçalho -->
     <header class="header">
+          <div class="topbar">
       <h1>Painel do Usuário</h1>
       <p>Bem-vindo(a), {{ usuario }}!</p>
+ </div>
+   <div class="navbar">
+    <div class="logo">
+     <h1><a href="comunicativo.html">ZoonoSys</a></h1>
+        <p>Vigilância, Prevenção e Controle de Zoonoses</p>
+   </div>
+   </div>
     </header>
 
     <!-- Área principal -->
@@ -70,16 +80,38 @@ export default {
 <style scoped>
 .user-home {
   padding: 20px;
-  font-family: Arial, sans-serif;
+  font-family: font-mono;
 }
 
 .header {
  background: linear-gradient(135deg, #abe2bc, #5c906e); /* azul mais claro que admin */
   color: rgb(26, 24, 24);
-  padding: 1rem;
-  border-radius: 8px;
-  margin-bottom: 10px;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 1.5rem;
+  font-size: 1.9rem;
 }
+
+/* Logo */
+.logo h1, a {
+  font-size: 1.5rem;
+   text-decoration: none;
+  color: #666947;
+  font-weight: bold;
+    display: flex;
+    
+
+}
+.logo p{
+   margin: 0;
+  font-size: 0.85rem;
+  opacity: 0.9;
+  color:#d9e077;
+
+}
+
 
 .atalhos, .noticias {
   margin-top: 10px;
