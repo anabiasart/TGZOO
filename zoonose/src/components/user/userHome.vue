@@ -85,11 +85,24 @@ export default {
   margin-top: 10px;
 }
 
+.noticias{
+ display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
+  background: #5c906e;
+  color: white;
+  padding: 1.5rem;
+  border-radius: 12px;
+  text-align: center;
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: bold;
+  
+}
 .cards {
-  display: flex;
-  gap: 5px;
-  flex-wrap: wrap;
-  padding: 0px;
+   display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
 
 }
 
@@ -100,7 +113,14 @@ export default {
   border-radius: 5px;
   text-align: center;
   transition: 0.2s;
+  
 }
+h2 {
+  margin-bottom: 1rem;
+  font-size: 1.5rem;
+  color: #5c906e;
+}
+
 
 .card:hover {
   box-shadow: 0 4px 8px rgba(0,0,0,0.2);
