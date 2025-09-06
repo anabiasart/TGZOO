@@ -8,6 +8,7 @@ import pata from "../assets/img/pata.jpg"
 
 const noticias = ref([])
 const router = useRouter()
+const menuAberto = ref(false)
 
 const servicos = [
   { 
@@ -84,6 +85,30 @@ onUnmounted(() => clearInterval(intervalo))
 <template>
   <div class="home-page">
     <div class="content">
+
+<nav class="navbar">
+  <div class="navbar-logo" @click="router.push('/')">
+    <span>🐾</span> ZoonoSys
+  </div>
+
+  <ul class="navbar-links">
+    <li @click="router.push('/')">Início</li>
+    <li @click="router.push('/edital')">Editais</li>
+    <li @click="router.push('/login')">Login</li>
+    <li @click="router.push('/contato')">Contato</li>
+  </ul>
+
+  <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>
+
+  <ul v-if="menuAberto" class="navbar-mobile">
+    <li @click="router.push('/')">Início</li>
+    <li @click="router.push('/edital')">Editais</li>
+    <li @click="router.push('/login')">Login</li>
+    <li @click="router.push('/contato')">Contato</li>
+  </ul>
+</nav>
+
+
 
       <!-- Botão fixo -->
       <div class="hero-text">
@@ -174,6 +199,93 @@ onUnmounted(() => clearInterval(intervalo))
   width: 100%;
 }
 
+/* Navbar */
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  background: white; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 2rem;
+  z-index: 1000;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    border-radius: 50px;
+
+}
+
+/* Logo */
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #0ea5e9;
+  cursor: pointer;
+  gap: 8px;
+}
+.navbar-logo span {
+  color: #059669; 
+}
+
+/* Links desktop */
+.navbar-links {
+  display: flex;
+  list-style: none;
+  gap: 2rem;
+}
+.navbar-links li {
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+}
+.navbar-links li:hover {
+  color: #0ea5e9;
+  transform: translateY(-2px);
+}
+
+/* Botão mobile */
+.navbar-toggle {
+  display: none;
+  background: transparent;
+  color: #0ea5e9;
+  font-size: 28px;
+  border: none;
+  cursor: pointer;
+}
+
+/* Menu mobile */
+.navbar-mobile {
+  position: absolute;
+  top: 70px;
+  right: 0;
+  background: white;
+  color: #333;
+  width: 220px;
+  list-style: none;
+  padding: 12px;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+.navbar-mobile li {
+  padding: 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+.navbar-mobile li:hover {
+  background: #f1f5f9;
+}
+
+/* Responsividade */
+@media (max-width: 768px) {
+  .navbar-links { display: none; }
+  .navbar-toggle { display: block; }
+}
+
 /* Layout responsivo */
 .template2 {
   display: grid;
@@ -190,11 +302,7 @@ onUnmounted(() => clearInterval(intervalo))
     display: grid;
   }
 }
-@media (max-width: 768px) {
-  .col-direita {
-    grid-template-columns: 1fr;
-  }
-}
+
 
 /* Botão fixo */
 .hero-text {
@@ -376,4 +484,3 @@ onUnmounted(() => clearInterval(intervalo))
   padding-left: 5px;
 }
 </style>
-  
