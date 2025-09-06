@@ -93,8 +93,8 @@ const noticiasData = [
 
 /* Header */
 header {
-  background-color: #5c906e;
-  color: white;
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
+  color: #059669;
   padding: 20px;
   text-align: center;
   border-radius: 0 0 50px 50px;
@@ -116,8 +116,9 @@ main {
   gap: 20px;
   max-width: 900px;
   margin: 30px auto;
-  padding: 0 15px;
+  padding:16px;
   font-size: 18px;
+  font-weight: bold; 
 }
 
 .card {
@@ -125,7 +126,7 @@ main {
   border-radius: 10px;
   padding: 20px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  transform: translateY(-5px);
 }
 
 .card:hover {
