@@ -10,6 +10,7 @@ const noticias = ref([])
 const router = useRouter()
 const menuAberto = ref(false)
 
+
 const servicos = [
   { 
     titulo: "Vacine o seu Pet", 
@@ -34,7 +35,6 @@ const servicos = [
   }
 ]
 
-// Função para cortar texto
 function cortarTexto(texto, limite) {
   if (!texto) return ''
   texto = texto.replace(/\s+/g, ' ').trim()
@@ -45,7 +45,6 @@ function cortarTexto(texto, limite) {
   return cortado.slice(0, ultimoEspaco) + '…'
 }
 
-// Notícias
 onMounted(() => {
   noticias.value = noticiasData.slice(0, 4).map((n, i) => ({
     titulo: n.titulo,
@@ -65,9 +64,10 @@ function toggleFaq(index) {
   faq.value[index].aberto = !faq.value[index].aberto
 }
 
-// Carrossel de banners
-const imagens = ref([ vete, pata])
-
+const imagens = ref([
+  { src: vete, texto: "Cuide do seu pet com amor e vacinas 💉🐶" },
+  { src: pata, texto: "Adote um amigo e ganhe um companheiro fiel 🐾❤️" }
+])
 const indexAtual = ref(0)
 let intervalo
 function proximo() {
@@ -83,9 +83,9 @@ onUnmounted(() => clearInterval(intervalo))
 </script>
 
 <template>
-  <div class="home-page">
-    <div class="content">
 
+
+  
 <nav class="navbar">
   <div class="navbar-logo" @click="router.push('/')">
     <span>🐾</span> ZoonoSys
@@ -96,6 +96,8 @@ onUnmounted(() => clearInterval(intervalo))
     <li @click="router.push('/edital')">Editais</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
+    <li @click="router.push('detalhes.html')">Adote um Amigo</li>
+
   </ul>
 
   <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>
@@ -105,41 +107,35 @@ onUnmounted(() => clearInterval(intervalo))
     <li @click="router.push('/edital')">Editais</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
+    <li  @click="router.push('detalhes.html')">Adote um Amigo</li>
+
   </ul>
 </nav>
 
+ <div class="carrossel-container">
+<img :src="imagens[indexAtual].src" alt="Carrossel" />
+     <transition name="fade" mode="out-in">
+    <div class="carrossel-texto" :key="indexAtual">
+      <h2>{{ imagens[indexAtual].texto }}</h2>
+    </div>
+  </transition>
 
+    <button class="btn-prev" @click="anterior">‹</button>
+    <button class="btn-next" @click="proximo">›</button>
+  </div>
+<div class="home-page">
+    <div class="content">
 
-      <!-- Botão fixo -->
-      <div class="hero-text">
-        <button class="btn-adote" @click="router.push('public/user/detalhes.html')">Adote um Amigo</button>
-      </div>
 
       <div class="template2">
 
-        <!-- Serviços -->
-        <aside class="col-esquerda">
-          <div v-for="(s, i) in servicos" :key="i" class="service">
-            <component :is="s.icon" class="icon"/>
-            <h3>{{ s.titulo }}</h3>
-            <p>{{ s.desc }}</p>
-            <button class="btn-action" @click="s.acao">{{ s.label }}</button>
-          </div>
-        </aside>
-
-        <!-- Conteúdo central -->
         <main class="col-central">
-          <section class="texto-zoonoses">
-            <h2>Sobre as Zoonoses</h2>
-            <p>
-              Zoonoses são doenças que podem ser transmitidas de animais para humanos.
-              É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
-            </p>
-          </section>
+         
 
-          <!-- Notícias estilo portal -->
           <section class="noticias">
             <h3 class="titulo">📰 Últimas Notícias & Editais</h3>
+
+            
             <div class="lista-noticias">
               <div v-for="(n, i) in noticias" :key="i" class="card-noticia">
                 <img :src="n.imagem" alt="Imagem notícia" />
@@ -150,10 +146,31 @@ onUnmounted(() => clearInterval(intervalo))
                 </div>
               </div>
             </div>
+
+             
           </section>
 
-          <!-- FAQ -->
-          <section class="faq">
+          
+      
+        </main>
+
+              <aside class="col-esquerda">
+
+                 <section class="texto-zoonoses">
+            <h2>Sobre as Zoonoses</h2>
+            <p>
+              Zoonoses são doenças que podem ser transmitidas de animais para humanos.
+              É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
+            </p>
+          </section>
+
+          <div v-for="(s, i) in servicos" :key="i" class="service">
+            <component :is="s.icon" class="icon"/>
+            <h3>{{ s.titulo }}</h3>
+            <p>{{ s.desc }}</p>
+            <button class="btn-action" @click="s.acao">{{ s.label }}</button>
+          </div>
+                <section class="faq">
             <h3>❓ Dúvidas Frequentes</h3>
             <div v-for="(item, i) in faq" :key="i" class="faq-item">
               <button class="faq-question" @click="toggleFaq(i)">
@@ -163,16 +180,8 @@ onUnmounted(() => clearInterval(intervalo))
               <p v-if="item.aberto" class="faq-answer">{{ item.resposta }}</p>
             </div>
           </section>
-        </main>
+              </aside>
 
-        <!-- Carrossel -->
-        <aside class="col-direita">
-          <div class="carrossel-container">
-            <img :src="imagens[indexAtual]" alt="Carrossel" />
-            <button class="btn-prev" @click="anterior">‹</button>
-            <button class="btn-next" @click="proximo">›</button>
-          </div>
-        </aside>
 
       </div>
     </div>
@@ -180,10 +189,10 @@ onUnmounted(() => clearInterval(intervalo))
 </template>
 
 <style>
-/* Fundo geral */
 .home-page {
   margin: 0;
   display: flex;
+  flex-direction: column; 
   min-height: 100vh;
   width: 100%;
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
@@ -191,7 +200,7 @@ onUnmounted(() => clearInterval(intervalo))
 
 /* Container */
 .content {
-  position: relative;
+  flex: 1; 
   display: flex;
   justify-content: center;
   align-items: flex-start;
@@ -199,25 +208,22 @@ onUnmounted(() => clearInterval(intervalo))
   width: 100%;
 }
 
-/* Navbar */
 .navbar {
   position: fixed;
   top: 0;
   left: 0;
   width: 100%;
   height: 70px;
-  background: white; 
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.8);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 2rem;
-  z-index: 1000;
   box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-radius: 50px;
-
+  z-index: 100;
 }
 
-/* Logo */
 .navbar-logo {
   display: flex;
   align-items: center;
@@ -231,7 +237,6 @@ onUnmounted(() => clearInterval(intervalo))
   color: #059669; 
 }
 
-/* Links desktop */
 .navbar-links {
   display: flex;
   list-style: none;
@@ -248,7 +253,6 @@ onUnmounted(() => clearInterval(intervalo))
   transform: translateY(-2px);
 }
 
-/* Botão mobile */
 .navbar-toggle {
   display: none;
   background: transparent;
@@ -258,7 +262,6 @@ onUnmounted(() => clearInterval(intervalo))
   cursor: pointer;
 }
 
-/* Menu mobile */
 .navbar-mobile {
   position: absolute;
   top: 70px;
@@ -280,31 +283,27 @@ onUnmounted(() => clearInterval(intervalo))
   background: #f1f5f9;
 }
 
-/* Responsividade */
 @media (max-width: 768px) {
   .navbar-links { display: none; }
   .navbar-toggle { display: block; }
 }
 
-/* Layout responsivo */
 .template2 {
   display: grid;
   grid-template-columns: 1fr 2fr 1fr;
+  grid-auto-rows: auto; 
   gap: 20px;
   width: 100%;
+  align-items: start;
 }
 @media (max-width: 1024px) {
   .template2 {
     grid-template-columns: 1fr;
   }
-  .col-direita {
-    grid-template-columns: 1fr 1fr;
-    display: grid;
-  }
+ 
 }
 
 
-/* Botão fixo */
 .hero-text {
   position: fixed;
   top: 15px;
@@ -323,23 +322,34 @@ onUnmounted(() => clearInterval(intervalo))
   transform: scale(1.05);
 }
 
-/* Serviços */
 .col-esquerda {
-  display: flex;
-  flex-direction: column;
-  gap: 15px;
+  display: flex;          
+  flex-direction: column;  
+  gap:65px;
+  grid-column: 1;
+  grid-row: 1;   
+  align-self: start;      
+  height: 100%;
+}
+.col-central {
+  grid-column: 2 / 4; /* sempre na segunda coluna / pega a quarta*/
 }
 .service {
-  background: white;
-  padding: 25px;
-  text-align: center;
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc);
+  padding: 20px;
   border-radius: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  text-align: center;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
 .service:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  transform: scale(1.05);
+  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+}
+.icon {
+  width: 56px;
+  height: 56px;
+  margin-bottom: 12px;
+  color: #059669;
 }
 .service h3 {
   font-size: 20px;
@@ -349,11 +359,7 @@ onUnmounted(() => clearInterval(intervalo))
   font-size: 14px;
   color: #555;
 }
-.icon {
-  width: 28px;
-  height: 28px;
-  color: #059669;
-}
+
 .btn-action {
   background: #059669;
   color: white;
@@ -367,7 +373,6 @@ onUnmounted(() => clearInterval(intervalo))
   transform: scale(1.05);
 }
 
-/* Texto zoonoses */
 .texto-zoonoses {
   background: white;
   padding: 20px;
@@ -382,7 +387,6 @@ onUnmounted(() => clearInterval(intervalo))
   margin-bottom: 10px;
 }
 
-/* Notícias estilo portal */
 .titulo {
   font-size: 1.5rem;
   font-weight: bold;
@@ -395,17 +399,17 @@ onUnmounted(() => clearInterval(intervalo))
 }
 .card-noticia {
   background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+  border-radius: 20px;
   overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
-.card-noticia:hover { transform: translateY(-5px); }
+.card-noticia:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+}
 .card-noticia img {
-  width: 100%;
-  height: 160px;
+  height: 180px;
   object-fit: cover;
 }
 .conteudo { padding: 16px; }
@@ -421,34 +425,73 @@ onUnmounted(() => clearInterval(intervalo))
 }
 .btn-leia:hover { background: #1e40af; }
 
-/* Carrossel */
 .carrossel-container {
   position: relative;
+  width: 100%;              
+  max-width: 100vw;         
+  height: 500px;            
   overflow: hidden;
-  border-radius: 16px;
+  margin: 0;               
+  border-radius: 0;         
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 .carrossel-container img {
   width: 100%;
-  height: 500px;
-  object-fit: cover;
-  transition: opacity 0.5s ease;
+  height: 100%;
+  object-fit:cover;        
+  transition: opacity 0.10s ease;
 }
 .btn-prev, .btn-next {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  background: rgba(0,0,0,0.5);
-  color: white;
+  background: rgba(255,255,255,0.8);
+  color: #0ea5e9;
   border-radius: 50%;
-  width: 36px;
-  height: 36px;
+  width: 48px;
+  height: 48px;
   border: none;
-  font-size: 20px;
+  font-size: 22px;
   cursor: pointer;
+  z-index: 10;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  transition: all 0.3s ease;
 }
-.btn-prev { left: 10px; }
-.btn-next { right: 10px; }
+.btn-prev:hover, .btn-next:hover {
+  background: #0ea5e9;
+  color: white;
+  transform: translateY(-50%) scale(1.1);
+}
+.btn-prev { left: 15px; }
+.btn-next { right: 15px; }
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.6s ease;
+}
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
+}
+
+.carrossel-texto {
+  position: absolute;
+  bottom: 50px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(14,165,233,0.8); 
+  color: white;
+  padding: 16px 32px;
+  border-radius: 16px;
+  font-size: 24px;
+  font-weight: 600;
+  text-align: center;
+  max-width: 80%;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  animation: fadeInUp 0.8s ease;
+}
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translate(-50%, 20px); }
+  to { opacity: 1; transform: translate(-50%, 0); }
+}
 
 /* FAQ */
 .faq {

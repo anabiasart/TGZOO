@@ -15,6 +15,8 @@ import Animal from '../components/admin/Animal.vue'
 import Especie from '../components/admin/Especie.vue'
 import Protocolo from '../components/admin/Protocolo.vue'
 import Atendimento from '../components/admin/Atendimento.vue'
+import Footer from '../components/footer.vue'
+
 
 const routes = [
   { path: '/', component: Home },   // Home vai ser a página inicial
@@ -29,6 +31,8 @@ const routes = [
   { path: '/edital',name: 'Edital',
   component: () => import('../components/edital.vue')
 },
+  { path: '/footer', component: Footer },
+
 
 ]
 

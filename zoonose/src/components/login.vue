@@ -1,122 +1,92 @@
-
 <template>
-<div class="login-page">
-        
-  <div class="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
-    <div class="font mb-4">
-      <p class="text-blue-600/25 dark:text-sky-400/25">Cuide-se bem...</p>
+  <div class="login-page">
+    <div class="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
+
+      <div class="font mb-4">
+        <p class="text-blue-600/25 dark:text-sky-400/25">Cuide-se bem...</p>
+      </div>
+
+      <!-- Alterna entre Login e Cadastro -->
+      <h1 class="text-3xl font-medium mb-3">
+        {{ modoCadastro ? "Cadastro" : "Login" }}
+      </h1>
+      <h2 class="text-xl mb-3">
+        {{ modoCadastro ? "Crie sua conta" : "Bem-vindo" }}
+      </h2>
+
+      <!-- Inputs comuns -->
+      <input
+        type="text"
+        v-model="usuario"
+        placeholder="Usuário"
+        class="border rounded p-2 mb-2 w-64 focus:outline-none focus:ring-2 focus:ring-purple-400"
+      />
+      <input
+        type="password"
+        v-model="senha"
+        placeholder="Senha"
+        class="border rounded p-2 mb-4 w-64 focus:outline-none focus:ring-2 focus:ring-purple-400"
+      />
+
+      <!-- Campo extra apenas no cadastro -->
+      <input
+        v-if="modoCadastro"
+        type="email"
+        v-model="email"
+        placeholder="E-mail"
+        class="border rounded p-2 mb-4 w-64 focus:outline-none focus:ring-2 focus:ring-purple-400"
+      />
+
+      <!-- Botões -->
+      <button v-if="!modoCadastro" @click="login" class="btn btn-primary mb-2">Entrar</button>
+      <button v-else @click="cadastrar" class="btn btn-primary mb-2">Registrar</button>
+
+      <!-- Alternar -->
+      <p class="text-sm mt-3">
+        {{ modoCadastro ? "Já tem conta?" : "Não tem conta?" }}
+        <span class="text-blue-600 cursor-pointer" @click="modoCadastro = !modoCadastro">
+          {{ modoCadastro ? "Faça login" : "Cadastre-se" }}
+        </span>
+      </p>
+
+      <p class="mensagem text-red-500 mt-2">{{ mensagem }}</p>
     </div>
-    <h1 class="text-3xl font-medium mb-3">Login</h1>
-    <h2 class="text-xl mb-3">Bem-vindo</h2>
-
-    <input
-      type="text"
-      v-model="usuario"
-      placeholder="Usuário"
-      class="border rounded p-2 mb-2 w-64 focus:outline-none focus:ring-2 focus:ring-purple-400"
-    />
-    <input
-      type="password"
-      v-model="senha"
-      placeholder="Senha"
-      class="border rounded p-2 mb-4 w-64 focus:outline-none focus:ring-2 focus:ring-purple-400"
-    />
-
-    <button @click="login()" class="btn btn-primary">Entrar</button>
-
-    <p class="mensagem text-red-500 mt-2">{{ mensagem }}</p>
   </div>
-</div>
 </template>
 
 <script setup>
-import { ref } from 'vue';
-import { useRouter } from 'vue-router';
+import { ref } from "vue";
+import { useRouter } from "vue-router";
 
-
-const usuario = ref('');
-const senha = ref('');
-const mensagem = ref('');
+const usuario = ref("");
+const senha = ref("");
+const email = ref("");
+const mensagem = ref("");
+const modoCadastro = ref(false); // alterna 
 
 const router = useRouter();
 
 function login() {
-  // Exemplo simples de validação
-  if (usuario.value === 'admin' && senha.value === '12345') {
-    mensagem.value = ''
-
-    router.push('/admin') //vai para 
-  }else if (usuario.value === 'user' && senha.value === '12345'){
-    mensagem.value = ''
-    router.push('/user')
+  if (usuario.value === "admin" && senha.value === "12345") {
+    mensagem.value = "";
+    router.push("/admin");
+  } else if (usuario.value === "user" && senha.value === "12345") {
+    mensagem.value = "";
+    router.push("/user");
   } else {
-    mensagem.value = 'Usuário ou senha incorretos!';
+    mensagem.value = "Usuário ou senha incorretos!";
+  }
+}
+
+function cadastrar() {
+  if (usuario.value && senha.value && email.value) {
+    mensagem.value = "Conta criada com sucesso! Faça login.";
+    modoCadastro.value = false;
+    usuario.value = "";
+    senha.value = "";
+    email.value = "";
+  } else {
+    mensagem.value = "Preencha todos os campos!";
   }
 }
 </script>
-
-
-<style>
-/*apenas usar o style scoped se for um css isolado. css usado apenas para essa pagina por exemplo. */
-
-
-
- .login-page {
-      font-family: Arial, sans-serif;
-      background-color:#ade0db;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center; /* important: menu aparece no topo */
-      min-height: 100vh;
-      margin: 0px;
-    }
-
-    
-    .container {
-      
-    background-color: rgba(255, 255, 255, 0.85); /* fundo claro e suave */
-    padding:100px;
-    display:flex;
-   flex-direction: column;
-    align-items: center;
-    border-radius: 20px;
-    box-shadow: 0 10px 15px rgba(0, 0, 0, 0.25);
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-    /*gap: 20px;  espaçamento entre os cards */
-    flex-wrap: wrap; /* quebra em linha nova no celular */
-    width: 550px;
-  min-height: 50vh;
-  padding: 20px;
-    }
-
-
-   
-
-
-    input {
-      width: 80%;
-      padding: 9px;
-      margin: 8px 0;
-      border: 1px solid #ccc;
-      border-radius: 10px;
-      
-      
-    }
-   
-    /*button {
-      width: 40%;
-      padding: 10px;
-      background: #4CAF50;
-      color: white;
-      border: none;
-      border-radius: 7px;
-      cursor: pointer;
-    }
-  */
-    
-    /*button:hover { background: #45a049; }
-    .mensagem { margin-top: 10px; font-size: 14px; }.container {
-  max-width: 400px;
-}*/
-</style>
