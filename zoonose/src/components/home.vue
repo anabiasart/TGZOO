@@ -92,7 +92,7 @@ onUnmounted(() => clearInterval(intervalo))
 
   <ul class="navbar-links">
     <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital')">Editais</li>
+    <li @click="router.push('/edital')">Noticias</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
     <li @click="router.push('/adocao')">Adote um Amigo</li>
@@ -103,7 +103,7 @@ onUnmounted(() => clearInterval(intervalo))
 
   <ul v-if="menuAberto" class="navbar-mobile">
     <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital')">Editais</li>
+    <li @click="router.push('/edital')">Noticias</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
     <li  @click="router.push('/adocao')">Adote um Amigo</li>
