@@ -9,7 +9,7 @@
     <!-- Logo + Navegação -->
     <div class="navbar">
       <div class="logo">
-        <h1><a href="comunicativo.html">ZoonoSys</a></h1>
+        <h1><a href="/home">ZoonoSys</a></h1>
         <p>Vigilância, Prevenção e Controle de Zoonoses</p>
       </div>
 
@@ -42,16 +42,25 @@ export default {
 <style scoped>
 /* Container do header */
 .header {
-  background: linear-gradient(135deg, #abe2bc, #5c906e); /* azul bonito */
+  background: linear-gradient(135deg, #abe2bc, #5c906e); 
   color: #14140f;
   border-radius: 0 0 12px 12px;
   box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+  
+
+
 }
 
 /* Barra superior com título e boas-vindas */
 .topbar {
+  position: relative;
+  width: 100%;              
+ max-width: 100vw; 
   display: flex;
-  justify-content: space-between;
+  overflow: hidden;
+  margin: 0;               
+  border-radius: 0;         
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   padding: 0.5rem 1.5rem;
   background: rgba(0,0,0,0.15);
   font-size: 0.9rem;
@@ -69,11 +78,28 @@ export default {
 
 /* Navbar principal */
 .navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 70px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.8);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 1rem 1.5rem;
-  flex-wrap: wrap;
+  padding: 0 2rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  z-index: 100;
+}
+.navbar-logo {
+  display: flex;
+  align-items: center;
+  font-size: 22px;
+  font-weight: bold;
+  color: #0ea5e9;
+  cursor: pointer;
+  gap: 8px;
 }
 
 /* Logo */
@@ -86,6 +112,7 @@ export default {
   text-decoration: none;
   color: #92965c;
   font-weight: bold;
+
 }
 
 .logo p {
@@ -96,22 +123,17 @@ export default {
 }
 
 /* Menu */
-.nav ul {
+
+.nav{
+ display: flex;
   list-style: none;
-  display: flex;
-  gap: 1rem;
-  margin: 0;
-  padding: 0;
+  gap: 2rem;
+
 }
 
-.nav a {
-  text-decoration: none;
-  color: white;
-  font-weight: 500;
-  transition: color 0.2s;
-}
 
 .nav a:hover {
-  color: #fcd34d; /* amarelo no hover */
+  color: #0ea5e9;
+  transform: translateY(-2px);
 }
 </style>

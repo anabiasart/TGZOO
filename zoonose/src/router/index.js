@@ -16,7 +16,7 @@ import Especie from '../components/admin/Especie.vue'
 import Protocolo from '../components/admin/Protocolo.vue'
 import Atendimento from '../components/admin/Atendimento.vue'
 import Footer from '../components/footer.vue'
-
+import Adocao from '../components/adocao.vue'
 
 const routes = [
   { path: '/', component: Home },   // Home vai ser a página inicial
@@ -28,11 +28,13 @@ const routes = [
   { path: '/especie', component: Especie},
   { path: '/protocolo', component: Protocolo },
   { path: '/atendimento', component: Atendimento },
+
   { path: '/edital',name: 'Edital',
   component: () => import('../components/edital.vue')
 },
   { path: '/footer', component: Footer },
-
+  { path: '/adocao', component: Adocao },
+    
 
 ]
 

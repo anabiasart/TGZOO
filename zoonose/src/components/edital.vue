@@ -24,10 +24,7 @@ import { noticiasData } from "data/noticiasData.js"
       </div>
     </main>
 
-    <footer>
-      <p>Secretaria Municipal de Saúde</p>
-      <p>Publicado em: 13 de agosto de 2025</p>
-    </footer>
+   
   </div>
 </template>
 
@@ -87,7 +84,10 @@ const noticiasData = [
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-color: #f5f6fa;
+  width: 100%;
+  display: flex;
+  flex-direction: column; 
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
   min-height: 100vh;
 }
 

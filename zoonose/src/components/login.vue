@@ -1,16 +1,16 @@
 <template>
   <div class="login-page">
-    <div class="container mx-auto p-4 flex flex-col items-center justify-center min-h-screen">
-
-      <div class="font mb-4">
-        <p class="text-blue-600/25 dark:text-sky-400/25">Cuide-se bem...</p>
+    <div class="container">
+      <div class="font mb-2">
+        <p class="font-style: italic text-blue-200 dark:text-sky-400/25">Cuide-se bem...</p>
       </div>
 
       <!-- Alterna entre Login e Cadastro -->
       <h1 class="text-3xl font-medium mb-3">
         {{ modoCadastro ? "Cadastro" : "Login" }}
       </h1>
-      <h2 class="text-xl mb-3">
+      <h2 class="font-style: italic text-xl mb-3 text-blue-300 --tw-text-opacity: 1;
+color: rgba(147, 197, 253, var(--tw-text-opacity))">
         {{ modoCadastro ? "Crie sua conta" : "Bem-vindo" }}
       </h2>
 
@@ -50,8 +50,9 @@
       </p>
 
       <p class="mensagem text-red-500 mt-2">{{ mensagem }}</p>
-    </div>
   </div>
+
+    </div>
 </template>
 
 <script setup>
@@ -90,3 +91,30 @@ function cadastrar() {
   }
 }
 </script>
+
+
+<style>
+
+.login-page {
+  min-height: 100vh;
+  margin: 0;
+  display: flex;
+  justify-content: center; 
+  align-items: center;    
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+}
+
+.container {
+  background: #fff;
+  border-radius: 12px;
+  padding: 40px;
+  width: 380px; 
+  box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+
+
+</style>

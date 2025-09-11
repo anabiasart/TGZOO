@@ -63,7 +63,7 @@ const faq = ref([
 function toggleFaq(index) {
   faq.value[index].aberto = !faq.value[index].aberto
 }
-
+/*criado uma ref para as imagens seguido dos textinhos */
 const imagens = ref([
   { src: vete, texto: "Cuide do seu pet com amor e vacinas 💉🐶" },
   { src: pata, texto: "Adote um amigo e ganhe um companheiro fiel 🐾❤️" }
@@ -84,8 +84,7 @@ onUnmounted(() => clearInterval(intervalo))
 
 <template>
 
-
-  
+<!--uma nav bar para enquadramento maior e uma responsiva para mobile--->  
 <nav class="navbar">
   <div class="navbar-logo" @click="router.push('/')">
     <span>🐾</span> ZoonoSys
@@ -96,7 +95,7 @@ onUnmounted(() => clearInterval(intervalo))
     <li @click="router.push('/edital')">Editais</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
-    <li @click="router.push('detalhes.html')">Adote um Amigo</li>
+    <li @click="router.push('/adocao')">Adote um Amigo</li>
 
   </ul>
 
@@ -107,11 +106,11 @@ onUnmounted(() => clearInterval(intervalo))
     <li @click="router.push('/edital')">Editais</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
-    <li  @click="router.push('detalhes.html')">Adote um Amigo</li>
+    <li  @click="router.push('/adocao')">Adote um Amigo</li>
 
   </ul>
 </nav>
-
+<!-------carrossel com as imagens e texto animado-->
  <div class="carrossel-container">
 <img :src="imagens[indexAtual].src" alt="Carrossel" />
      <transition name="fade" mode="out-in">
@@ -135,7 +134,7 @@ onUnmounted(() => clearInterval(intervalo))
           <section class="noticias">
             <h3 class="titulo">📰 Últimas Notícias & Editais</h3>
 
-            
+            <!----aqui é para manter o resumo com imagem-->
             <div class="lista-noticias">
               <div v-for="(n, i) in noticias" :key="i" class="card-noticia">
                 <img :src="n.imagem" alt="Imagem notícia" />
@@ -163,13 +162,15 @@ onUnmounted(() => clearInterval(intervalo))
               É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
             </p>
           </section>
-
+<!-----Seguido dos cards de serviços com icones-->
           <div v-for="(s, i) in servicos" :key="i" class="service">
             <component :is="s.icon" class="icon"/>
             <h3>{{ s.titulo }}</h3>
             <p>{{ s.desc }}</p>
             <button class="btn-action" @click="s.acao">{{ s.label }}</button>
           </div>
+
+          <!----Faq com perguntas basicas e animação de item aberto ou fechado-->
                 <section class="faq">
             <h3>❓ Dúvidas Frequentes</h3>
             <div v-for="(item, i) in faq" :key="i" class="faq-item">
@@ -189,6 +190,7 @@ onUnmounted(() => clearInterval(intervalo))
 </template>
 
 <style>
+
 .home-page {
   margin: 0;
   display: flex;
@@ -283,6 +285,8 @@ onUnmounted(() => clearInterval(intervalo))
   background: #f1f5f9;
 }
 
+/**aqui segue sobre ambiente responsivo usando o media do css para intercalar o tamanho <= 768px ou >= 1024px */
+
 @media (max-width: 768px) {
   .navbar-links { display: none; }
   .navbar-toggle { display: block; }
@@ -322,6 +326,7 @@ onUnmounted(() => clearInterval(intervalo))
   transform: scale(1.05);
 }
 
+/**aqui o col esquerda representa o separamento dos cards de serviços e do faq dos de noticia  */
 .col-esquerda {
   display: flex;          
   flex-direction: column;  
@@ -331,6 +336,8 @@ onUnmounted(() => clearInterval(intervalo))
   align-self: start;      
   height: 100%;
 }
+
+/**aqui eu deixei os cards de noticia para ocupar tanto a coluna dois quanto até a coluna qautro que pega até o final da página */
 .col-central {
   grid-column: 2 / 4; /* sempre na segunda coluna / pega a quarta*/
 }
@@ -467,6 +474,8 @@ onUnmounted(() => clearInterval(intervalo))
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.6s ease;
 }
+
+/**transitions do text-carrossel */
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
@@ -487,7 +496,7 @@ onUnmounted(() => clearInterval(intervalo))
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   animation: fadeInUp 0.8s ease;
 }
-
+/**usado apenas a fim de deixar mais bonito */
 @keyframes fadeInUp {
   from { opacity: 0; transform: translate(-50%, 20px); }
   to { opacity: 1; transform: translate(-50%, 0); }

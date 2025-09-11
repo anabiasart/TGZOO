@@ -83,6 +83,7 @@ export default {
 .admin-home {
   padding: 2rem;
   font-family: font-mono;
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
 }
 
 /* Seções */
