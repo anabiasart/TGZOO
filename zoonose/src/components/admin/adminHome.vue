@@ -1,7 +1,7 @@
 <template>
   <div class="admin-home">
     <!-- Cabeçalho -->
-    <Header :usuario="usuario" />
+    <Header :admin="Admin" />
 
     <!-- Atalhos rápidos -->
     <section class="atalhos">
@@ -81,9 +81,14 @@ export default {
 
 <style scoped>
 .admin-home {
-  padding: 2rem;
-  font-family: font-mono;
-  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+  margin: 0;
+  display: flex;
+  flex-direction: column; 
+  min-height: 100vh;
+  width: 100%;
+    padding: 20px;
+
+  background: linear-gradient(135deg, rgb(205, 245, 255), #a5f3fc, #93c5fd);
 }
 
 /* Seções */
@@ -132,8 +137,8 @@ h2 {
 }
 
 .stat {
-  background: #5c906e;
-  color: white;
+  background: #fdfdfd;
+  color: #5c906e;
   padding: 1.5rem;
   border-radius: 12px;
   text-align: center;

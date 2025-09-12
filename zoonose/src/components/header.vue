@@ -40,100 +40,111 @@ export default {
 </script>
 
 <style scoped>
-/* Container do header */
+/* Container geral */
 .header {
-  background: linear-gradient(135deg, #abe2bc, #5c906e); 
-  color: #14140f;
-  border-radius: 0 0 12px 12px;
-  box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-  
-
-
+  width: 100%;
+  font-family: "Segoe UI", Roboto, sans-serif;
 }
 
-/* Barra superior com título e boas-vindas */
+/* Barra superior */
 .topbar {
-  position: relative;
-  width: 100%;              
- max-width: 100vw; 
   display: flex;
-  overflow: hidden;
-  margin: 0;               
-  border-radius: 0;         
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  padding: 0.5rem 1.5rem;
-  background: rgba(0,0,0,0.15);
-  font-size: 0.9rem;
+  justify-content: space-between;
+  align-items: center;
+  background: linear-gradient(135deg, #3b6e54, #a5f3fc, #81b7f6);
+  color: #fff;
+  padding: 0.5rem 2rem;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
 }
 
 .painel {
-  font-size: 1.9rem;
-  opacity: 0.9;
+  font-size: 1.2rem;
+  font-weight: 600;
 }
 
 .bemvindo {
-  font-size: 1.9rem;
+  font-size: 1rem;
   opacity: 0.9;
+  font-style: italic;
 }
 
 /* Navbar principal */
 .navbar {
-  position: fixed;
+  position: sticky; /* não precisa ser fixed, assim não sobrepõe */
   top: 0;
   left: 0;
   width: 100%;
-  height: 70px;
   backdrop-filter: blur(10px);
-  background: rgba(255,255,255,0.8);
+  background: rgba(255, 255, 255, 0.8);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  z-index: 100;
-}
-.navbar-logo {
-  display: flex;
-  align-items: center;
-  font-size: 22px;
-  font-weight: bold;
-  color: #0ea5e9;
-  cursor: pointer;
-  gap: 8px;
+  padding: 0.8rem 2rem;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  z-index: 99;
 }
 
 /* Logo */
 .logo h1 {
-  font-size: 1.5rem;
+  font-size: 1.6rem;
   margin: 0;
 }
 
 .logo a {
   text-decoration: none;
-  color: #92965c;
+  color: #0ea5e9;
   font-weight: bold;
+  transition: color 0.3s;
+}
 
+.logo a:hover {
+  color: #3b6e54;
 }
 
 .logo p {
   margin: 0;
   font-size: 0.85rem;
-  opacity: 0.9;
-  color:#92965c;
+  opacity: 0.8;
+  font-style: italic;
+  color: #333;
 }
 
 /* Menu */
-
-.nav{
- display: flex;
+.nav ul {
+  display: flex;
   list-style: none;
   gap: 2rem;
-
+  margin: 0;
+  padding: 0;
 }
 
-
-.nav a:hover {
-  color: #0ea5e9;
-  transform: translateY(-2px);
+.nav a, .nav router-link {
+  text-decoration: none;
+  color: #333;
+  font-weight: 500;
+  position: relative;
+  transition: color 0.3s ease;
 }
+
+.nav a:hover, .nav router-link:hover {
+  color: #5c906e;
+}
+
+/* Efeito underline animado */
+.nav a::after, .nav router-link::after {
+  content: "";
+  position: absolute;
+  width: 0%;
+  height: 2px;
+  bottom: -4px;
+  left: 0;
+  background-color: #5c906e;
+  transition: width 0.3s ease;
+}
+
+.nav a:hover::after, .nav router-link:hover::after {
+  width: 100%;
+}
+
 </style>
