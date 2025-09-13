@@ -1,10 +1,12 @@
 <script setup>
 import { ref, onMounted } from "vue"
-import { noticiasSeed } from "@/data/noticiasData.js"
+import { useNoticias } from "@/data/noticiasData.js"
 
-const STORAGE_KEY = "noticias"
+const { noticias, adicionarNoticia, removerNoticia, carregarNoticias } = useNoticias()
 
-const noticiasData = ref([])
+onMounted(() => {
+  carregarNoticias()
+})
 
 const novaNoticia = ref({
   titulo: "",
@@ -13,30 +15,10 @@ const novaNoticia = ref({
   detalhes: { data: "", horario: "", local: "", publico: "", contato: "" }
 })
 
-onMounted(() => {
-  const salvas = localStorage.getItem(STORAGE_KEY)
-  if (salvas) {
-    noticiasData.value = JSON.parse(salvas)
-  } else {
-    noticiasData.value = [...noticiasSeed]
-    salvarLocal()
-  }
-})
-
-function salvarLocal() {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(noticiasData.value))
-}
-
 function adicionar() {
-  const novaComId = {
-    ...novaNoticia.value,
-    id: noticiasData.value.length 
-  }
-  
-  noticiasData.value.push(novaComId)
-  
-  salvarLocal()
-  
+  adicionarNoticia(novaNoticia.value)
+
+  // resetar form
   novaNoticia.value = {
     titulo: "",
     resumo: "",
@@ -44,13 +26,7 @@ function adicionar() {
     detalhes: { data: "", horario: "", local: "", publico: "", contato: "" }
   }
 }
-
-function remover(i) {
-  noticiasData.value.splice(i, 1)
-  salvarLocal()
-}
 </script>
-
 
 <template>
   <div class="admin">
@@ -68,17 +44,15 @@ function remover(i) {
       <button type="submit">Adicionar</button>
     </form>
 
-    <div v-for="(n, i) in (Array.isArray(noticiasData?.value) ? noticiasData.value : noticiasData)" :key="i" class="card">
+    <div v-for="(n, i) in noticias" :key="n.id" class="card">
       <h3>{{ n.titulo }}</h3>
       <p>{{ n.resumo }}</p>
       <img v-if="n.imagem" :src="n.imagem" alt="Imagem da notícia" class="preview"/>
-      <button @click="remover(i)">❌ Excluir</button>
+      <button @click="removerNoticia(i)">❌ Excluir</button>
     </div>
   </div>
 </template>
-
 <style scoped>
-/* (mantive seu CSS, copie/cole o CSS original aqui) */
 .admin {
   font-family: Arial, sans-serif;
   padding: 30px;

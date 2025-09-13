@@ -32,7 +32,7 @@ const routes = [
   { path: '/atendimento', component: Atendimento },
 
      {path: '/edital',
-    redirect: { name: 'edital/1' } // Ou para onde você quiser redirecionar
+    redirect: { name: 'edital/1' } 
   },
   {
     path: '/edital/:id',
