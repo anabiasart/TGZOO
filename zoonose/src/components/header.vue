@@ -20,6 +20,8 @@
           <li><a href="/especie">Espécies</a></li>
           <li><a href="/protocolo">Protocolo</a></li>
           <li><a href="/atendimento">Atendimento</a></li>
+          <li><a href="/edital-admin">Post Edital</a></li>
+
         <li><router-link to="/agenda">Agenda</router-link></li>        
     </ul>
       </nav>

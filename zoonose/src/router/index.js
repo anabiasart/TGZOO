@@ -17,9 +17,11 @@ import Protocolo from '../components/admin/Protocolo.vue'
 import Atendimento from '../components/admin/Atendimento.vue'
 import Footer from '../components/footer.vue'
 import Adocao from '../components/adocao.vue'
+import editalAdmin from '../components/admin/editalAdmin.vue'
+import Edital from '@/components/edital.vue'
 
 const routes = [
-  { path: '/', component: Home },   // Home vai ser a página inicial
+  { path: '/', component: Home },  
   { path: '/login', component: Login },
   { path: '/admin', component: adminHome },
   { path: '/user', component: userHome },
@@ -29,12 +31,17 @@ const routes = [
   { path: '/protocolo', component: Protocolo },
   { path: '/atendimento', component: Atendimento },
 
-  { path: '/edital',name: 'Edital',
-  component: () => import('../components/edital.vue')
-},
+     {path: '/edital',
+    redirect: { name: 'edital/1' } // Ou para onde você quiser redirecionar
+  },
+  {
+    path: '/edital/:id',
+    name: 'edital',
+    component: Edital
+  },
   { path: '/footer', component: Footer },
   { path: '/adocao', component: Adocao },
-    
+{ path: '/edital-admin', component: editalAdmin },    
 
 ]
 

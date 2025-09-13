@@ -1,7 +1,8 @@
-// src/data/noticiasData.js
-export const noticiasData = [
+
+export const noticiasSeed = [
 
   {
+     id: 1,
     titulo: "Campanha de Vacinação Gratuita",
     resumo: "Todos os pets cadastrados poderão receber vacinas gratuitamente.",
     detalhes: {
@@ -13,6 +14,7 @@ export const noticiasData = [
     }
   },
   {
+     id: 2,
     titulo: "Mutirão de Adoção",
     resumo: "Evento especial para adoção de cães e gatos.",
     detalhes: {
@@ -24,6 +26,7 @@ export const noticiasData = [
     }
   },
   {
+     id: 3,
     titulo: "Novos Horários de Atendimento",
     resumo: "Atendimento ampliado para os sábados.",
     detalhes: {
@@ -35,6 +38,7 @@ export const noticiasData = [
     }
   },
     {
+       id: 4,
     titulo: "SEJA UM VOLUNTÁRIO - Ajude a comunidade!",
     resumo: "Se torne parte da nossa causa.",
     detalhes: {
@@ -45,4 +49,6 @@ export const noticiasData = [
       contato: "(11) 97777-2222"
     }
   }
+  
 ]
+export const noticiasData = noticiasSeed  // alias para compatibilidade

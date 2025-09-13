@@ -46,14 +46,21 @@ function cortarTexto(texto, limite) {
 }
 
 onMounted(() => {
-  noticias.value = noticiasData.slice(0, 4).map((n, i) => ({
-    titulo: n.titulo,
-    resumo: cortarTexto(n.resumo, 80),
-    imagem: i % 2 === 0 ? vete : pata
+  noticias.value = noticiasData.slice(0, 4).map((n) => {
+    let imagemFinal
+    if (n.imagem && n.imagem.trim() !== "") {
+      imagemFinal = n.imagem
+    } else {
+      imagemFinal = vete || pata
+    }
 
-  }))
+    return {
+      titulo: n.titulo,
+      resumo: cortarTexto(n.resumo, 80),
+      imagem: imagemFinal
+    }
+  })
 })
-
 // FAQ
 const faq = ref([
   { pergunta: "Como faço para cadastrar meu pet?", resposta: "Basta acessar a área de login, criar sua conta e cadastrar os dados do seu pet.", aberto: false },
@@ -92,7 +99,7 @@ onUnmounted(() => clearInterval(intervalo))
 
   <ul class="navbar-links">
     <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital')">Noticias</li>
+    <li @click="router.push('/edital/${n.id}')"> Noticias </li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
     <li @click="router.push('/adocao')">Adote um Amigo</li>
@@ -103,7 +110,7 @@ onUnmounted(() => clearInterval(intervalo))
 
   <ul v-if="menuAberto" class="navbar-mobile">
     <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital')">Noticias</li>
+    <li @click="router.push(`/edital/${n.id}`)">Noticias</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
     <li  @click="router.push('/adocao')">Adote um Amigo</li>
@@ -131,23 +138,21 @@ onUnmounted(() => clearInterval(intervalo))
         <main class="col-central">
          
 
-          <section class="noticias">
-            <h3 class="titulo">📰 Últimas Notícias & Editais</h3>
+        <section class="noticias">
+  <h3 class="titulo">📰 Últimas Notícias & Editais</h3>
 
-            <!----aqui é para manter o resumo com imagem-->
-            <div class="lista-noticias">
-              <div v-for="(n, i) in noticias" :key="i" class="card-noticia">
-                <img :src="n.imagem" alt="Imagem notícia" />
-                <div class="conteudo">
-                  <h4>{{ n.titulo }}</h4>
-                  <p>{{ n.resumo }}</p>
-                  <button class="btn-leia" @click="router.push('/edital')">Leia mais ›</button>
-                </div>
-              </div>
-            </div>
-
-             
-          </section>
+  <div class="lista-noticias">
+    <div v-for="n in noticias" :key="n.id" class="card-noticia">
+      <img :src="n.imagem" alt="Imagem notícia" />
+      <div class="conteudo">
+        <h4>{{ n.titulo }}</h4>
+        <p>{{ n.resumo }}</p>
+        
+        <button class="btn-leia" @click="router.push(`/edital/${n.id}`)">Leia mais ›</button>
+      </div>
+    </div>
+  </div>
+</section>
 
           
       
