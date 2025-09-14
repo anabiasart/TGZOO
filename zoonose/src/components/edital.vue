@@ -1,52 +1,53 @@
-
-<script setup>
+<script>
 import { ref, onMounted } from "vue"
 import { useRoute } from "vue-router"
-import { noticiasData as initialData } from "@/data/noticiasData.js" // Renomeie a importação
-const STORAGE_KEY = "noticias"
-const noticias = ref([]) // Use um nome diferente para a variável reativa
+import { useNoticias } from "@/data/noticiasData.js"
+
+const { noticias, carregarNoticias } = useNoticias()
 const noticia = ref(null)
-
+const carregando = ref(true) // ✅ controle de loading
 const route = useRoute()
-onMounted(() => {
-  const salvas = localStorage.getItem(STORAGE_KEY)
-  noticias.value = salvas ? JSON.parse(salvas) : initialData 
 
-  console.log("Rota recebida:", route.params.id)
-  console.log("Noticias carregadas:", noticias.value)
+onMounted(async () => {
+  await carregarNoticias() // garante que espere carregar
 
   const id = parseInt(route.params.id, 10)
-  console.log("ID convertido:", id)
-
   if (!isNaN(id)) {
     noticia.value = noticias.value.find(item => item.id === id)
-    console.log("Notícia encontrada:", noticia.value)
-  } 
+  }
+  carregando.value = false // finaliza loading
 })
-
 </script>
 
 <template>
-  <div class="edital-page" v-if="noticia">
-    <header>
-      <h1>{{ noticia.titulo }}</h1>
-      <p class="orgao">Prefeitura Municipal • Secretaria de Saúde • Centro Veterinário</p>
-    </header>
+  <div class="edital-page">
+    <template v-if="carregando">
+      <p>Carregando notícia...</p>
+    </template>
 
-    <main class="conteudo">
-      <ul v-if="noticia.detalhes">
-        <li><strong>Data:</strong> {{ noticia.detalhes.data }}</li>
-        <li><strong>Horário:</strong> {{ noticia.detalhes.horario }}</li>
-        <li><strong>Local:</strong> {{ noticia.detalhes.local }}</li>
-        <li><strong>Público:</strong> {{ noticia.detalhes.publico }}</li>
-        <li><strong>Contato:</strong> {{ noticia.detalhes.contato }}</li>
-      </ul>
-    </main>
+    <template v-else-if="noticia">
+      <header>
+        <h1>{{ noticia.titulo }}</h1>
+        <p class="orgao">Prefeitura Municipal • Secretaria de Saúde • Centro Veterinário</p>
+      </header>
+
+      <main class="conteudo">
+        <p>{{ noticia.resumo }}</p>
+        <ul v-if="noticia.detalhes">
+          <li><strong>Dados:</strong> {{ noticia.detalhes.data }}</li>
+          <li><strong>Horário:</strong> {{ noticia.detalhes.horario }}</li>
+          <li><strong>Local:</strong> {{ noticia.detalhes.local }}</li>
+          <li><strong>Público:</strong> {{ noticia.detalhes.publico }}</li>
+          <li><strong>Contato:</strong> {{ noticia.detalhes.contato }}</li>
+        </ul>
+      </main>
+    </template>
+
+    <template v-else>
+      <p>Notícia não encontrada.</p>
+    </template>
   </div>
-
-  <p v-else>Notícia não encontrada.</p>
 </template>
-
 
 
 

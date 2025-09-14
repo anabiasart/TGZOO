@@ -1,40 +1,17 @@
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Syringe, User, Calendar } from 'lucide-vue-next'
-import { noticiasData } from "@/data/noticiasData.js"
-import vete from "../assets/img/vete.jpg";
+import { useNoticias } from "@/data/noticiasData.js"
+import vete from "../assets/img/vete.jpg"
 import pata from "../assets/img/pata.jpg"
 
+const { noticias: todasNoticias, carregarNoticias } = useNoticias()
 const noticias = ref([])
 const router = useRouter()
 const menuAberto = ref(false)
 
-
-const servicos = [
-  { 
-    titulo: "Vacine o seu Pet", 
-    desc: "Garanta a saúde dos seus amigos peludos...", 
-    label: "CONSULTAR", 
-    icon: Syringe, 
-    acao: () => router.push('/edital') 
-  },
-  { 
-    titulo: "Faça login", 
-    desc: "Receba dicas dos nossos veterinários...", 
-    label: "LOGIN", 
-    icon: User, 
-    acao: () => router.push('/login') 
-  },
-  { 
-    titulo: "Agende uma Consulta", 
-    desc: "Receba atendimento especializado...", 
-    label: "AGENDAR", 
-    icon: Calendar, 
-    acao: () => router.push('/login') 
-  }
-]
-
+// Função para cortar texto
 function cortarTexto(texto, limite) {
   if (!texto) return ''
   texto = texto.replace(/\s+/g, ' ').trim()
@@ -45,48 +22,52 @@ function cortarTexto(texto, limite) {
   return cortado.slice(0, ultimoEspaco) + '…'
 }
 
-onMounted(() => {
-  noticias.value = noticiasData.slice(0, 4).map((n) => {
-    let imagemFinal
-    if (n.imagem && n.imagem.trim() !== "") {
-      imagemFinal = n.imagem
-    } else {
-      imagemFinal = vete || pata
-    }
+  onMounted(() => {
+  carregarNoticias()
+})
 
-    return {
+watch(todasNoticias, () => {
+  noticias.value = todasNoticias.value
+    .slice(0, 4)
+    .map(n => ({
+      id: n.id,
       titulo: n.titulo,
       resumo: cortarTexto(n.resumo, 80),
-      imagem: imagemFinal
-    }
-  })
+      imagem: n.imagem && n.imagem.trim() ? n.imagem : vete
+    }))
 })
-// FAQ
-const faq = ref([
-  { pergunta: "Como faço para cadastrar meu pet?", resposta: "Basta acessar a área de login, criar sua conta e cadastrar os dados do seu pet.", aberto: false },
-  { pergunta: "As vacinas são gratuitas?", resposta: "Sim, as campanhas de vacinação promovidas pela prefeitura são gratuitas.", aberto: false },
-  { pergunta: "Onde acontecem os mutirões de adoção?", resposta: "Normalmente na Praça Central ou no Centro Veterinário Municipal. Confira no edital.", aberto: false }
-])
-function toggleFaq(index) {
-  faq.value[index].aberto = !faq.value[index].aberto
+
+function fecharMenu() {
+  if (window.innerWidth > 768) menuAberto.value = false
 }
-/*criado uma ref para as imagens seguido dos textinhos */
+onMounted(() => window.addEventListener('resize', fecharMenu))
+onUnmounted(() => window.removeEventListener('resize', fecharMenu))
+
 const imagens = ref([
   { src: vete, texto: "Cuide do seu pet com amor e vacinas 💉🐶" },
   { src: pata, texto: "Adote um amigo e ganhe um companheiro fiel 🐾❤️" }
 ])
 const indexAtual = ref(0)
 let intervalo
-function proximo() {
-  indexAtual.value = (indexAtual.value + 1) % imagens.value.length
-}
-function anterior() {
-  indexAtual.value = (indexAtual.value - 1 + imagens.value.length) % imagens.value.length
-}
-onMounted(() => {
-  intervalo = setInterval(proximo, 4000)
-})
+function proximo() { indexAtual.value = (indexAtual.value + 1) % imagens.value.length }
+function anterior() { indexAtual.value = (indexAtual.value - 1 + imagens.value.length) % imagens.value.length }
+onMounted(() => { intervalo = setInterval(proximo, 4000) })
 onUnmounted(() => clearInterval(intervalo))
+
+// Serviços
+const servicos = [
+  { titulo: "Vacine o seu Pet", desc: "Garanta a saúde dos seus amigos peludos...", label: "CONSULTAR", icon: Syringe, acao: () => router.push('/edital') },
+  { titulo: "Faça login", desc: "Receba dicas dos nossos veterinários...", label: "LOGIN", icon: User, acao: () => router.push('/login') },
+  { titulo: "Agende uma Consulta", desc: "Receba atendimento especializado...", label: "AGENDAR", icon: Calendar, acao: () => router.push('/login') }
+]
+
+// FAQ
+const faq = ref([
+  { pergunta: "Como faço para cadastrar meu pet?", resposta: "Basta acessar a área de login, criar sua conta e cadastrar os dados do seu pet.", aberto: false },
+  { pergunta: "As vacinas são gratuitas?", resposta: "Sim, as campanhas de vacinação promovidas pela prefeitura são gratuitas.", aberto: false },
+  { pergunta: "Onde acontecem os mutirões de adoção?", resposta: "Normalmente na Praça Central ou no Centro Veterinário Municipal. Confira no edital.", aberto: false }
+])
+function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 </script>
 
 <template>
@@ -99,7 +80,7 @@ onUnmounted(() => clearInterval(intervalo))
 
   <ul class="navbar-links">
     <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital/${n.id}')"> Noticias </li>
+    <li @click="router.push('/edital')">Noticias</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
     <li @click="router.push('/adocao')">Adote um Amigo</li>
@@ -110,10 +91,9 @@ onUnmounted(() => clearInterval(intervalo))
 
   <ul v-if="menuAberto" class="navbar-mobile">
     <li @click="router.push('/')">Início</li>
-    <li @click="router.push(`/edital/${n.id}`)">Noticias</li>
+<li @click="router.push('/edital')">Noticias</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
-    <li  @click="router.push('/adocao')">Adote um Amigo</li>
 
   </ul>
 </nav>

@@ -2,7 +2,7 @@
 import { ref, onMounted } from "vue"
 import { useNoticias } from "@/data/noticiasData.js"
 
-const { noticias, adicionarNoticia, removerNoticia, carregarNoticias } = useNoticias()
+const { noticias, adicionarNoticia, removerNoticiaPorId, carregarNoticias } = useNoticias()
 
 onMounted(() => {
   carregarNoticias()
@@ -44,14 +44,17 @@ function adicionar() {
       <button type="submit">Adicionar</button>
     </form>
 
-    <div v-for="(n, i) in noticias" :key="n.id" class="card">
+    <div v-for="n in noticias" :key="n.id" class="card">
       <h3>{{ n.titulo }}</h3>
       <p>{{ n.resumo }}</p>
       <img v-if="n.imagem" :src="n.imagem" alt="Imagem da notícia" class="preview"/>
-      <button @click="removerNoticia(i)">❌ Excluir</button>
+      <router-link :to="`/edital/${n.id}`">📄 Ver edital</router-link>
+      <button @click="removerNoticiaPorId(n.id)">❌ Excluir</button>
     </div>
   </div>
 </template>
+
+
 <style scoped>
 .admin {
   font-family: Arial, sans-serif;

@@ -35,9 +35,9 @@ const routes = [
     redirect: { name: 'edital/1' } 
   },
   {
-    path: '/edital/:id',
+    path: '/edital/noticias',
     name: 'edital',
-    component: Edital
+    component: Edital 
   },
   { path: '/footer', component: Footer },
   { path: '/adocao', component: Adocao },
