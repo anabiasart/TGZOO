@@ -23,14 +23,13 @@
         <form @submit.prevent="modoCadastro ? cadastrar() : login()">
           <!-- Inputs comuns -->
           <input
-            type="text"
-            v-model="form.usuario"
-            placeholder="Usuário"
-            class="input-field"
-            required
-            :disabled="loading"
-          />
-          
+          <input
+  type="email"
+  v-model="form.usuario"
+  placeholder="E-mail"
+  class="input-field"
+  required
+/>
           <input
             type="password"
             v-model="form.senha"
@@ -199,7 +198,7 @@ async function login() {
   
   try {
     const response = await authAPI.login({
-      username: form.usuario,
+      email: form.usuario,     // Mudou de "username" para "email"
       password: form.senha,
     });
 
@@ -215,20 +214,20 @@ async function login() {
     // Salvar token
     localStorage.setItem("token", token);
 
-    // Pegar role (vem da API ou do helper)
+    // Pegar role
     const role = authAPI.getUserRole() || response.data.role;
     localStorage.setItem("role", role);
 
     mostrarMensagem("Login realizado com sucesso!", "success");
     
-    // Redirecionar para a home correta
+    // Redirecionar
     setTimeout(() => {
       if (role === "ADMINISTRATOR" || role === "user_administrador") {
         router.push("/admin");
       } else if (role === "CUSTOMER" || role === "user_costumer") {
         router.push("/user");
       } else {
-        router.push("/"); // fallback
+        router.push("/");
       }
     }, 1000);
     
@@ -238,7 +237,7 @@ async function login() {
     if (error.response) {
       switch (error.response.status) {
         case 401:
-          mostrarMensagem("Usuário ou senha inválidos");
+          mostrarMensagem("E-mail ou senha inválidos");
           break;
         case 403:
           mostrarMensagem("Acesso negado");
@@ -258,7 +257,6 @@ async function login() {
     loading.value = false;
   }
 }
-
 async function cadastrar() {
   if (!validarFormulario()) return;
   

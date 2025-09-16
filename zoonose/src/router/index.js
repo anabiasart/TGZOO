@@ -1,9 +1,4 @@
-
-/*criando um router por conta que o tailwind tava bugando o css e nao tava rodando
-a logica aqui é que basicamente ele vai ir primeiro no app e depois
-aop pressionar login a logica é ele ir para o login.vue */
-
-
+// ROUTER CONFIGURADO PARA HOME.VUE SEMPRE PRIMEIRO
 
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../components/home.vue'
@@ -26,68 +21,69 @@ export const getUsers = () => api.get("/users");
 export const createUser = (user) => api.post("/users", user);
 
 const routes = [
-  { path: '/', component: Home },  
-  { path: '/login', component: Login },
-  { path: '/admin', component: adminHome },
-  { path: '/user', component: userHome },
-  { path: '/agenda', component: Agendar },
-  { path: '/animal', component: Animal },
-  { path: '/especie', component: Especie},
-  { path: '/protocolo', component: Protocolo },
-  { path: '/atendimento', component: Atendimento },
-
-     {path: '/edital',
-    redirect: { name: 'edital/1' } 
-  },
-  {
-    path: '/edital/noticias',
-    name: 'edital',
-    component: Edital 
-  },
+  { path: '/', component: Home },        // Home sempre acessível
+  { path: '/login', component: Login },   // Login sempre acessível
+  { path: '/admin', component: adminHome, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/user', component: userHome, meta: { requiresAuth: true, role: 'user' } },
+  { path: '/agenda', component: Agendar, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/animal', component: Animal, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/especie', component: Especie, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/protocolo', component: Protocolo, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/atendimento', component: Atendimento, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/edital', redirect: '/edital/noticias' },
+  { path: '/edital/noticias', name: 'edital', component: Edital },
   { path: '/footer', component: Footer },
-  { path: '/adocao', component: Adocao },
-{ path: '/edital-admin', component: editalAdmin },    
-
+  { path: '/adocao', component: Adocao },   // Público
+  { path: '/edital-admin', component: editalAdmin, meta: { requiresAuth: true, role: 'admin' } },    
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
 })
+
+// ROUTER GUARD SIMPLIFICADO
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  // Rotas públicas
-  const publicRoutes = ["/", "/login", "/adocao", "/contato"];
-  const isPublicEdital = to.path.startsWith("/edital");
+  console.log(`Navegando para: ${to.path}`)
+  console.log(`Token: ${!!token}, Role: ${role}`)
 
-  // Se não tiver token e não for rota pública → manda pro login
-  if (!token && !publicRoutes.includes(to.path) && !isPublicEdital) {
-    return next("/login");
+  // Rotas que sempre podem ser acessadas (públicas)
+  const publicRoutes = ["/", "/login", "/adocao", "/contato"];
+  const isPublicEdital = to.path.startsWith("/edital") && !to.path.includes("admin");
+
+  // Se é rota pública, sempre permite
+  if (publicRoutes.includes(to.path) || isPublicEdital) {
+    console.log("Rota pública, permitindo acesso")
+    return next();
   }
 
-  // 🔹 Se já estiver logado e tentar ir para /login → redireciona para sua home correta
-  if (token && to.path === "/login") {
-    if (role === "ADMINISTRATOR" || role === "user_administrador") {
-      return next("/admin");
-    } else if (role === "CUSTOMER" || role === "user_costumer") {
-      return next("/user");
-    } else {
-      return next("/");
+  // Para rotas protegidas, verificar autenticação
+  if (to.meta?.requiresAuth) {
+    if (!token || !role || role === "undefined") {
+      console.log("Sem autenticação, redirecionando para login")
+      return next("/login");
+    }
+
+    // Verificar permissões baseadas no role
+    if (to.meta.role === 'admin') {
+      if (!(role === "ADMINISTRATOR" || role === "user_administrador")) {
+        console.log("Sem permissão de admin")
+        return next("/");
+      }
+    }
+
+    if (to.meta.role === 'user') {
+      if (!(role === "CUSTOMER" || role === "user_costumer")) {
+        console.log("Sem permissão de usuário")
+        return next("/");
+      }
     }
   }
 
-  // 🔹 Proteção de rotas administrativas
-  if (to.path.startsWith("/admin") && !(role === "ADMINISTRATOR" || role === "user_administrador")) {
-    return next("/user");
-  }
-
-  // 🔹 Proteção de rotas de usuário comum
-  if (to.path.startsWith("/user") && !(role === "CUSTOMER" || role === "user_costumer")) {
-    return next("/admin");
-  }
-
+  console.log("Acesso permitido")
   next();
 });
 

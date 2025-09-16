@@ -1,4 +1,3 @@
-// services/api.js - VERSÃO CORRIGIDA COMPLETA
 
 import axios from "axios";
 
@@ -14,16 +13,13 @@ const api = axios.create({
   },
 });
 
-// Log para verificar se está funcionando
 console.log("🔗 API configurada para:", API_BASE_URL);
 
-// Interceptor para requisições (adiciona o token automaticamente)
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     
     if (token) {
-      // Remove 'Bearer ' se já estiver presente no token
       const cleanToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
       config.headers.Authorization = cleanToken;
     }
@@ -38,12 +34,10 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor para respostas (trata erros e tokens)
 api.interceptors.response.use(
   (response) => {
     console.log(`✅ Resposta: ${response.status} ${response.config.url}`);
     
-    // Captura token do header Authorization da resposta
     const newToken = response.headers["authorization"];
     if (newToken) {
       localStorage.setItem("token", newToken);
@@ -81,8 +75,8 @@ export const authAPI = {
   login: async (credentials) => {
   try {
     const response = await api.post("/users/login", {
-      email: credentials.email,       // ✅ corrigido
-      password: credentials.password, // ✅ igual ao backend
+      email: credentials.email,       
+      password: credentials.password, 
     });
 
     // Se backend devolver mais infos (ex: role, user)
@@ -91,7 +85,7 @@ export const authAPI = {
 
       if (user) localStorage.setItem("user", JSON.stringify(user));
       if (role) localStorage.setItem("role", role);
-      if (token) localStorage.setItem("token", token); // se vier no body
+      if (token) localStorage.setItem("token", token); 
     }
 
     return response;
@@ -105,9 +99,9 @@ export const authAPI = {
   register: async (userData) => {
     try {
       const payload = {
-  email: userData.email,       // ✅ email
-  password: userData.password, // ✅ senha
-  role: userData.role || "ROLE_CUSTOMER" // opcional, só se backend aceitar
+  email: userData.email,       
+  password: userData.password, 
+  role: userData.role || "ROLE_CUSTOMER" 
 };
 
       console.log("📤 Enviando dados de registro:", payload);
@@ -134,14 +128,12 @@ export const authAPI = {
       const token = localStorage.getItem("token");
       
       if (token) {
-        // Tentar invalidar o token no servidor
         try {
           await api.post("/users/logout", {}, {
             headers: { Authorization: token }
           });
           console.log("🔐 Token invalidado no servidor");
         } catch (serverError) {
-          // Se der erro no servidor, continue com logout local
           console.warn("⚠️ Erro ao invalidar token no servidor:", serverError.message);
         }
       }
@@ -205,7 +197,6 @@ getToken: () => {
     return localStorage.getItem("token");
   },
 
-  // ✅ REFRESH TOKEN (se implementar no backend)
   refreshToken: async () => {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
@@ -230,17 +221,14 @@ getToken: () => {
     }
   },
 
-  // Retorna o role do usuário
   getUserRole: () => {
     return localStorage.getItem("role");
   },
 
-  // Retorna dados do usuário
   getUser: () => {
     const user = localStorage.getItem("user");
     return user ? JSON.parse(user) : null;
   },
 };
 
-// ✅ Export default da instância do axios
 export default api;
