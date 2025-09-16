@@ -20,6 +20,11 @@ import Adocao from '../components/adocao.vue'
 import editalAdmin from '../components/admin/editalAdmin.vue'
 import Edital from '@/components/edital.vue'
 
+import api from "@/services/api";
+
+export const getUsers = () => api.get("/users");
+export const createUser = (user) => api.post("/users", user);
+
 const routes = [
   { path: '/', component: Home },  
   { path: '/login', component: Login },
@@ -49,5 +54,22 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 })
+
+router.beforeEach((to, from, next) => {
+  const token = localStorage.getItem("token");
+  const role = localStorage.getItem("role");
+
+  // se não tem token e não está indo para login -> redireciona
+  if (!token && to.path !== "/login") {
+    return next("/login");
+  }
+
+  // se a rota for admin, mas o usuário não é admin
+  if (to.path.startsWith("/admin") && role !== "ADMINISTRATOR") {
+    return next("/user");
+  }
+
+  next();
+});
 
 export default router

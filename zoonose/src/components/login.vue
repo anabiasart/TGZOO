@@ -58,38 +58,64 @@ color: rgba(147, 197, 253, var(--tw-text-opacity))">
 <script setup>
 import { ref } from "vue";
 import { useRouter } from "vue-router";
+import api from "@/services/api.js";
 
 const usuario = ref("");
 const senha = ref("");
 const email = ref("");
 const mensagem = ref("");
-const modoCadastro = ref(false); // alterna 
+const modoCadastro = ref(false);
 
 const router = useRouter();
 
-function login() {
-  if (usuario.value === "admin" && senha.value === "12345") {
-    mensagem.value = "";
-    router.push("/admin");
-  } else if (usuario.value === "user" && senha.value === "12345") {
-    mensagem.value = "";
-    router.push("/user");
-  } else {
-    mensagem.value = "Usuário ou senha incorretos!";
+async function login() {
+  try {
+    const response = await api.post("/users/login", {
+      username: usuario.value,
+      password: senha.value,
+    });
+
+    console.log("Login OK:", response.data);
+
+    const token = response.headers["authorization"] || response.data.token;
+
+    if (token) {
+      localStorage.setItem("token", token);
+
+      router.push("/user"); 
+    } else {
+      mensagem.value = "Token não recebido!";
+    }
+  } catch (error) {
+    console.error("Erro no login:", error);
+    mensagem.value = "Usuário ou senha inválidos!";
   }
 }
 
-function cadastrar() {
-  if (usuario.value && senha.value && email.value) {
-    mensagem.value = "Conta criada com sucesso! Faça login.";
-    modoCadastro.value = false;
-    usuario.value = "";
-    senha.value = "";
-    email.value = "";
-  } else {
-    mensagem.value = "Preencha todos os campos!";
-  }
+async function cadastrar() {
+  if (usuario.value && senha.value && email.value) {
+    try {
+      await api.post("/users/register", {
+        roleName: usuario.value, 
+        password: senha.value,
+        email: email.value,
+      });
+      
+      mensagem.value = "Conta criada com sucesso! Faça login.";
+      modoCadastro.value = false;
+      usuario.value = "";
+      senha.value = "";
+      email.value = "";
+    } catch (error) {
+      console.error("Erro no cadastro:", error);
+      mensagem.value = "Erro ao registrar usuário.";
+    }
+  } else {
+    mensagem.value = "Preencha todos os campos!";
+  }
 }
+
+
 </script>
 
 
