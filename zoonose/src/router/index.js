@@ -54,19 +54,38 @@ const router = createRouter({
   history: createWebHistory(),
   routes,
 })
-
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  // se não tem token e não está indo para login -> redireciona
-  if (!token && to.path !== "/login") {
+  // Rotas públicas
+  const publicRoutes = ["/", "/login", "/adocao", "/contato"];
+  const isPublicEdital = to.path.startsWith("/edital");
+
+  // Se não tiver token e não for rota pública → manda pro login
+  if (!token && !publicRoutes.includes(to.path) && !isPublicEdital) {
     return next("/login");
   }
 
-  // se a rota for admin, mas o usuário não é admin
-  if (to.path.startsWith("/admin") && role !== "ADMINISTRATOR") {
+  // 🔹 Se já estiver logado e tentar ir para /login → redireciona para sua home correta
+  if (token && to.path === "/login") {
+    if (role === "ADMINISTRATOR" || role === "user_administrador") {
+      return next("/admin");
+    } else if (role === "CUSTOMER" || role === "user_costumer") {
+      return next("/user");
+    } else {
+      return next("/");
+    }
+  }
+
+  // 🔹 Proteção de rotas administrativas
+  if (to.path.startsWith("/admin") && !(role === "ADMINISTRATOR" || role === "user_administrador")) {
     return next("/user");
+  }
+
+  // 🔹 Proteção de rotas de usuário comum
+  if (to.path.startsWith("/user") && !(role === "CUSTOMER" || role === "user_costumer")) {
+    return next("/admin");
   }
 
   next();

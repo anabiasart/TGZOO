@@ -214,18 +214,21 @@ async function login() {
 
     // Salvar token
     localStorage.setItem("token", token);
-    
-    // Determinar role e redirecionar
-    const role = authAPI.getUserRole();
-    
+
+    // Pegar role (vem da API ou do helper)
+    const role = authAPI.getUserRole() || response.data.role;
+    localStorage.setItem("role", role);
+
     mostrarMensagem("Login realizado com sucesso!", "success");
     
-    // Pequeno delay para mostrar a mensagem de sucesso
+    // Redirecionar para a home correta
     setTimeout(() => {
-      if (role === "ADMINISTRATOR") {
+      if (role === "ADMINISTRATOR" || role === "user_administrador") {
         router.push("/admin");
-      } else {
+      } else if (role === "CUSTOMER" || role === "user_costumer") {
         router.push("/user");
+      } else {
+        router.push("/"); // fallback
       }
     }, 1000);
     
