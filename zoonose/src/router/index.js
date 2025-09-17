@@ -32,6 +32,7 @@ const routes = [
   { path: '/atendimento', component: Atendimento, meta: { requiresAuth: true, role: 'admin' } },
   { path: '/edital', redirect: '/edital/noticias' },
   { path: '/edital/noticias', name: 'edital', component: Edital },
+  { path: '/edital/:id', name: 'edital-detalhes', component: Edital },
   { path: '/footer', component: Footer },
   { path: '/adocao', component: Adocao },   // Público
   { path: '/edital-admin', component: editalAdmin, meta: { requiresAuth: true, role: 'admin' } },    
@@ -42,13 +43,40 @@ const router = createRouter({
   routes,
 })
 
-// ROUTER GUARD SIMPLIFICADO
+// Função para verificar se o role tem permissão de admin
+function isAdmin(role) {
+  if (!role) return false;
+  
+  const roleNormalized = role.replace('ROLE_', '').toLowerCase();
+  
+  return roleNormalized.includes('admin') || 
+         roleNormalized === 'administrator' ||
+         role === 'ROLE_ADMINISTRATOR' ||
+         role === 'ADMINISTRATOR' ||
+         role === 'user_administrador';
+}
+
+// Função para verificar se o role tem permissão de usuário
+function isUser(role) {
+  if (!role) return false;
+  
+  const roleNormalized = role.replace('ROLE_', '').toLowerCase();
+  
+  return roleNormalized.includes('customer') || 
+         roleNormalized.includes('costumer') ||
+         roleNormalized === 'user' ||
+         role === 'ROLE_CUSTOMER' ||
+         role === 'CUSTOMER' ||
+         role === 'user_costumer';
+}
+
+// ROUTER GUARD APRIMORADO
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  console.log(`Navegando para: ${to.path}`)
-  console.log(`Token: ${!!token}, Role: ${role}`)
+  console.log(`🧭 Navegando para: ${to.path}`)
+  console.log(`🔑 Token: ${!!token}, Role: ${role}`)
 
   // Rotas que sempre podem ser acessadas (públicas)
   const publicRoutes = ["/", "/login", "/adocao", "/contato"];
@@ -56,34 +84,40 @@ router.beforeEach((to, from, next) => {
 
   // Se é rota pública, sempre permite
   if (publicRoutes.includes(to.path) || isPublicEdital) {
-    console.log("Rota pública, permitindo acesso")
+    console.log("🌐 Rota pública, permitindo acesso")
     return next();
   }
 
   // Para rotas protegidas, verificar autenticação
   if (to.meta?.requiresAuth) {
-    if (!token || !role || role === "undefined") {
-      console.log("Sem autenticação, redirecionando para login")
+    // Verificar se tem token e role válidos
+    if (!token || !role || role === "undefined" || role === "null") {
+      console.log("❌ Sem autenticação válida, redirecionando para login")
+      console.log(`Token: ${token}, Role: ${role}`);
       return next("/login");
     }
 
-    // Verificar permissões baseadas no role
+    // Verificar permissões específicas
     if (to.meta.role === 'admin') {
-      if (!(role === "ADMINISTRATOR" || role === "user_administrador")) {
-        console.log("Sem permissão de admin")
+      if (!isAdmin(role)) {
+        console.log(`❌ Sem permissão de admin. Role atual: ${role}`)
         return next("/");
+      } else {
+        console.log(`✅ Acesso admin autorizado para role: ${role}`)
       }
     }
 
     if (to.meta.role === 'user') {
-      if (!(role === "CUSTOMER" || role === "user_costumer")) {
-        console.log("Sem permissão de usuário")
+      if (!isUser(role)) {
+        console.log(`❌ Sem permissão de usuário. Role atual: ${role}`)
         return next("/");
+      } else {
+        console.log(`✅ Acesso usuário autorizado para role: ${role}`)
       }
     }
   }
 
-  console.log("Acesso permitido")
+  console.log("✅ Acesso permitido")
   next();
 });
 

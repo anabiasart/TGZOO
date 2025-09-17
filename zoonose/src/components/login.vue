@@ -1,7 +1,6 @@
 <template>
   <div class="login-page">
     <div class="container">
-      <!-- Loading spinner -->
       <div v-if="loading" class="loading-spinner">
         <div class="spinner"></div>
         <p>Processando...</p>
@@ -21,34 +20,55 @@
         </h2>
 
         <form @submit.prevent="modoCadastro ? cadastrar() : login()">
-          <!-- Inputs comuns -->
-          <input
-          <input
-  type="email"
-  v-model="form.usuario"
-  placeholder="E-mail"
-  class="input-field"
-  required
-/>
-          <input
-            type="password"
-            v-model="form.senha"
-            placeholder="Senha"
-            class="input-field"
-            required
-            :disabled="loading"
-          />
+          <!-- Campos do LOGIN -->
+          <template v-if="!modoCadastro">
+            <input
+              type="email"
+              v-model="form.usuario"
+              placeholder="E-mail"
+              class="input-field"
+              required
+              :disabled="loading"
+            />
+            <input
+              type="password"
+              v-model="form.senha"
+              placeholder="Senha"
+              class="input-field"
+              required
+              :disabled="loading"
+            />
+          </template>
 
-          <!-- Campo extra apenas no cadastro -->
-          <input
-            v-if="modoCadastro"
-            type="email"
-            v-model="form.email"
-            placeholder="E-mail"
-            class="input-field"
-            required
-            :disabled="loading"
-          />
+          <!-- Campos do CADASTRO -->
+          <template v-if="modoCadastro">
+            <input
+              type="email"
+              v-model="form.email"
+              placeholder="E-mail"
+              class="input-field"
+              required
+              :disabled="loading"
+            />
+            <input
+              type="password"
+              v-model="form.senha"
+              placeholder="Senha"
+              class="input-field"
+              required
+              :disabled="loading"
+            />
+            <select
+              v-model="form.role"
+              class="input-field"
+              required
+              :disabled="loading"
+            >
+              <option value="">Selecione o tipo de conta</option>
+              <option value="ROLE_CUSTOMER">Usuário Comum</option>
+              <option value="ROLE_ADMINISTRATOR">Administrador</option>
+            </select>
+          </template>
 
           <!-- Botões -->
           <button 
@@ -95,9 +115,10 @@ import { authAPI } from "@/services/api.js";
 
 // Estados reativo
 const form = reactive({
-  usuario: "",
+  usuario: "", 
+  email: "", 
   senha: "",
-  email: ""
+  role: "" 
 });
 
 const mensagem = ref("");
@@ -107,7 +128,6 @@ const tipoMensagem = ref("error"); // success, error, warning
 
 const router = useRouter();
 
-// Computed
 const mensagemClasse = computed(() => ({
   'text-red-500': tipoMensagem.value === 'error',
   'text-green-500': tipoMensagem.value === 'success',
@@ -128,7 +148,6 @@ const debugInfo = computed(() => ({
   }
 }));
 
-// Métodos
 function limparMensagem() {
   mensagem.value = "";
   tipoMensagem.value = "error";
@@ -152,16 +171,41 @@ function alternarModo() {
   
   // Limpar formulário ao alternar
   form.usuario = "";
-  form.senha = "";
   form.email = "";
+  form.senha = "";
+  form.role = "";
 }
 
 function validarFormulario() {
-  if (!form.usuario.trim()) {
-    mostrarMensagem("Por favor, digite seu usuário");
-    return false;
+  if (modoCadastro.value) {
+    if (!form.email.trim()) {
+      mostrarMensagem("Por favor, digite o e-mail");
+      return false;
+    }
+    
+    if (!isValidEmail(form.email)) {
+      mostrarMensagem("Por favor, digite um e-mail válido");
+      return false;
+    }
+    
+    if (!form.role) {
+      mostrarMensagem("Por favor, selecione o tipo de conta");
+      return false;
+    }
+  } else {
+    // Validações para login
+    if (!form.usuario.trim()) {
+      mostrarMensagem("Por favor, digite seu e-mail");
+      return false;
+    }
+    
+    if (!isValidEmail(form.usuario)) {
+      mostrarMensagem("Por favor, digite um e-mail válido");
+      return false;
+    }
   }
   
+  // Validação comum para senha
   if (!form.senha.trim()) {
     mostrarMensagem("Por favor, digite sua senha");
     return false;
@@ -169,16 +213,6 @@ function validarFormulario() {
   
   if (form.senha.length < 6) {
     mostrarMensagem("A senha deve ter pelo menos 6 caracteres");
-    return false;
-  }
-  
-  if (modoCadastro.value && !form.email.trim()) {
-    mostrarMensagem("Por favor, digite seu e-mail");
-    return false;
-  }
-  
-  if (modoCadastro.value && !isValidEmail(form.email)) {
-    mostrarMensagem("Por favor, digite um e-mail válido");
     return false;
   }
   
@@ -190,6 +224,32 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
+// Função para determinar o redirecionamento baseado no role
+function determinarRedirecionamento(role) {
+  console.log("🔄 Determinando redirecionamento para role:", role);
+  
+  if (!role) {
+    console.log("⚠️ Role vazio, redirecionando para home");
+    return '/';
+  }
+  
+  // Normalizar o role para comparação (remover ROLE_ se existir)
+  const roleNormalizado = role.replace('ROLE_', '').toLowerCase();
+  
+  console.log("🔍 Role normalizado:", roleNormalizado);
+  
+  if (roleNormalizado.includes('admin') || roleNormalizado === 'administrator') {
+    console.log("✅ Redirecionando para /admin");
+    return '/admin';
+  } else if (roleNormalizado.includes('customer') || roleNormalizado.includes('costumer') || roleNormalizado === 'user') {
+    console.log("✅ Redirecionando para /user");
+    return '/user';
+  } else {
+    console.log(`⚠️ Role '${role}' não reconhecido, redirecionando para home`);
+    return '/';
+  }
+}
+
 async function login() {
   if (!validarFormulario()) return;
   
@@ -197,66 +257,153 @@ async function login() {
   limparMensagem();
   
   try {
+    console.log("🔐 Tentando fazer login...");
+    
     const response = await authAPI.login({
-      email: form.usuario,     // Mudou de "username" para "email"
+      email: form.usuario,
       password: form.senha,
     });
 
-    console.log("Login bem-sucedido:", response.data);
+    console.log("✅ Login bem-sucedido - Response completa:", response);
+    console.log("📦 Data recebida:", response.data);
+    console.log("📋 Headers recebidos:", response.headers);
     
-    // Verificar o token
-    const token = response.headers["authorization"] || response.data.token;
+    // Verificar e salvar token
+    const token = response.headers["authorization"] || 
+                  response.headers["Authorization"] || 
+                  response.data.token;
     
     if (!token) {
       throw new Error("Token não recebido do servidor");
     }
 
-    // Salvar token
     localStorage.setItem("token", token);
+    console.log("💾 Token salvo:", token.substring(0, 20) + "...");
 
-    // Pegar role
-    const role = authAPI.getUserRole() || response.data.role;
-    localStorage.setItem("role", role);
+    // DEBUGGING: 
+    console.log("🔍 Procurando role em response.data:", Object.keys(response.data));
+    
+    let role = null;
+    
+    if (response.data.role) {
+      role = response.data.role;
+      console.log("✅ Role encontrado em response.data.role:", role);
+    }
+    
+    else if (response.data.user && response.data.user.role) {
+      role = response.data.user.role;
+      console.log("✅ Role encontrado em response.data.user.role:", role);
+    }
+    
+    // Opção 3: Authorities (Spring Security)
+    else if (response.data.authorities && response.data.authorities.length > 0) {
+      role = response.data.authorities[0];
+      console.log("✅ Role encontrado em authorities[0]:", role);
+    }
+    
+    // Opção 4: Extrair do token JWT
+    else if (token && token.includes('.')) {
+      try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        console.log("🔍 Payload do token:", payload);
+        
+        role = payload.role || 
+               payload.authority || 
+               payload.authorities?.[0] || 
+               (payload.authorities && Array.isArray(payload.authorities) ? payload.authorities[0] : null);
+        
+        console.log("🎯 Role extraído do token:", role);
+      } catch (err) {
+        console.warn("⚠️ Erro ao decodificar token:", err);
+      }
+    }
+    
+    if (!role) {
+      const possibleRoleFields = ['userRole', 'roleName', 'roleType', 'permission', 'userType'];
+      for (const field of possibleRoleFields) {
+        if (response.data[field]) {
+          role = response.data[field];
+          console.log(`✅ Role encontrado em ${field}:`, role);
+          break;
+        }
+      }
+    }
+    
+    if (role) {
+      // Normalizar o role se necessário
+      if (typeof role === 'object' && role.name) {
+        role = role.name; // Se for um objeto com propriedade name
+      }
+      
+      localStorage.setItem("role", role);
+      console.log("💾 Role final salvo:", role);
+    } else {
+      console.error("❌ ROLE NÃO ENCONTRADO! Estrutura da resposta:", JSON.stringify(response.data, null, 2));
+      if (form.usuario.toLowerCase().includes('admin')) {
+        role = 'ROLE_ADMINISTRATOR';
+        console.log("🔧 Role padrão definido como admin baseado no email");
+      } else {
+        role = 'ROLE_CUSTOMER';
+        console.log("🔧 Role padrão definido como customer");
+      }
+      localStorage.setItem("role", role);
+    }
+
+    // Salvar informações do usuário se disponível
+    if (response.data.user) {
+      localStorage.setItem("user", JSON.stringify(response.data.user));
+    } else if (response.data.email || response.data.username) {
+      // Criar objeto user básico se não vier pronto
+      const user = {
+        email: response.data.email || form.usuario,
+        username: response.data.username || form.usuario,
+        role: role
+      };
+      localStorage.setItem("user", JSON.stringify(user));
+    }
 
     mostrarMensagem("Login realizado com sucesso!", "success");
     
-    // Redirecionar
+    // Determinar redirecionamento
+    const destino = determinarRedirecionamento(role);
+    
+    console.log(`🚀 Redirecionando em 1.5s para: ${destino}`);
+    console.log(`📊 Estado final - Token: ${!!token}, Role: ${role}`);
+    
     setTimeout(() => {
-      if (role === "ADMINISTRATOR" || role === "user_administrador") {
-        router.push("/admin");
-      } else if (role === "CUSTOMER" || role === "user_costumer") {
-        router.push("/user");
-      } else {
-        router.push("/");
-      }
-    }, 1000);
+      router.push(destino);
+    }, 1500);
     
   } catch (error) {
-    console.error("Erro no login:", error);
+    console.error("❌ Erro no login:", error);
     
     if (error.response) {
-      switch (error.response.status) {
+      const status = error.response.status;
+      const data = error.response.data;
+      
+      switch (status) {
         case 401:
           mostrarMensagem("E-mail ou senha inválidos");
           break;
         case 403:
-          mostrarMensagem("Acesso negado");
+          mostrarMensagem("Acesso negado. Conta pode estar desativada.");
           break;
         case 500:
-          mostrarMensagem("Erro do servidor. Tente novamente");
+          mostrarMensagem("Erro do servidor. Tente novamente em alguns instantes.");
           break;
         default:
-          mostrarMensagem(`Erro: ${error.response.data.message || 'Erro desconhecido'}`);
+          mostrarMensagem(data.message || data.error || 'Erro no login');
       }
     } else if (error.request) {
-      mostrarMensagem("Erro de conexão. Verifique sua internet");
+      mostrarMensagem("Erro de conexão. Verifique sua internet.");
     } else {
-      mostrarMensagem(error.message || "Erro desconhecido");
+      mostrarMensagem(error.message || "Erro desconhecido no login");
     }
   } finally {
     loading.value = false;
   }
 }
+
 async function cadastrar() {
   if (!validarFormulario()) return;
   
@@ -264,49 +411,71 @@ async function cadastrar() {
   limparMensagem();
   
   try {
-    const response = await authAPI.register({
-      roleName: form.usuario,    // Será mapeado para 'username' na API
-      password: form.senha,
+    console.log("📝 Tentando fazer cadastro...");
+    console.log("📋 Dados do formulário:", {
       email: form.email,
+      senha: form.senha ? "***" : "vazio",
+      role: form.role
+    });
+    
+    const response = await authAPI.register({
+      email: form.email,       
+      password: form.senha,    
+      role: form.role
     });
     
     console.log("✅ Cadastro bem-sucedido:", response.data);
     
-    mostrarMensagem("Conta criada com sucesso! Faça login.", "success");
+    mostrarMensagem("Conta criada com sucesso! Você pode fazer login agora.", "success");
     
     // Alternar para modo login e limpar formulário
     setTimeout(() => {
       modoCadastro.value = false;
       form.usuario = "";
-      form.senha = "";
       form.email = "";
+      form.senha = "";
+      form.role = "";
       limparMensagem();
     }, 2000);
     
   } catch (error) {
-    console.error("❌ Erro no cadastro:", error);
+    console.error("❌ Erro completo no cadastro:", error);
     
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
       
+      console.error("🔍 Detalhes do erro:");
+      console.error("Status:", status);
+      console.error("Data:", data);
+      console.error("Headers:", error.response.headers);
+      console.error("URL tentada:", error.response.config?.url);
+      
       switch (status) {
+        case 403:
+          mostrarMensagem("Acesso negado. Verifique se o endpoint de cadastro está ativo.");
+          break;
+        case 404:
+          mostrarMensagem("Endpoint não encontrado. Verifique a URL da API.");
+          break;
         case 409:
-          mostrarMensagem("Usuário ou e-mail já existe");
+          mostrarMensagem("E-mail já está em uso.");
           break;
         case 400:
-          mostrarMensagem(data.error || "Dados inválidos. Verifique os campos");
+          mostrarMensagem(data.error || data.message || "Dados inválidos. Verifique os campos.");
           break;
         case 500:
-          mostrarMensagem("Erro interno do servidor. Tente novamente");
+          mostrarMensagem("Erro interno do servidor. Tente novamente.");
           break;
         default:
-          mostrarMensagem(data.error || data.message || 'Erro no cadastro');
+          mostrarMensagem(`Erro ${status}: ${data.error || data.message || 'Erro no cadastro'}`);
       }
     } else if (error.request) {
-      mostrarMensagem("Erro de conexão. Verifique sua internet");
+      console.error("🌐 Erro de rede:", error.request);
+      mostrarMensagem("Erro de conexão. Verifique se o servidor está rodando.");
     } else {
-      mostrarMensagem(error.message || "Erro desconhecido");
+      console.error("⚠️ Erro desconhecido:", error.message);
+      mostrarMensagem(error.message || "Erro desconhecido no cadastro");
     }
   } finally {
     loading.value = false;
@@ -336,7 +505,8 @@ async function cadastrar() {
   position: relative;
 }
 
-.input-field {
+/* Estilos para select igual aos inputs */
+.input-field, select.input-field {
   border: 2px solid #e2e8f0;
   border-radius: 8px;
   padding: 12px;
@@ -344,15 +514,16 @@ async function cadastrar() {
   width: 100%;
   font-size: 16px;
   transition: border-color 0.2s ease;
+  background: white;
 }
 
-.input-field:focus {
+.input-field:focus, select.input-field:focus {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
-.input-field:disabled {
+.input-field:disabled, select.input-field:disabled {
   background-color: #f8f9fa;
   cursor: not-allowed;
   opacity: 0.6;
@@ -427,6 +598,25 @@ async function cadastrar() {
   white-space: pre-wrap;
   word-break: break-word;
 }
+
+/* Estilos para as classes do Tailwind que não estão sendo aplicadas */
+.text-3xl { font-size: 1.875rem; }
+.font-medium { font-weight: 500; }
+.mb-3 { margin-bottom: 0.75rem; }
+.mb-2 { margin-bottom: 0.5rem; }
+.italic { font-style: italic; }
+.text-xl { font-size: 1.25rem; }
+.text-blue-200 { color: #bfdbfe; }
+.text-blue-300 { color: #93c5fd; }
+.text-sm { font-size: 0.875rem; }
+.mt-3 { margin-top: 0.75rem; }
+.mt-4 { margin-top: 1rem; }
+.text-blue-600 { color: #2563eb; }
+.cursor-pointer { cursor: pointer; }
+.hover\:underline:hover { text-decoration: underline; }
+.text-red-500 { color: #ef4444; }
+.text-green-500 { color: #10b981; }
+.text-yellow-500 { color: #f59e0b; }
 
 /* Responsividade */
 @media (max-width: 480px) {

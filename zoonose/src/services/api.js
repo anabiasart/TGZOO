@@ -1,8 +1,7 @@
-
 import axios from "axios";
 
 // ✅ Configuração base da API
-const API_BASE_URL = "http://localhost:8080";
+const API_BASE_URL = "http://localhost:8080/api/";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -73,41 +72,67 @@ api.interceptors.response.use(
 export const authAPI = {
   // Login do usuário
   login: async (credentials) => {
-  try {
-    const response = await api.post("/users/login", {
-      email: credentials.email,       
-      password: credentials.password, 
-    });
+    try {
+      console.log("📤 Enviando dados de login:", { email: credentials.email });
+      
+      // Tentar o endpoint que pode funcionar baseado no padrão do registro
+      const response = await api.post("/users/login", {
+        email: credentials.email,       
+        password: credentials.password, 
+      });
 
-    // Se backend devolver mais infos (ex: role, user)
-    if (response.data) {
-      const { user, role, token } = response.data;
+      // Se backend devolver mais infos (ex: role, user)
+      if (response.data) {
+        const { user, role, token } = response.data;
 
-      if (user) localStorage.setItem("user", JSON.stringify(user));
-      if (role) localStorage.setItem("role", role);
-      if (token) localStorage.setItem("token", token); 
+        if (user) localStorage.setItem("user", JSON.stringify(user));
+        if (role) localStorage.setItem("role", role);
+        if (token) localStorage.setItem("token", token); 
+      }
+
+      return response;
+    } catch (error) {
+      // Se /api/users/login não funcionar, tenta o original
+      if (error.response?.status === 404) {
+        console.log("🔄 Tentando endpoint alternativo para login...");
+        try {
+          const response = await api.post("/users/login", {
+            email: credentials.email,       
+            password: credentials.password, 
+          });
+
+          if (response.data) {
+            const { user, role, token } = response.data;
+            if (user) localStorage.setItem("user", JSON.stringify(user));
+            if (role) localStorage.setItem("role", role);
+            if (token) localStorage.setItem("token", token); 
+          }
+
+          return response;
+        } catch (secondError) {
+          console.error("❌ Ambos endpoints de login falharam");
+          throw secondError;
+        }
+      }
+      
+      console.error("❌ Erro no login:", error);
+      throw error;
     }
-
-    return response;
-  } catch (error) {
-    console.error("Erro no login:", error);
-    throw error;
-  }
-},
+  },
 
   // Registro de usuário
   register: async (userData) => {
     try {
       const payload = {
-  email: userData.email,       
-  password: userData.password, 
-  role: userData.role || "ROLE_CUSTOMER" 
-};
+        email: userData.email,        
+        password: userData.password,  
+        role: userData.role        
+      };
 
       console.log("📤 Enviando dados de registro:", payload);
       
-      const response = await api.post("/users/register", payload);
-      
+const response = await api.post("/users/register", payload);
+
       console.log("✅ Registro bem-sucedido:", response.status);
       
       return response;
@@ -117,6 +142,7 @@ export const authAPI = {
       if (error.response) {
         console.error("Status:", error.response.status);
         console.error("Dados:", error.response.data);
+        console.error("Headers:", error.response.headers);
       }
       
       throw error;
@@ -142,7 +168,7 @@ export const authAPI = {
       localStorage.removeItem("token");
       localStorage.removeItem("role");
       localStorage.removeItem("user");
-      localStorage.removeItem("refreshToken"); // se usar refresh token
+      localStorage.removeItem("refreshToken"); 
       
       console.log("🧹 Dados locais limpos");
       
@@ -167,23 +193,22 @@ export const authAPI = {
     }
   },
 
-  // ✅ LOGOUT FORÇADO (para casos de token inválido)
   forceLogout: () => {
     console.log("🚨 Logout forçado - token inválido");
     localStorage.clear();
     window.location.href = "/login";
   },
-  // Verifica se está autenticado
+  
   isAuthenticated: () => {
     const token = localStorage.getItem("token");
     return !!token;
   },
+  
   isTokenExpired: () => {
     const token = localStorage.getItem("token");
     if (!token) return true;
     
     try {
-      // Decodificar JWT para verificar expiração
       const payload = JSON.parse(atob(token.split('.')[1]));
       const now = Math.floor(Date.now() / 1000);
       
@@ -193,7 +218,8 @@ export const authAPI = {
       return true;
     }
   },
-getToken: () => {
+
+  getToken: () => {
     return localStorage.getItem("token");
   },
 
