@@ -1,3 +1,4 @@
+
 import { createRouter, createWebHistory } from 'vue-router'
 import Home from '../components/home.vue'
 import Login from '../components/login.vue'
@@ -18,55 +19,22 @@ import api from "@/services/api";
 export const getUsers = () => api.get("/users");
 export const createUser = (user) => api.post("/users", user);
 
-// ✅ ROTAS CORRIGIDAS - Adicionadas rotas de dashboard que estavam faltando
 const routes = [
-  { path: '/', component: Home },
-  { path: '/login', component: Login },
-  
-  // 🔥 ROTAS ADMIN - Adicionadas rotas de dashboard
-  { 
-    path: '/admin', 
-    component: adminHome, 
-    meta: { requiresAuth: true, role: 'admin' } 
-  },
-  { 
-    path: '/admin/dashboard', // ⭐ ROTA QUE ESTAVA FALTANDO!
-    component: adminHome, 
-    meta: { requiresAuth: true, role: 'admin' } 
-  },
-  
-  // 🔥 ROTAS USER - Adicionadas rotas de dashboard  
-  { 
-    path: '/user', 
-    component: userHome, 
-    meta: { requiresAuth: true, role: 'user' } 
-  },
-  { 
-    path: '/customer/dashboard', // ⭐ ROTA QUE ESTAVA FALTANDO!
-    component: userHome, 
-    meta: { requiresAuth: true, role: 'user' } 
-  },
-  
-  // Outras rotas admin
+  { path: '/', component: Home },        // Home sempre acessível
+  { path: '/login', component: Login },   // Login sempre acessível
+  { path: '/admin', component: adminHome, meta: { requiresAuth: true, role: 'admin' } },
+  { path: '/user', component: userHome, meta: { requiresAuth: true, role: 'user' } },
   { path: '/agenda', component: Agendar, meta: { requiresAuth: true, role: 'admin' } },
   { path: '/animal', component: Animal, meta: { requiresAuth: true, role: 'admin' } },
   { path: '/especie', component: Especie, meta: { requiresAuth: true, role: 'admin' } },
   { path: '/protocolo', component: Protocolo, meta: { requiresAuth: true, role: 'admin' } },
   { path: '/atendimento', component: Atendimento, meta: { requiresAuth: true, role: 'admin' } },
-  { path: '/edital-admin', component: editalAdmin, meta: { requiresAuth: true, role: 'admin' } },
-  
-  // Rotas públicas
   { path: '/edital', redirect: '/edital/noticias' },
   { path: '/edital/noticias', name: 'edital', component: Edital },
   { path: '/edital/:id', name: 'edital-detalhes', component: Edital },
   { path: '/footer', component: Footer },
-  { path: '/adocao', component: Adocao },
-  
-  // 🔥 ROTA CATCH-ALL para páginas não encontradas
-  { 
-    path: '/:pathMatch(.*)*', 
-    redirect: '/' 
-  }
+  { path: '/adocao', component: Adocao },   // Público
+  { path: '/edital-admin', component: editalAdmin, meta: { requiresAuth: true, role: 'admin' } },    
 ]
 
 const router = createRouter({
@@ -74,7 +42,7 @@ const router = createRouter({
   routes,
 })
 
-// ✅ FUNÇÃO CORRIGIDA - Agora funciona com os roles que seu backend retorna
+// Função para verificar se o role tem permissão de admin
 function isAdmin(role) {
   if (!role) {
     console.log("🔍 isAdmin: role vazio");
@@ -97,27 +65,20 @@ function isAdmin(role) {
     console.log("🔍 isAdmin: role é objeto, extraído:", roleToCheck);
   }
   
-  const roleString = String(roleToCheck).trim().toUpperCase();
+  const roleString = String(roleToCheck).trim();
+  const roleNormalized = roleString.replace('ROLE_', '').toLowerCase();
   
-  // ✅ VERIFICAÇÕES MAIS ABRANGENTES
-  const adminRoles = [
-    'ADMIN',
-    'ADMINISTRATOR', 
-    'ROLE_ADMIN',
-    'ROLE_ADMINISTRATOR',
-    'USER_ADMINISTRADOR',
-    'ADMINISTRADOR'
-  ];
-  
-  const isAdminRole = adminRoles.some(adminRole => 
-    roleString === adminRole || roleString.includes('ADMIN')
-  );
+  const isAdminRole = roleNormalized.includes('admin') || 
+                      roleNormalized === 'administrator' ||
+                      roleString === 'ROLE_ADMINISTRATOR' ||
+                      roleString === 'ADMINISTRATOR' ||
+                      roleString === 'user_administrador';
   
   console.log("🔍 isAdmin resultado:", isAdminRole, "para role:", roleString);
   return isAdminRole;
 }
 
-// ✅ FUNÇÃO CORRIGIDA - Agora funciona com customer/user
+// Função para verificar se o role tem permissão de usuário
 function isUser(role) {
   if (!role) {
     console.log("🔍 isUser: role vazio");
@@ -131,48 +92,39 @@ function isUser(role) {
   // Se for array, pegar primeiro elemento
   if (Array.isArray(role)) {
     roleToCheck = role[0];
+    console.log("🔍 isUser: role é array, usando:", roleToCheck);
   }
   
   // Se for objeto, extrair valor
   if (typeof roleToCheck === 'object') {
     roleToCheck = roleToCheck.authority || roleToCheck.name || roleToCheck.role;
+    console.log("🔍 isUser: role é objeto, extraído:", roleToCheck);
   }
   
-  const roleString = String(roleToCheck).trim().toUpperCase();
+  const roleString = String(roleToCheck).trim();
+  const roleNormalized = roleString.replace('ROLE_', '').toLowerCase();
   
-  // ✅ VERIFICAÇÕES MAIS ABRANGENTES
-  const userRoles = [
-    'USER',
-    'CUSTOMER',
-    'CLIENT',
-    'ROLE_USER',
-    'ROLE_CUSTOMER', 
-    'ROLE_CLIENT',
-    'USER_COSTUMER',
-    'USER_CUSTOMER',
-    'COSTUMER' // Para caso de typo no backend
-  ];
-  
-  const isUserRole = userRoles.some(userRole => 
-    roleString === userRole || 
-    roleString.includes('CUSTOMER') || 
-    roleString.includes('USER')
-  );
+  const isUserRole = roleNormalized.includes('customer') || 
+                     roleNormalized.includes('costumer') ||
+                     roleNormalized === 'user' ||
+                     roleString === 'ROLE_CUSTOMER' ||
+                     roleString === 'CUSTOMER' ||
+                     roleString === 'user_costumer';
   
   console.log("🔍 isUser resultado:", isUserRole, "para role:", roleString);
   return isUserRole;
 }
 
-// ✅ ROUTER GUARD MELHORADO
+// ROUTER GUARD APRIMORADO
 router.beforeEach((to, from, next) => {
   const token = localStorage.getItem("token");
   const role = localStorage.getItem("role");
 
-  console.log(`🧭 Navegando de ${from.path} para: ${to.path}`)
-  console.log(`🔑 Token: ${!!token}, Role: "${role}" (tipo: ${typeof role})`)
+  console.log(`🧭 Navegando para: ${to.path}`)
+  console.log(`🔑 Token: ${!!token}, Role: ${role}`)
 
-  // Rotas públicas
-  const publicRoutes = ["/", "/login", "/adocao", "/contato", "/footer"];
+  // Rotas que sempre podem ser acessadas (públicas)
+  const publicRoutes = ["/", "/login", "/adocao", "/contato"];
   const isPublicEdital = to.path.startsWith("/edital") && !to.path.includes("admin");
 
   // Se é rota pública, sempre permite
@@ -183,107 +135,35 @@ router.beforeEach((to, from, next) => {
 
   // Para rotas protegidas, verificar autenticação
   if (to.meta?.requiresAuth) {
-    // Verificar se tem token
-    if (!token || token === "null" || token === "undefined") {
-      console.log("❌ Token inválido, redirecionando para login")
-      console.log(`Token atual: "${token}"`);
+    // Verificar se tem token e role válidos
+    if (!token || !role || role === "undefined" || role === "null") {
+      console.log("❌ Sem autenticação válida, redirecionando para login")
+      console.log(`Token: ${token}, Role: ${role}`);
       return next("/login");
     }
 
-    // Verificar se tem role
-    if (!role || role === "null" || role === "undefined") {
-      console.log("❌ Role inválido, redirecionando para login")
-      console.log(`Role atual: "${role}"`);
-      return next("/login");
-    }
-
-    // ✅ VERIFICAÇÃO CORRIGIDA - Agora verifica corretamente os roles
+    // Verificar permissões específicas
     if (to.meta.role === 'admin') {
       if (!isAdmin(role)) {
-        console.log(`❌ Sem permissão de admin. Role atual: "${role}"`)
-        console.log(`❌ Redirecionando para home`)
+        console.log(`❌ Sem permissão de admin. Role atual: ${role}`)
         return next("/");
       } else {
-        console.log(`✅ Acesso admin AUTORIZADO para role: "${role}"`)
+        console.log(`✅ Acesso admin autorizado para role: ${role}`)
       }
     }
 
     if (to.meta.role === 'user') {
       if (!isUser(role)) {
-        console.log(`❌ Sem permissão de usuário. Role atual: "${role}"`)
-        console.log(`❌ Redirecionando para home`)
+        console.log(`❌ Sem permissão de usuário. Role atual: ${role}`)
         return next("/");
       } else {
-        console.log(`✅ Acesso usuário AUTORIZADO para role: "${role}"`)
+        console.log(`✅ Acesso usuário autorizado para role: ${role}`)
       }
     }
   }
 
-  console.log(`✅ Navegação permitida para: ${to.path}`)
+  console.log("✅ Acesso permitido")
   next();
 });
-
-// ✅ FUNÇÃO AUXILIAR - Determinar redirecionamento correto
-export function determinarRedirecionamento(role) {
-  console.log("🎯 Determinando redirecionamento para role:", role);
-  
-  if (!role) {
-    console.warn("⚠️ Role não definido, redirecionando para login");
-    return "/login";
-  }
-
-  // Normalizar role
-  const roleString = String(role).trim().toUpperCase();
-  console.log("🔄 Role normalizado:", roleString);
-  
-  // Verificar se é admin
-  if (isAdmin(role)) {
-    console.log(`📍 Role "${roleString}" é ADMIN → /admin/dashboard`);
-    return "/admin/dashboard";
-  }
-  
-  // Verificar se é user/customer
-  if (isUser(role)) {
-    console.log(`📍 Role "${roleString}" é USER → /customer/dashboard`);
-    return "/customer/dashboard";
-  }
-  
-  // Fallback
-  console.warn(`⚠️ Role "${roleString}" não reconhecido, usando fallback`);
-  
-  // Se contém admin no nome, vai para admin
-  if (roleString.includes('ADMIN')) {
-    console.log(`📍 Fallback: "${roleString}" contém ADMIN → /admin/dashboard`);
-    return "/admin/dashboard";
-  }
-  
-  // Senão, vai para user
-  console.log(`📍 Fallback: "${roleString}" → /customer/dashboard`);
-  return "/customer/dashboard";
-}
-
-// ✅ FUNÇÃO DE DEBUG - Use para testar
-export function debugAuth() {
-  console.log("=== 🔍 DEBUG AUTENTICAÇÃO ===");
-  
-  const token = localStorage.getItem("token");
-  const role = localStorage.getItem("role");
-  const user = localStorage.getItem("user");
-  
-  console.log("Token:", token ? `${token.substring(0, 30)}...` : "❌ Não encontrado");
-  console.log("Role:", `"${role}" (tipo: ${typeof role})`);
-  console.log("User:", user ? JSON.parse(user) : "❌ Não encontrado");
-  
-  console.log("\n--- Verificações ---");
-  console.log("É Admin?", isAdmin(role));
-  console.log("É User?", isUser(role));
-  
-  const destino = determinarRedirecionamento(role);
-  console.log("Destino calculado:", destino);
-  
-  console.log("=== 🔍 FIM DEBUG ===");
-  
-  return { token, role, user, isAdmin: isAdmin(role), isUser: isUser(role), destino };
-}
 
 export default router
