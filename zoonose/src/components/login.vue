@@ -1,6 +1,9 @@
+
 <template>
   <div class="login-page">
     <div class="container">
+      
+      <!-- Loading spinner -->
       <div v-if="loading" class="loading-spinner">
         <div class="spinner"></div>
         <p>Processando...</p>
@@ -113,12 +116,15 @@ import { ref, reactive, computed } from "vue";
 import { useRouter } from "vue-router";
 import { authAPI } from "@/services/api.js";
 
+// ✅ REMOVER ESTA IMPORTAÇÃO QUE ESTÁ CAUSANDO CONFLITO:
+// import { determinarRedirecionamento, debugAuth } from '@/router'
+
 // Estados reativo
 const form = reactive({
-  usuario: "", 
-  email: "", 
+  usuario: "", // Para login (email)
+  email: "", // Para cadastro (email)
   senha: "",
-  role: "" 
+  role: "" // Para cadastro (role)
 });
 
 const mensagem = ref("");
@@ -126,8 +132,12 @@ const modoCadastro = ref(false);
 const loading = ref(false);
 const tipoMensagem = ref("error"); // success, error, warning
 
+// ✅ REMOVER ESTA LINHA QUE ESTAVA CAUSANDO ERRO:
+// const destino = determinarRedirecionamento(role);
+
 const router = useRouter();
 
+// Computed
 const mensagemClasse = computed(() => ({
   'text-red-500': tipoMensagem.value === 'error',
   'text-green-500': tipoMensagem.value === 'success',
@@ -148,6 +158,7 @@ const debugInfo = computed(() => ({
   }
 }));
 
+// Métodos
 function limparMensagem() {
   mensagem.value = "";
   tipoMensagem.value = "error";
@@ -178,6 +189,7 @@ function alternarModo() {
 
 function validarFormulario() {
   if (modoCadastro.value) {
+    // Validações para cadastro
     if (!form.email.trim()) {
       mostrarMensagem("Por favor, digite o e-mail");
       return false;
@@ -224,30 +236,55 @@ function isValidEmail(email) {
   return emailRegex.test(email);
 }
 
-// Função para determinar o redirecionamento baseado no role
-function determinarRedirecionamento(role) {
-  console.log("🔄 Determinando redirecionamento para role:", role);
+// ✅ FUNÇÃO CORRIGIDA PARA USAR AS ROTAS CERTAS DO SEU ROUTER
+function determinarRedirecionamentoCorreto(role) {
+  console.log("🎯 Determinando redirecionamento para role:", role);
   
-  if (!role) {
-    console.log("⚠️ Role vazio, redirecionando para home");
-    return '/';
+  if (!role || role === 'null' || role === 'undefined') {
+    console.warn("⚠️ Role inválido, redirecionando para login");
+    return "/login";
+  }
+
+  // Processar o role se for objeto
+  let roleProcessado = role;
+  if (typeof roleProcessado === 'object' && roleProcessado !== null) {
+    roleProcessado = roleProcessado.authority || roleProcessado.name || roleProcessado.role;
+    console.log("📝 Role é objeto, valor extraído:", roleProcessado);
   }
   
-  // Normalizar o role para comparação (remover ROLE_ se existir)
-  const roleNormalizado = role.replace('ROLE_', '').toLowerCase();
+  // Converter para string e normalizar
+  const roleString = String(roleProcessado).trim().toUpperCase();
+  const roleNormalizado = roleString.replace('ROLE_', '');
   
+  console.log("🔤 Role string:", roleString);
   console.log("🔍 Role normalizado:", roleNormalizado);
   
-  if (roleNormalizado.includes('admin') || roleNormalizado === 'administrator') {
-    console.log("✅ Redirecionando para /admin");
-    return '/admin';
-  } else if (roleNormalizado.includes('customer') || roleNormalizado.includes('costumer') || roleNormalizado === 'user') {
-    console.log("✅ Redirecionando para /user");
-    return '/user';
-  } else {
-    console.log(`⚠️ Role '${role}' não reconhecido, redirecionando para home`);
-    return '/';
+  // ✅ VERIFICAR ADMIN - Usando as rotas que existem no seu router
+  if (roleNormalizado === 'ADMINISTRATOR' || 
+      roleNormalizado === 'ADMIN' || 
+      roleString.includes('ADMIN')) {
+    console.log("✅ Redirecionando para /admin/dashboard (admin)");
+    return '/admin/dashboard'; // ✅ Rota que existe no seu router
   }
+  
+  // ✅ VERIFICAR USER/CUSTOMER - Usando as rotas que existem no seu router  
+  if (roleNormalizado === 'CUSTOMER' || 
+      roleNormalizado === 'USER' || 
+      roleNormalizado === 'CLIENT' ||
+      roleString.includes('CUSTOMER')) {
+    console.log("✅ Redirecionando para /customer/dashboard (user)");
+    return '/customer/dashboard'; // ✅ Rota que existe no seu router
+  }
+  
+  // Fallback baseado no conteúdo do role
+  if (roleString.includes('ADMIN')) {
+    console.log("🔄 Fallback: contém ADMIN → /admin/dashboard");
+    return '/admin/dashboard';
+  }
+  
+  // Fallback padrão para usuário comum
+  console.log("🔄 Fallback padrão → /customer/dashboard");
+  return '/customer/dashboard';
 }
 
 async function login() {
@@ -258,149 +295,192 @@ async function login() {
   
   try {
     console.log("🔐 Tentando fazer login...");
+    console.log("📤 Dados enviados:", { email: form.usuario });
     
     const response = await authAPI.login({
       email: form.usuario,
       password: form.senha,
     });
 
-    console.log("✅ Login bem-sucedido - Response completa:", response);
-    console.log("📦 Data recebida:", response.data);
-    console.log("📋 Headers recebidos:", response.headers);
+    console.log("✅ Login bem-sucedido!");
+    console.log("📦 Response.data:", response.data);
+    console.log("📋 Response.headers:", response.headers);
     
-    // Verificar e salvar token
+    // ✅ 1. SALVAR TOKEN
     const token = response.headers["authorization"] || 
                   response.headers["Authorization"] || 
-                  response.data.token;
+                  response.data.token ||
+                  response.data.accessToken;
     
     if (!token) {
       throw new Error("Token não recebido do servidor");
     }
 
     localStorage.setItem("token", token);
-    console.log("💾 Token salvo:", token.substring(0, 20) + "...");
+    console.log("💾 Token salvo:", token.substring(0, 30) + "...");
 
-    // DEBUGGING: 
-    console.log("🔍 Procurando role em response.data:", Object.keys(response.data));
-    
-    let role = null;
-    
-    if (response.data.role) {
-      role = response.data.role;
-      console.log("✅ Role encontrado em response.data.role:", role);
-    }
-    
-    else if (response.data.user && response.data.user.role) {
-      role = response.data.user.role;
-      console.log("✅ Role encontrado em response.data.user.role:", role);
-    }
-    
-    // Opção 3: Authorities (Spring Security)
-    else if (response.data.authorities && response.data.authorities.length > 0) {
-      role = response.data.authorities[0];
-      console.log("✅ Role encontrado em authorities[0]:", role);
-    }
-    
-    // Opção 4: Extrair do token JWT
-    else if (token && token.includes('.')) {
-      try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        console.log("🔍 Payload do token:", payload);
-        
-        role = payload.role || 
-               payload.authority || 
-               payload.authorities?.[0] || 
-               (payload.authorities && Array.isArray(payload.authorities) ? payload.authorities[0] : null);
-        
-        console.log("🎯 Role extraído do token:", role);
-      } catch (err) {
-        console.warn("⚠️ Erro ao decodificar token:", err);
-      }
-    }
+    // ✅ 2. ENCONTRAR E SALVAR ROLE
+    let role = await buscarRoleNaResposta(response, token);
     
     if (!role) {
-      const possibleRoleFields = ['userRole', 'roleName', 'roleType', 'permission', 'userType'];
-      for (const field of possibleRoleFields) {
-        if (response.data[field]) {
-          role = response.data[field];
-          console.log(`✅ Role encontrado em ${field}:`, role);
-          break;
-        }
-      }
+      // Fallback baseado no email
+      role = form.usuario.toLowerCase().includes('admin') ? 'ROLE_ADMINISTRATOR' : 'ROLE_CUSTOMER';
+      console.log("🔧 Role fallback definido:", role);
     }
+
+    localStorage.setItem("role", role);
+    console.log("💾 Role salvo:", role);
+
+    // ✅ 3. SALVAR DADOS DO USUÁRIO
+    salvarDadosUsuario(response, role);
+
+    // ✅ 4. DETERMINAR DESTINO E REDIRECIONAR
+    const destino = determinarRedirecionamentoCorreto(role);
     
-    if (role) {
-      // Normalizar o role se necessário
-      if (typeof role === 'object' && role.name) {
-        role = role.name; // Se for um objeto com propriedade name
-      }
-      
-      localStorage.setItem("role", role);
-      console.log("💾 Role final salvo:", role);
-    } else {
-      console.error("❌ ROLE NÃO ENCONTRADO! Estrutura da resposta:", JSON.stringify(response.data, null, 2));
-      if (form.usuario.toLowerCase().includes('admin')) {
-        role = 'ROLE_ADMINISTRATOR';
-        console.log("🔧 Role padrão definido como admin baseado no email");
-      } else {
-        role = 'ROLE_CUSTOMER';
-        console.log("🔧 Role padrão definido como customer");
-      }
-      localStorage.setItem("role", role);
-    }
-
-    // Salvar informações do usuário se disponível
-    if (response.data.user) {
-      localStorage.setItem("user", JSON.stringify(response.data.user));
-    } else if (response.data.email || response.data.username) {
-      // Criar objeto user básico se não vier pronto
-      const user = {
-        email: response.data.email || form.usuario,
-        username: response.data.username || form.usuario,
-        role: role
-      };
-      localStorage.setItem("user", JSON.stringify(user));
-    }
-
+    console.log("🎯 Estado final:");
+    console.log("- Token:", !!token);
+    console.log("- Role:", role);
+    console.log("- Destino:", destino);
+    
     mostrarMensagem("Login realizado com sucesso!", "success");
     
-    // Determinar redirecionamento
-    const destino = determinarRedirecionamento(role);
-    
-    console.log(`🚀 Redirecionando em 1.5s para: ${destino}`);
-    console.log(`📊 Estado final - Token: ${!!token}, Role: ${role}`);
+    // ✅ 5. REDIRECIONAR COM VERIFICAÇÃO
+    console.log(`🚀 Redirecionando para: ${destino}`);
     
     setTimeout(() => {
-      router.push(destino);
+      console.log("🔄 Executando redirecionamento...");
+      
+      router.push(destino).then(() => {
+        console.log("✅ Redirecionamento concluído!");
+      }).catch(error => {
+        console.error("❌ Erro no router.push:", error);
+        console.log("🔄 Tentando com window.location...");
+        window.location.href = destino;
+      });
     }, 1500);
     
   } catch (error) {
     console.error("❌ Erro no login:", error);
-    
-    if (error.response) {
-      const status = error.response.status;
-      const data = error.response.data;
-      
-      switch (status) {
-        case 401:
-          mostrarMensagem("E-mail ou senha inválidos");
-          break;
-        case 403:
-          mostrarMensagem("Acesso negado. Conta pode estar desativada.");
-          break;
-        case 500:
-          mostrarMensagem("Erro do servidor. Tente novamente em alguns instantes.");
-          break;
-        default:
-          mostrarMensagem(data.message || data.error || 'Erro no login');
-      }
-    } else if (error.request) {
-      mostrarMensagem("Erro de conexão. Verifique sua internet.");
-    } else {
-      mostrarMensagem(error.message || "Erro desconhecido no login");
-    }
+    tratarErroLogin(error);
   } finally {
     loading.value = false;
+  }
+}
+
+// ✅ FUNÇÃO AUXILIAR PARA BUSCAR ROLE
+async function buscarRoleNaResposta(response, token) {
+  console.log("🔍 Buscando role na resposta...");
+  
+  const data = response.data;
+  let role = null;
+  
+  // Estratégia 1: Role direto
+  if (data.role) {
+    role = data.role;
+    console.log("✅ Role encontrado em data.role:", role);
+    return role;
+  }
+  
+  // Estratégia 2: Role no user
+  if (data.user?.role) {
+    role = data.user.role;
+    console.log("✅ Role encontrado em data.user.role:", role);
+    return role;
+  }
+  
+  // Estratégia 3: Authorities
+  if (data.authorities?.length > 0) {
+    role = data.authorities[0];
+    console.log("✅ Role encontrado em authorities:", role);
+    return role;
+  }
+  
+  // Estratégia 4: Decodificar token JWT
+  if (token && token.includes('.')) {
+    try {
+      const tokenPayload = token.split('.')[1];
+      const payload = JSON.parse(atob(tokenPayload));
+      console.log("🔍 Token payload:", payload);
+      
+      role = payload.role || 
+             payload.authority || 
+             payload.authorities?.[0] ||
+             payload.scope;
+             
+      if (role) {
+        console.log("✅ Role encontrado no token:", role);
+        return role;
+      }
+    } catch (err) {
+      console.warn("⚠️ Erro ao decodificar token:", err);
+    }
+  }
+  
+  // Estratégia 5: Outros campos
+  const possibleFields = ['userRole', 'roleName', 'roleType', 'permission', 'userType', 'type'];
+  for (const field of possibleFields) {
+    if (data[field]) {
+      role = data[field];
+      console.log(`✅ Role encontrado em ${field}:`, role);
+      return role;
+    }
+  }
+  
+  console.error("❌ Role não encontrado em nenhuma estratégia!");
+  console.log("📋 Estrutura completa da resposta:", JSON.stringify(data, null, 2));
+  
+  return null;
+}
+
+// ✅ FUNÇÃO AUXILIAR PARA SALVAR DADOS DO USUÁRIO
+function salvarDadosUsuario(response, role) {
+  const data = response.data;
+  
+  if (data.user) {
+    const userData = { ...data.user, role };
+    localStorage.setItem("user", JSON.stringify(userData));
+    console.log("💾 Dados do usuário salvos:", userData);
+  } else {
+    const userData = {
+      id: data.id || data.userId,
+      email: data.email || form.usuario,
+      username: data.username || data.email || form.usuario,
+      name: data.name || data.fullName,
+      role: role
+    };
+    localStorage.setItem("user", JSON.stringify(userData));
+    console.log("💾 Objeto user criado:", userData);
+  }
+}
+
+// ✅ FUNÇÃO PARA TRATAR ERROS
+function tratarErroLogin(error) {
+  if (error.response) {
+    const status = error.response.status;
+    const data = error.response.data;
+    
+    console.error(`❌ Erro ${status}:`, data);
+    
+    switch (status) {
+      case 401:
+        mostrarMensagem("E-mail ou senha inválidos");
+        break;
+      case 403:
+        mostrarMensagem("Acesso negado. Conta pode estar desativada.");
+        break;
+      case 404:
+        mostrarMensagem("Serviço não encontrado. Verifique se o servidor está rodando.");
+        break;
+      case 500:
+        mostrarMensagem("Erro do servidor. Tente novamente em alguns instantes.");
+        break;
+      default:
+        mostrarMensagem(data.message || data.error || `Erro ${status} no login`);
+    }
+  } else if (error.request) {
+    mostrarMensagem("Erro de conexão. Verifique sua internet e se o servidor está rodando.");
+  } else {
+    mostrarMensagem(error.message || "Erro desconhecido no login");
   }
 }
 
@@ -412,15 +492,11 @@ async function cadastrar() {
   
   try {
     console.log("📝 Tentando fazer cadastro...");
-    console.log("📋 Dados do formulário:", {
-      email: form.email,
-      senha: form.senha ? "***" : "vazio",
-      role: form.role
-    });
+    console.log("📋 Dados:", { email: form.email, role: form.role });
     
     const response = await authAPI.register({
-      email: form.email,       
-      password: form.senha,    
+      email: form.email,
+      password: form.senha,
       role: form.role
     });
     
@@ -428,10 +504,10 @@ async function cadastrar() {
     
     mostrarMensagem("Conta criada com sucesso! Você pode fazer login agora.", "success");
     
-    // Alternar para modo login e limpar formulário
+    // Alternar para modo login
     setTimeout(() => {
       modoCadastro.value = false;
-      form.usuario = "";
+      form.usuario = form.email; // ✅ Pré-preencher o email no login
       form.email = "";
       form.senha = "";
       form.role = "";
@@ -439,49 +515,52 @@ async function cadastrar() {
     }, 2000);
     
   } catch (error) {
-    console.error("❌ Erro completo no cadastro:", error);
+    console.error("❌ Erro no cadastro:", error);
     
     if (error.response) {
       const status = error.response.status;
       const data = error.response.data;
       
-      console.error("🔍 Detalhes do erro:");
-      console.error("Status:", status);
-      console.error("Data:", data);
-      console.error("Headers:", error.response.headers);
-      console.error("URL tentada:", error.response.config?.url);
-      
       switch (status) {
-        case 403:
-          mostrarMensagem("Acesso negado. Verifique se o endpoint de cadastro está ativo.");
-          break;
-        case 404:
-          mostrarMensagem("Endpoint não encontrado. Verifique a URL da API.");
-          break;
         case 409:
           mostrarMensagem("E-mail já está em uso.");
           break;
         case 400:
-          mostrarMensagem(data.error || data.message || "Dados inválidos. Verifique os campos.");
+          mostrarMensagem(data.error || data.message || "Dados inválidos.");
           break;
         case 500:
-          mostrarMensagem("Erro interno do servidor. Tente novamente.");
+          mostrarMensagem("Erro interno do servidor.");
           break;
         default:
           mostrarMensagem(`Erro ${status}: ${data.error || data.message || 'Erro no cadastro'}`);
       }
     } else if (error.request) {
-      console.error("🌐 Erro de rede:", error.request);
       mostrarMensagem("Erro de conexão. Verifique se o servidor está rodando.");
     } else {
-      console.error("⚠️ Erro desconhecido:", error.message);
       mostrarMensagem(error.message || "Erro desconhecido no cadastro");
     }
   } finally {
     loading.value = false;
   }
 }
+
+// ✅ FUNÇÃO DE DEBUG - Para testar
+window.debugLogin = function() {
+  console.log("=== 🔍 DEBUG LOGIN ===");
+  console.log("Token:", localStorage.getItem("token")?.substring(0, 30) + "...");
+  console.log("Role:", localStorage.getItem("role"));
+  console.log("User:", JSON.parse(localStorage.getItem("user") || "null"));
+  
+  const role = localStorage.getItem("role");
+  const destino = determinarRedirecionamentoCorreto(role);
+  console.log("Destino calculado:", destino);
+  console.log("=== 🔍 FIM DEBUG ===");
+  
+  return { token: !!localStorage.getItem("token"), role, destino };
+}
 </script>
+
+// ... resto do CSS permanece igual
 
 <style scoped>
 .login-page {

@@ -1,7 +1,6 @@
 import axios from "axios";
 
-// ✅ Configuração base da API
-const API_BASE_URL = "http://localhost:8080/api/";
+const API_BASE_URL = "http://localhost:8080/api";
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -96,7 +95,7 @@ export const authAPI = {
       if (error.response?.status === 404) {
         console.log("🔄 Tentando endpoint alternativo para login...");
         try {
-          const response = await api.post("/users/login", {
+          const response = await api.post("users/login", {
             email: credentials.email,       
             password: credentials.password, 
           });
@@ -131,7 +130,7 @@ export const authAPI = {
 
       console.log("📤 Enviando dados de registro:", payload);
       
-const response = await api.post("/users/register", payload);
+const response = await api.post("users/register", payload);
 
       console.log("✅ Registro bem-sucedido:", response.status);
       
@@ -228,7 +227,7 @@ const response = await api.post("/users/register", payload);
       const refreshToken = localStorage.getItem("refreshToken");
       if (!refreshToken) throw new Error("No refresh token");
       
-      const response = await api.post("/auth/refresh", {
+      const response = await api.post("auth/refresh", {
         refreshToken: refreshToken
       });
       
