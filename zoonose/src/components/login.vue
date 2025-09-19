@@ -124,6 +124,19 @@ const API_BASE_URL = "http://localhost:8080/api";
 
 const router = useRouter();
 
+const redirecionarUsuario = (role) => {
+  console.log("🎯 Redirecionando usuário com role:", role);
+  
+  // Usar as rotas definidas no router diretamente
+  if (role === 'ROLE_ADMINISTRATOR' || role.includes('ADMIN')) {
+    console.log("👑 Admin detectado - indo para /admin");
+    router.push('/admin');
+  } else {
+    console.log("👤 Customer detectado - indo para /user"); 
+    router.push('/user');
+  }
+};
+
 // Estado
 const form = reactive({
   email: "",
@@ -178,81 +191,101 @@ const alternarModo = () => {
   mensagem.value = "";
   Object.keys(form).forEach(key => form[key] = "");
 };
+
+
+
 //alterna entre login e cadast
 const handleSubmit = () => {
   modoCadastro.value ? cadastrar() : login();
 };
 
 
-//aqui ele determina a rota baseado no modo atual
-const determinarRota = (role) => {//converte role para string
-  const roleUpper = String(role).toUpperCase();
-  return roleUpper.includes("ADMIN") ? "/admin" : "/user";
-};
-
-//limpa mensagens alteriores e roda o carregamento
 const login = async () => {
   loading.value = true;
   mensagem.value = "";
   
   try {
-    //espera resposta antes de carregar
-    const response = await authAPI.login({//chama a api passando email e senha
+    const response = await authAPI.login({
       email: form.email,
       password: form.password,
     });
-   // DEBUG: Ver o que o backend está retornando
+    
     console.log("🔍 DEBUG - Resposta completa do login:");
     console.log("Headers:", response.headers);
     console.log("Data:", response.data);
     
-    // Salvar token
-    const token = response.headers["authorization"] || 
-                  response.data.token ||
-                  response.data.accessToken;
+    // Obter token
+    let token = response.headers["authorization"] || 
+                response.data.token ||
+                response.data.accessToken;
+
+    if (!token) throw new Error("Token não recebido");
     
-
-
-       if (!token) throw new Error("Token não recebido");
-    localStorage.setItem("token", token);
-
-    // baseada em quais endpoints o usuário consegue acessar
-    let role = "ROLE_CUSTOMER"; // Padrão
-    
-    try {
-      // Tentar acessar endpoint de admin para verificar se é admin
-      const testResponse = await api.get('/users/test/administrator', {
-        headers: { Authorization: `Bearer ${token}` }
-      });
-      
-      if (testResponse.status === 200) {
-        role = "ROLE_ADMINISTRATOR";
-        console.log("✅ Usuário é administrador");
-      }
-    } catch (error) {
-      // Se der 403, não é admin, continua como customer
-      console.log("ℹ️ Usuário é customer");
-     
-
+    // Garantir formato Bearer
+    if (!token.startsWith('Bearer ')) {
+      token = `Bearer ${token}`;
     }
     
-    localStorage.setItem("role", role);
-    console.log("✅ Role definido:", role);
+    console.log("🔑 Token processado:", token);
 
+    localStorage.setItem("token", token);
+    console.log("✅ Token salvo:", localStorage.getItem("token"));
+    
+    let role = "ROLE_CUSTOMER"; 
+    
+    try {
+      console.log("🔍 Testando se é administrador...");
+      
+      const testResponse = await fetch(`${API_BASE_URL}/users/test/administrator`, {
+        method: 'GET',
+        headers: {
+          'Authorization': token,
+          'Content-Type': 'application/json'
+        }
+      });
+      
+      if (testResponse.ok) {
+        role = "ROLE_ADMINISTRATOR";
+        console.log("✅ Usuário é administrador");
+      } else {
+        console.log("ℹ️ Usuário é customer (status:", testResponse.status, ")");
+      }
+    } catch (error) {
+      console.log("ℹ️ Usuário é customer (erro esperado)");
+    }
+    
+    // ETAPA 3: SALVAR ROLE E USER DATA
+    localStorage.setItem("role", role);
+    
     const userData = {
       email: form.email,
       role: role
     };
     localStorage.setItem("user", JSON.stringify(userData));
-
+    
+    console.log("✅ Dados finais salvos:");
+    console.log("Token:", localStorage.getItem("token"));
+    console.log("Role:", localStorage.getItem("role"));
+    console.log("User:", localStorage.getItem("user"));
+    
+    // ETAPA 4: VERIFICAÇÃO FINAL ANTES DO REDIRECIONAMENTO
+    const finalToken = localStorage.getItem("token");
+    const finalRole = localStorage.getItem("role");
+    
+    if (!finalToken || !finalRole) {
+      throw new Error("Dados perdidos durante o processo");
+    }
+    
     mostrarMensagem("Login realizado com sucesso!", "success");
     
-    const destino = determinarRota(role);
-    console.log("🚀 Redirecionando para:", destino);
-    
-    setTimeout(() => {
-      router.push(destino);
-    }, 1000);
+    // ETAPA 5: REDIRECIONAMENTO BASEADO NA ROLE
+    if (role === "ROLE_ADMINISTRATOR") {
+      console.log("🚀 Redirecionando admin para /admin");
+      router.push('/admin');
+    } else {
+      console.log("🚀 Redirecionando customer para /user");
+      router.push('/user');
+    }
     
   } catch (error) {
     console.error("Erro no login:", error);
@@ -272,7 +305,6 @@ const login = async () => {
 const cadastrar = async () => {
   loading.value = true;
   mensagem.value = "";
-
 
   
   try {
@@ -299,7 +331,7 @@ const cadastrar = async () => {
       return;
     }
 
-        const roleEscolhido = form.role;
+  const roleEscolhido = form.role;
 
    const dadosCadastro = {
       email: form.email,
@@ -346,9 +378,8 @@ const cadastrar = async () => {
 
        localStorage.setItem("user", JSON.stringify(userData));
 
-     const destino = determinarRota(roleEscolhido);
-        router.push(destino);
-        
+           redirecionarUsuario(roleEscolhido);
+
       } catch (loginError) {
         console.error("Erro no auto-login:", loginError);
         mostrarMensagem("Cadastro realizado! Faça login para continuar.", "success");

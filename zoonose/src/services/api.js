@@ -35,12 +35,18 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     console.log(`✅ ${response.status} ${response.config.url}`);
+        // Só atualizar token em endpoints de autenticação
+    const isAuthEndpoint = response.config.url?.includes('/login') || 
+                          response.config.url?.includes('/register');
     
-    // Atualizar token se enviado no header
-    const newToken = response.headers["authorization"];
-    if (newToken) {
-      localStorage.setItem("token", newToken);
+     if (isAuthEndpoint) {
+      const newToken = response.headers["authorization"];
+      if (newToken) {
+        console.log("🔄 Atualizando token de autenticação:", newToken);
+        localStorage.setItem("token", newToken);
+      }
     }
+    
     
     return response;
   },

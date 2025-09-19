@@ -30,44 +30,44 @@ const routes = [
     //usando o requires para ele depender de ser autenticado
     path: '/admin', 
     component: adminHome, 
-    meta: { requiresAuth: true, role: 'admin' } 
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/agenda', 
     component: Agendar, 
-    meta: { requiresAuth: true, role: 'admin' } 
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/animal', 
     component: Animal, 
-    meta: { requiresAuth: true, role: 'admin' } 
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/especie', 
     component: Especie, 
-    meta: { requiresAuth: true, role: 'admin' } 
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/protocolo', 
     component: Protocolo, 
-    meta: { requiresAuth: true, role: 'admin' } 
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/atendimento', 
     component: Atendimento, 
-    meta: { requiresAuth: true, role: 'admin' } 
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/edital-admin', 
     component: editalAdmin, 
-    meta: { requiresAuth: true, role: 'admin' } 
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   
   // Rotas de usuário
   { 
     path: '/user', 
     component: userHome, 
-    meta: { requiresAuth: true, role: 'user' } 
+    meta: { requiresAuth: true, role: 'ROLE_CUSTOMER' } 
   },
 ]
 
@@ -91,15 +91,37 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
 
+  //debug
+  console.log(`🔍 Token: ${token ? 'Presente' : 'Ausente'}`);
+  console.log(`🔍 Role do usuário: ${userRole}`);
+  console.log(`🔍 Role necessária: ${to.meta?.role}`);
+
   if (to.meta?.requiresAuth) {
     // Sem autenticação
     if (!token || !userRole) {
+      console.log('❌ Sem autenticação, redirecionando para login');
       return next('/login');
     }
 
+    // Verificar se a role do usuário corresponde à role necessária
+    if (to.meta.role && userRole !== to.meta.role) {
+      console.log(`❌ Role inválida. Usuário: ${userRole}, Necessária: ${to.meta.role}`);
+      
+      // Redirecionar para a página correta baseada na role do usuário
+      if (userRole === 'ROLE_ADMINISTRATOR') {
+        console.log('🔄 Redirecionando admin para /admin');
+        return next('/admin');
+      } else if (userRole === 'ROLE_CUSTOMER') {
+        console.log('🔄 Redirecionando customer para /user');
+        return next('/user');
+      } else {
+        console.log('🔄 Role desconhecida, redirecionando para login');
+        return next('/login');
+      }
+    }
   }
 
+  console.log('✅ Acesso permitido');
   next();
 });
-
 export default router
