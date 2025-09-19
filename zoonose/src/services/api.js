@@ -11,19 +11,18 @@ const api = axios.create({
   },
 });
 
-console.log("🔗 API configurada para:", API_BASE_URL);
-
+// Interceptor de Request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
     
     if (token) {
-      const cleanToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-      config.headers.Authorization = cleanToken;
+      config.headers.Authorization = token.startsWith('Bearer ') 
+        ? token 
+        : `Bearer ${token}`;
     }
     
-    console.log(`🚀 Requisição: ${config.method?.toUpperCase()} ${config.url}`);
-    
+    console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
     return config;
   },
   (error) => {
@@ -32,32 +31,26 @@ api.interceptors.request.use(
   }
 );
 
+// Interceptor de Response
 api.interceptors.response.use(
   (response) => {
-    console.log(`✅ Resposta: ${response.status} ${response.config.url}`);
+    console.log(`✅ ${response.status} ${response.config.url}`);
     
+    // Atualizar token se enviado no header
     const newToken = response.headers["authorization"];
     if (newToken) {
       localStorage.setItem("token", newToken);
-      console.log("🔑 Token atualizado");
     }
     
     return response;
   },
   (error) => {
-    const { response } = error;
-    
-    if (response) {
-      console.error(`❌ Erro ${response.status}:`, response.data);
+    if (error.response) {
+      console.error(`❌ Erro ${error.response.status}:`, error.response.data);
       
-      // Token expirado ou inválido
-      if (response.status === 401 || response.status === 403) {
-        console.log("🚪 Token inválido, limpando localStorage");
-        
-        // Limpa dados do usuário
-        localStorage.removeItem("token");
-        localStorage.removeItem("role");
-        localStorage.removeItem("user");
+      // Limpar dados em caso de token inválido
+      if ([401, 403].includes(error.response.status)) {
+        localStorage.clear();
       }
     } else {
       console.error("🌐 Erro de rede:", error.message);
@@ -67,193 +60,79 @@ api.interceptors.response.use(
   }
 );
 
-// ✅ Funções de autenticação
 export const authAPI = {
-  // Login do usuário
+  // Login
   login: async (credentials) => {
-    try {
-      console.log("📤 Enviando dados de login:", { email: credentials.email });
-      
-      // Tentar o endpoint que pode funcionar baseado no padrão do registro
-      const response = await api.post("/users/login", {
-        email: credentials.email,       
-        password: credentials.password, 
-      });
+    const response = await api.post("/users/login", {
+      email: credentials.email,
+      password: credentials.password,
+    });
 
-      // Se backend devolver mais infos (ex: role, user)
-      if (response.data) {
-        const { user, role, token } = response.data;
-
-        if (user) localStorage.setItem("user", JSON.stringify(user));
-        if (role) localStorage.setItem("role", role);
-        if (token) localStorage.setItem("token", token); 
-      }
-
-      return response;
-    } catch (error) {
-      // Se /api/users/login não funcionar, tenta o original
-      if (error.response?.status === 404) {
-        console.log("🔄 Tentando endpoint alternativo para login...");
-        try {
-          const response = await api.post("users/login", {
-            email: credentials.email,       
-            password: credentials.password, 
-          });
-
-          if (response.data) {
-            const { user, role, token } = response.data;
-            if (user) localStorage.setItem("user", JSON.stringify(user));
-            if (role) localStorage.setItem("role", role);
-            if (token) localStorage.setItem("token", token); 
-          }
-
-          return response;
-        } catch (secondError) {
-          console.error("❌ Ambos endpoints de login falharam");
-          throw secondError;
-        }
-      }
-      
-      console.error("❌ Erro no login:", error);
-      throw error;
+    // Processar resposta se houver dados adicionais
+    if (response.data) {
+      const { user, role, token } = response.data;
+      if (user) localStorage.setItem("user", JSON.stringify(user));
+      if (role) localStorage.setItem("role", role);
+      if (token) localStorage.setItem("token", token);
     }
+
+    return response;
   },
 
-  // Registro de usuário
+  // Registro
   register: async (userData) => {
-    try {
-      const payload = {
-        email: userData.email,        
-        password: userData.password,  
-        role: userData.role        
-      };
+     const response = await api.post("/users/register", {
+      email: userData.email,
+      password: userData.password,
+      role: userData.role,
+      name: userData.name,
+      cpf: userData.cpf,       
+      phone: userData.phone, 
+      sexo: userData.sexo || undefined, //opcional
+      //campos opcionais
+      secundaryPhone: undefined,
+      secundarEmail: undefined,
+      address: undefined,
+    });
 
-      console.log("📤 Enviando dados de registro:", payload);
-      
-const response = await api.post("users/register", payload);
-
-      console.log("✅ Registro bem-sucedido:", response.status);
-      
-      return response;
-    } catch (error) {
-      console.error("❌ Erro no registro:", error);
-      
-      if (error.response) {
-        console.error("Status:", error.response.status);
-        console.error("Dados:", error.response.data);
-        console.error("Headers:", error.response.headers);
-      }
-      
-      throw error;
+       // Garantir que o role cadastrado seja mantido
+    if (response.data) {
+      response.data.registeredRole = userData.role;
     }
-  },
-
-  logout: async (shouldRedirect = true) => {
-    try {
-      const token = localStorage.getItem("token");
-      
-      if (token) {
-        try {
-          await api.post("/users/logout", {}, {
-            headers: { Authorization: token }
-          });
-          console.log("🔐 Token invalidado no servidor");
-        } catch (serverError) {
-          console.warn("⚠️ Erro ao invalidar token no servidor:", serverError.message);
-        }
-      }
-      
-      // Limpar dados locais
-      localStorage.removeItem("token");
-      localStorage.removeItem("role");
-      localStorage.removeItem("user");
-      localStorage.removeItem("refreshToken"); 
-      
-      console.log("🧹 Dados locais limpos");
-      
-      // Redirecionar apenas se solicitado
-      if (shouldRedirect) {
-        // Usar window.location para força recarregamento completo
-        window.location.href = "/login";
-      }
-      
-      return true;
-    } catch (error) {
-      console.error("❌ Erro durante logout:", error);
-      
-      // Mesmo com erro, limpar dados locais
-      localStorage.clear();
-      
-      if (shouldRedirect) {
-        window.location.href = "/login";
-      }
-      
-      return false;
-    }
-  },
-
-  forceLogout: () => {
-    console.log("🚨 Logout forçado - token inválido");
-    localStorage.clear();
-    window.location.href = "/login";
-  },
-  
-  isAuthenticated: () => {
-    const token = localStorage.getItem("token");
-    return !!token;
-  },
-  
-  isTokenExpired: () => {
-    const token = localStorage.getItem("token");
-    if (!token) return true;
     
+    return response;
+  },
+
+
+  // Logout
+  logout: async () => {
     try {
-      const payload = JSON.parse(atob(token.split('.')[1]));
-      const now = Math.floor(Date.now() / 1000);
-      
-      return payload.exp < now;
+      await api.post("/users/logout");
     } catch (error) {
-      console.error("Erro ao verificar token:", error);
-      return true;
+      console.warn("Logout no servidor falhou:", error.message);
+    } finally {
+      localStorage.clear();
+      window.location.href = "/login";
     }
   },
 
-  getToken: () => {
-    return localStorage.getItem("token");
-  },
-
-  refreshToken: async () => {
-    try {
-      const refreshToken = localStorage.getItem("refreshToken");
-      if (!refreshToken) throw new Error("No refresh token");
-      
-      const response = await api.post("auth/refresh", {
-        refreshToken: refreshToken
-      });
-      
-      const { token, refreshToken: newRefreshToken } = response.data;
-      
-      localStorage.setItem("token", token);
-      if (newRefreshToken) {
-        localStorage.setItem("refreshToken", newRefreshToken);
-      }
-      
-      return token;
-    } catch (error) {
-      console.error("Erro ao renovar token:", error);
-      authAPI.forceLogout();
-      throw error;
-    }
-  },
-
-  getUserRole: () => {
-    return localStorage.getItem("role");
-  },
-
+  // Helpers
+  isAuthenticated: () => !!localStorage.getItem("token"),
+  
+  getToken: () => localStorage.getItem("token"),
+  
+  getUserRole: () => localStorage.getItem("role"),
+  
   getUser: () => {
-    const user = localStorage.getItem("user");
-    return user ? JSON.parse(user) : null;
+    try {
+      const user = localStorage.getItem("user");
+      return user ? JSON.parse(user) : null;
+    } catch {
+      return null;
+    }
   },
 };
+
+
 
 export default api;
