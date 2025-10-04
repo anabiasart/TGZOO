@@ -13,7 +13,7 @@ const menuAberto = ref(false)
 
 // Função para cortar texto
 function cortarTexto(texto, limite) {
-  if (!texto) return ''
+  if (!texto) return '' 
   texto = texto.replace(/\s+/g, ' ').trim()
   if (texto.length <= limite) return texto
   const cortado = texto.slice(0, limite + 1)
