@@ -17,6 +17,7 @@
           <p class="orgao">Prefeitura Municipal • Secretaria de Saúde • Centro Veterinário</p>
           <div class="metadata">
             <span class="data-publicacao">📅 Publicado em: {{ formatarData(noticia.dataPublicacao) }}</span>
+            <span v-if="noticia.autor" class="autor">👤 Por: {{ noticia.autor }}</span>
           </div>
         </div>
       </header>
@@ -28,12 +29,12 @@
 
       <main class="conteudo">
         <section class="resumo">
-          <h2>📄 Resumo</h2>
-          <p>{{ noticia.resumo }}</p>
+          <h2>📄 Conteúdo</h2>
+          <div class="conteudo-texto" v-html="formatarConteudo(noticia.resumo)"></div>
         </section>
 
         <!-- Detalhes do Edital -->
-        <section v-if="noticia.detalhes && temDetalhes" class="detalhes">
+        <section v-if="temDetalhes" class="detalhes">
           <h2>📋 Informações Detalhadas</h2>
           <div class="grid-detalhes">
             <div v-if="noticia.detalhes.data" class="detalhe-item">
@@ -55,6 +56,10 @@
             <div v-if="noticia.detalhes.contato" class="detalhe-item">
               <strong>📞 Contato:</strong>
               <span>{{ noticia.detalhes.contato }}</span>
+            </div>
+            <div v-if="noticia.detalhes.inscricoes" class="detalhe-item">
+              <strong>📝 Inscrições:</strong>
+              <span>{{ noticia.detalhes.inscricoes }}</span>
             </div>
           </div>
         </section>
@@ -87,31 +92,107 @@
 <script setup>
 import { ref, computed, onMounted } from "vue"
 import { useRoute, useRouter } from "vue-router"
-import { useNoticias } from "@/data/noticiasData.js"
 
-const { noticias, carregarNoticias } = useNoticias()
 const noticia = ref(null)
 const carregando = ref(true)
 const route = useRoute()
 const router = useRouter()
 
+const API_URL = 'http://localhost:8080/api/news'
+
+// Função para extrair detalhes do conteúdo
+const extrairDetalhes = (content) => {
+  const detalhes = {
+    data: '',
+    horario: '',
+    local: '',
+    publico: '',
+    contato: '',
+    inscricoes: ''
+  }
+  
+  if (!content) return detalhes
+  
+  // Buscar padrões no texto (case insensitive)
+  const dataMatch = content.match(/Data:\s*(.+?)(?:\n|$)/i)
+  const horarioMatch = content.match(/Horário:\s*(.+?)(?:\n|$)/i)
+  const localMatch = content.match(/Local:\s*(.+?)(?:\n|$)/i)
+  const publicoMatch = content.match(/Público:\s*(.+?)(?:\n|$)/i) || 
+                       content.match(/Público-alvo:\s*(.+?)(?:\n|$)/i)
+  const contatoMatch = content.match(/Contato:\s*(.+?)(?:\n|$)/i)
+  const inscricoesMatch = content.match(/Inscrições:\s*(.+?)(?:\n|$)/i) ||
+                          content.match(/Informações de Inscrição:\s*(.+?)(?:\n|$)/i)
+  
+  if (dataMatch) detalhes.data = dataMatch[1].trim()
+  if (horarioMatch) detalhes.horario = horarioMatch[1].trim()
+  if (localMatch) detalhes.local = localMatch[1].trim()
+  if (publicoMatch) detalhes.publico = publicoMatch[1].trim()
+  if (contatoMatch) detalhes.contato = contatoMatch[1].trim()
+  if (inscricoesMatch) detalhes.inscricoes = inscricoesMatch[1].trim()
+  
+  return detalhes
+}
+
+// Função para remover os detalhes do conteúdo principal
+const removerDetalhesDoConteudo = (content) => {
+  if (!content) return ''
+  
+  // Remove as linhas com os detalhes
+  return content
+    .replace(/\n\nData:.*$/gim, '')
+    .replace(/\nHorário:.*$/gim, '')
+    .replace(/\nLocal:.*$/gim, '')
+    .replace(/\nPúblico(-alvo)?:.*$/gim, '')
+    .replace(/\nContato:.*$/gim, '')
+    .replace(/\nInscrições:.*$/gim, '')
+    .replace(/\nInformações de Inscrição:.*$/gim, '')
+    .trim()
+}
+
 // Computed para verificar se tem detalhes válidos
 const temDetalhes = computed(() => {
   if (!noticia.value?.detalhes) return false
   const detalhes = noticia.value.detalhes
-  return detalhes.data || detalhes.horario || detalhes.local || detalhes.publico || detalhes.contato
+  return detalhes.data || detalhes.horario || detalhes.local || 
+         detalhes.publico || detalhes.contato || detalhes.inscricoes
 })
 
 onMounted(async () => {
   try {
-    await carregarNoticias()
-    
     const id = parseInt(route.params.id, 10)
-    if (!isNaN(id)) {
-      noticia.value = noticias.value.find(item => item.id === id)
+    
+    if (isNaN(id)) {
+      carregando.value = false
+      return
     }
+    
+    // Buscar notícia diretamente da API
+    const response = await fetch(`${API_URL}/${id}`)
+    
+    if (!response.ok) {
+      throw new Error('Notícia não encontrada')
+    }
+    
+    const data = await response.json()
+    
+    // Extrair detalhes do conteúdo
+    const detalhes = extrairDetalhes(data.content)
+    const conteudoLimpo = removerDetalhesDoConteudo(data.content)
+    
+    // Mapear dados do backend
+    noticia.value = {
+      id: data.id,
+      titulo: data.title,
+      resumo: conteudoLimpo || data.content,
+      imagem: data.imageUrl,
+      dataPublicacao: data.createdAt,
+      autor: data.user?.name || 'Sistema',
+      detalhes: detalhes
+    }
+    
   } catch (error) {
     console.error('Erro ao carregar notícia:', error)
+    noticia.value = null
   } finally {
     carregando.value = false
   }
@@ -120,20 +201,36 @@ onMounted(async () => {
 // Funções utilitárias
 function formatarData(data) {
   if (!data) return 'Data não disponível'
-  return new Date(data).toLocaleDateString('pt-BR')
+  return new Date(data).toLocaleDateString('pt-BR', {
+    day: '2-digit',
+    month: 'long',
+    year: 'numeric'
+  })
+}
+
+function formatarConteudo(texto) {
+  if (!texto) return ''
+  // Converter quebras de linha em parágrafos
+  return texto
+    .split('\n\n')
+    .map(paragrafo => `<p>${paragrafo.replace(/\n/g, '<br>')}</p>`)
+    .join('')
 }
 
 function compartilhar() {
   if (navigator.share) {
     navigator.share({
       title: noticia.value.titulo,
-      text: noticia.value.resumo,
+      text: noticia.value.resumo.substring(0, 200),
       url: window.location.href
+    }).catch(err => {
+      console.log('Erro ao compartilhar:', err)
     })
   } else {
     // Fallback para navegadores que não suportam Web Share API
     navigator.clipboard.writeText(window.location.href)
-    alert('Link copiado para a área de transferência!')
+      .then(() => alert('Link copiado para a área de transferência!'))
+      .catch(err => console.error('Erro ao copiar:', err))
   }
 }
 
@@ -144,7 +241,7 @@ function imprimir() {
 
 <style scoped>
 .edital-page {
-  font-family: Arial, sans-serif;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
   margin: 0;
   padding: 0;
   width: 100%;
@@ -218,9 +315,13 @@ function imprimir() {
   margin-top: 1rem;
   padding-top: 1rem;
   border-top: 1px solid #e5e7eb;
+  display: flex;
+  gap: 2rem;
+  flex-wrap: wrap;
 }
 
-.data-publicacao {
+.data-publicacao,
+.autor {
   color: #6b7280;
   font-size: 0.9em;
 }
@@ -244,7 +345,7 @@ function imprimir() {
 .conteudo {
   max-width: 900px;
   margin: 2rem auto;
-  padding: 0 2rem;
+  padding: 0 2rem 4rem;
 }
 
 .resumo, .detalhes, .acoes {
@@ -261,10 +362,22 @@ function imprimir() {
   font-size: 1.5em;
 }
 
-.resumo p {
+.conteudo-texto {
   color: #374151;
-  line-height: 1.6;
-  font-size: 1.1em;
+  line-height: 1.8;
+  font-size: 1.05em;
+}
+
+.conteudo-texto :deep(p) {
+  margin: 1rem 0;
+}
+
+.conteudo-texto :deep(p:first-child) {
+  margin-top: 0;
+}
+
+.conteudo-texto :deep(p:last-child) {
+  margin-bottom: 0;
 }
 
 /* Grid de Detalhes */
@@ -285,6 +398,7 @@ function imprimir() {
   display: block;
   color: #059669;
   margin-bottom: 0.25rem;
+  font-size: 0.95em;
 }
 
 .detalhe-item span {
@@ -308,11 +422,15 @@ function imprimir() {
   cursor: pointer;
   font-size: 1rem;
   transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn-compartilhar:hover, .btn-imprimir:hover {
   background: #047857;
   transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
 /* Erro */
@@ -369,8 +487,12 @@ function imprimir() {
     font-size: 1.8em;
   }
   
+  .metadata {
+    gap: 1rem;
+  }
+  
   .conteudo {
-    padding: 0 1rem;
+    padding: 0 1rem 2rem;
   }
   
   .resumo, .detalhes, .acoes {

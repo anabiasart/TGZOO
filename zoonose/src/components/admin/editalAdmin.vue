@@ -24,6 +24,17 @@
       </div>
     </header>
 
+    <!-- Banner de Aviso -->
+    <div class="warning-banner">
+      <div class="warning-content">
+        <span class="warning-icon">⚠️</span>
+        <div>
+          <strong>Modo de Desenvolvimento:</strong>
+          Edição e exclusão funcionam apenas localmente. As alterações são perdidas ao recarregar a página.
+        </div>
+      </div>
+    </div>
+
     <!-- Controles e Filtros -->
     <section class="controls-section">
       <div class="search-filters">
@@ -237,15 +248,16 @@
               </div>
 
               <div class="form-group">
-                <label for="resumo">Resumo</label>
+                <label for="resumo">Resumo *</label>
                 <textarea 
                   id="resumo"
                   v-model="noticiaForm.resumo" 
                   placeholder="Escreva um resumo da notícia"
                   rows="3"
-                  maxlength="300"
+                  maxlength="500"
+                  required
                 ></textarea>
-                <small>{{ noticiaForm.resumo.length }}/300 caracteres</small>
+                <small>{{ noticiaForm.resumo.length }}/500 caracteres</small>
               </div>
 
               <div class="form-row">
@@ -279,7 +291,7 @@
 
             <!-- Detalhes do Evento -->
             <div class="form-section">
-              <h3>📅 Detalhes do Evento</h3>
+              <h3>📅 Detalhes do Evento (Opcional)</h3>
               
               <div class="form-row">
                 <div class="form-group">
@@ -507,7 +519,7 @@ function resetarForm() {
 function abrirModalNoticia(noticia = null) {
   if (noticia) {
     // Modo edição
-    noticiaForm.value = { ...noticia }
+    noticiaForm.value = JSON.parse(JSON.stringify(noticia))
     modoEdicao.value = true
     noticiaEditandoId.value = noticia.id
   } else {
@@ -519,7 +531,7 @@ function abrirModalNoticia(noticia = null) {
 
 function fecharModal() {
   modalAberto.value = false
-  setTimeout(resetarForm, 300) // Aguarda animação
+  setTimeout(resetarForm, 300)
 }
 
 async function salvarNoticia() {
@@ -527,6 +539,11 @@ async function salvarNoticia() {
     salvando.value = true
     
     if (modoEdicao.value) {
+      // Alerta sobre limitação
+      if (!confirm('⚠️ ATENÇÃO: O backend não suporta edição. As alterações serão salvas apenas localmente e serão perdidas ao recarregar a página. Deseja continuar?')) {
+        salvando.value = false
+        return
+      }
       await editarNoticiaData(noticiaEditandoId.value, noticiaForm.value)
     } else {
       await adicionarNoticia(noticiaForm.value)
@@ -536,6 +553,7 @@ async function salvarNoticia() {
     
   } catch (error) {
     console.error('Erro ao salvar notícia:', error)
+    alert('Erro ao salvar: ' + error.message)
   } finally {
     salvando.value = false
   }
@@ -582,10 +600,16 @@ function cancelarExclusao() {
 
 async function confirmarExclusaoFinal() {
   try {
+    // Alerta sobre limitação
+    if (!confirm('⚠️ ATENÇÃO: O backend não suporta exclusão. A notícia será removida apenas localmente e reaparecerá ao recarregar a página. Deseja continuar?')) {
+      return
+    }
+    
     await removerNoticiaPorId(modalExclusao.value.noticia.id)
     cancelarExclusao()
   } catch (error) {
     console.error('Erro ao excluir notícia:', error)
+    alert('Erro ao excluir: ' + error.message)
   }
 }
 
@@ -594,7 +618,6 @@ function toggleMenuCard(id) {
 }
 
 function aplicarFiltros() {
-  // Os filtros são aplicados automaticamente via computed
   menuAberto.value = null
 }
 
@@ -715,6 +738,27 @@ onMounted(() => {
   opacity: 0.8;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+/* Banner de Aviso */
+.warning-banner {
+  background: #fef3c7;
+  border-bottom: 2px solid #f59e0b;
+  padding: 1rem 2rem;
+}
+
+.warning-content {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: #92400e;
+}
+
+.warning-icon {
+  font-size: 1.5rem;
+  flex-shrink: 0;
 }
 
 /* Controls */
@@ -1269,6 +1313,14 @@ onMounted(() => {
 
   .header-stats {
     justify-content: center;
+  }
+
+  .warning-banner {
+    padding: 1rem;
+  }
+
+  .warning-content {
+    font-size: 0.875rem;
   }
 
   .search-filters {
