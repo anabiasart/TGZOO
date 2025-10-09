@@ -1,5 +1,7 @@
 <script setup>
 import { Facebook, Instagram, Mail, Phone } from "lucide-vue-next"
+import zoo from "../assets/img/zoo.png"
+
 
 const ano = new Date().getFullYear()
 </script>
@@ -10,7 +12,10 @@ const ano = new Date().getFullYear()
 
       <!-- Sobre -->
       <div class="footer-section">
-        <h3 class="footer-title">🐾 ZoonoSys</h3>
+
+        <h3 class="footer-title"> 
+            <img :src="zoo" alt="ZoonoSys Logo" class="logo" /> 
+             </h3>
         <p>
           Sistema de apoio à saúde animal e prevenção de zoonoses.
           Conectando você a informações, serviços e campanhas da prefeitura.

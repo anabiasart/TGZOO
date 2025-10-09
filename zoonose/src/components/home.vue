@@ -5,6 +5,7 @@ import { Syringe, User, Calendar } from 'lucide-vue-next'
 import { useNoticias } from "@/data/noticiasData.js"
 import vete from "../assets/img/vete.jpg"
 import pata from "../assets/img/pata.jpg"
+import zoo from "../assets/img/zoo.png"
 
 const { noticias: todasNoticias, carregarNoticias } = useNoticias()
 const noticias = ref([])
@@ -75,12 +76,11 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 <!--uma nav bar para enquadramento maior e uma responsiva para mobile--->  
 <nav class="navbar">
   <div class="navbar-logo" @click="router.push('/')">
-    <span>🐾</span> ZoonoSys
-  </div>
+    <img :src="zoo" alt="ZoonoSys Logo" class="logo" /> </div>
 
   <ul class="navbar-links">
     <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital/noticias')">Notícias</li> <!-- ✅ Rota corrigida -->
+    <li @click="router.push('/edital/noticias')">Notícias</li> 
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
     <li @click="router.push('/adocao')">Adote um Amigo</li>
@@ -91,7 +91,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 
   <ul v-if="menuAberto" class="navbar-mobile">
     <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital/noticias')">Notícias</li> <!-- ✅ Rota corrigida -->
+    <li @click="router.push('/edital/noticias')">Notícias</li> 
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
 
@@ -175,7 +175,6 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 </template>
 
 <style>
-
 .home-page {
   margin: 0;
   display: flex;
@@ -193,6 +192,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   align-items: flex-start;
   padding: 2rem;
   width: 100%;
+  margin-top: 70px; /* Espaço para a navbar fixa */
 }
 
 .navbar {
@@ -214,27 +214,34 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 .navbar-logo {
   display: flex;
   align-items: center;
-  font-size: 22px;
-  font-weight: bold;
-  color: #0ea5e9;
   cursor: pointer;
-  gap: 8px;
 }
-.navbar-logo span {
-  color: #059669; 
+
+.navbar-logo .logo {
+  height: 150px;       /* tamanho do logo */
+  width: auto;        /* mantém proporção */
+  transition: transform 0.3s ease;
+}
+
+.navbar-logo .logo:hover {
+  transform: scale(1.05);
 }
 
 .navbar-links {
-  display: flex;
   list-style: none;
-  gap: 2rem;
+  display: flex;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
 }
+
 .navbar-links li {
   cursor: pointer;
   font-weight: 500;
   color: #333;
   transition: all 0.2s ease;
 }
+
 .navbar-links li:hover {
   color: #0ea5e9;
   transform: translateY(-2px);
@@ -261,16 +268,16 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   border-radius: 0 0 12px 12px;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
 .navbar-mobile li {
   padding: 14px;
   cursor: pointer;
   border-bottom: 1px solid #eee;
 }
+
 .navbar-mobile li:hover {
   background: #f1f5f9;
 }
-
-/**aqui segue sobre ambiente responsivo usando o media do css para intercalar o tamanho <= 768px ou >= 1024px */
 
 @media (max-width: 768px) {
   .navbar-links { display: none; }
@@ -285,13 +292,12 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   width: 100%;
   align-items: start;
 }
+
 @media (max-width: 1024px) {
   .template2 {
     grid-template-columns: 1fr;
   }
- 
 }
-
 
 .hero-text {
   position: fixed;
@@ -299,6 +305,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   left: 15px;
   z-index: 50;
 }
+
 .btn-adote {
   background: linear-gradient(90deg, #38bdf8, #0ea5e9);
   color: white;
@@ -307,25 +314,25 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   border-radius: 9999px;
   transition: transform 0.3s ease;
 }
+
 .btn-adote:hover {
   transform: scale(1.05);
 }
 
-/**aqui o col esquerda representa o separamento dos cards de serviços e do faq dos de noticia  */
 .col-esquerda {
   display: flex;          
   flex-direction: column;  
-  gap:65px;
+  gap: 65px;
   grid-column: 1;
   grid-row: 1;   
   align-self: start;      
   height: 100%;
 }
 
-/**aqui eu deixei os cards de noticia para ocupar tanto a coluna dois quanto até a coluna qautro que pega até o final da página */
 .col-central {
-  grid-column: 2 / 4; /* sempre na segunda coluna / pega a quarta*/
+  grid-column: 2 / 4;
 }
+
 .service {
   background: linear-gradient(135deg, #d1fae5, #a5f3fc);
   padding: 20px;
@@ -333,20 +340,24 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .service:hover {
   transform: scale(1.05);
   box-shadow: 0 8px 16px rgba(0,0,0,0.2);
 }
+
 .icon {
   width: 56px;
   height: 56px;
   margin-bottom: 12px;
   color: #059669;
 }
+
 .service h3 {
   font-size: 20px;
   margin: 10px 0;
 }
+
 .service p {
   font-size: 14px;
   color: #555;
@@ -361,6 +372,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   font-size: 14px;
   transition: transform 0.2s ease;
 }
+
 .btn-action:hover {
   transform: scale(1.05);
 }
@@ -372,6 +384,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   margin-bottom: 40px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
+
 .texto-zoonoses h2 {
   font-size: 1.25rem;
   font-weight: 600;
@@ -385,10 +398,12 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   color: #0ea5e9;
   margin-bottom: 20px;
 }
+
 .lista-noticias {
   display: grid;
   gap: 20px;
 }
+
 .card-noticia {
   background: #fff;
   border-radius: 20px;
@@ -396,17 +411,21 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
 }
+
 .card-noticia:hover {
   transform: translateY(-8px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
+
 .card-noticia img {
   height: 180px;
   object-fit: cover;
 }
+
 .conteudo { padding: 16px; }
 .conteudo h4 { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
 .conteudo p { font-size: 14px; color: #555; margin-bottom: 12px; }
+
 .btn-leia {
   background: #2563eb;
   color: white;
@@ -415,6 +434,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   font-size: 14px;
   transition: background 0.2s;
 }
+
 .btn-leia:hover { background: #1e40af; }
 
 .carrossel-container {
@@ -424,15 +444,18 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   height: 500px;            
   overflow: hidden;
   margin: 0;               
+  margin-top: 70px;        /* Espaço para a navbar fixa */
   border-radius: 0;         
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
+
 .carrossel-container img {
   width: 100%;
   height: 100%;
-  object-fit:cover;        
+  object-fit: cover;        
   transition: opacity 0.10s ease;
 }
+
 .btn-prev, .btn-next {
   position: absolute;
   top: 50%;
@@ -449,18 +472,20 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
   transition: all 0.3s ease;
 }
+
 .btn-prev:hover, .btn-next:hover {
   background: #0ea5e9;
   color: white;
   transform: translateY(-50%) scale(1.1);
 }
+
 .btn-prev { left: 15px; }
 .btn-next { right: 15px; }
+
 .fade-enter-active, .fade-leave-active {
   transition: opacity 0.6s ease;
 }
 
-/**transitions do text-carrossel */
 .fade-enter-from, .fade-leave-to {
   opacity: 0;
 }
@@ -481,7 +506,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   box-shadow: 0 4px 12px rgba(0,0,0,0.2);
   animation: fadeInUp 0.8s ease;
 }
-/**usado apenas a fim de deixar mais bonito */
+
 @keyframes fadeInUp {
   from { opacity: 0; transform: translate(-50%, 20px); }
   to { opacity: 1; transform: translate(-50%, 0); }
@@ -495,12 +520,15 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   margin-top: 40px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
+
 .faq h3 {
   margin-bottom: 15px;
   color: #059669;
   text-align: left;
 }
+
 .faq-item { margin-bottom: 10px; }
+
 .faq-question {
   width: 100%;
   text-align: left;
@@ -513,7 +541,9 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   cursor: pointer;
   transition: background 0.2s ease;
 }
+
 .faq-question:hover { background: #e2e8f0; }
+
 .faq-answer {
   margin-top: 8px;
   font-size: 14px;

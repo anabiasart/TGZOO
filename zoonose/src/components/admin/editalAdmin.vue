@@ -55,11 +55,8 @@
             class="filter-select"
           >
             <option value="">Todas as categorias</option>
-            <option value="vacinacao">🏥 Vacinação</option>
-            <option value="adocao">🐕 Adoção</option>
             <option value="campanha">📢 Campanha</option>
-            <option value="evento">🎪 Evento</option>
-            <option value="geral">📝 Geral</option>
+            <option value="geral">📝 Notícia</option>
           </select>
           
           <select 

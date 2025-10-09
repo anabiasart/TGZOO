@@ -30,7 +30,7 @@
     <header class="controls">
       <h2>Animais disponíveis para adoção</h2>
       <div class="search-area">
-        <input v-model="q" placeholder="Buscar por nome, cidade ou tipo..." />
+        <input v-model="q" placeholder="Buscar por nome,tipo..." />
         <select v-model="filterType">
           <option value="">Todos</option>
           <option value="Cachorro">Cachorro</option>
@@ -48,8 +48,7 @@
 
         <div class="info">
           <h3>{{ animal.name }} <span class="badge">{{ animal.type }}</span></h3>
-          <p class="meta">{{ animal.age }} • {{ animal.size }} • {{ animal.city }} - {{ animal.state }}</p>
-          <p class="address">{{ animal.address }}</p>
+          <p class="meta">{{ animal.age }} • {{ animal.size }} </p>
           <p class="desc">{{ truncate(animal.description, 100) }}</p>
 
           <div class="actions">
@@ -71,7 +70,6 @@
           <div class="detail">
             <h3>{{ selected.name }} <small>({{ selected.type }})</small></h3>
             <p class="meta">{{ selected.age }} • {{ selected.size }}</p>
-            <p class="address">{{ selected.address }} — {{ selected.city }} / {{ selected.state }}</p>
             <p class="desc">{{ selected.description }}</p>
 
             <div class="contact">
@@ -110,7 +108,6 @@ const animals = ref([
     size: 'Pequeno',
     city: 'São Paulo',
     state: 'SP',
-    address: 'Rua das Flores, 123',
     description: 'Gata carinhosa, vacinada e castrada. Muito brincalhona e sociável com outros gatos.',
     photo: 'https://placekitten.com/400/300',
     contact: { phone: '(11) 99999-0001', email: 'adocao@example.com' },
@@ -121,9 +118,6 @@ const animals = ref([
     type: 'Cachorro',
     age: '3 anos',
     size: 'Médio',
-    city: 'Campinas',
-    state: 'SP',
-    address: 'Avenida Brasil, 45',
     description: 'Cachorro protetor, ótimo para família. Já vacinado e vermifugado.',
     photo: 'https://placedog.net/500/300?id=1',
     contact: { phone: '(19) 98888-1111', email: 'thor.adocao@example.com' },
@@ -134,9 +128,6 @@ const animals = ref([
     type: 'Cachorro',
     age: '6 meses',
     size: 'Pequeno',
-    city: 'Santos',
-    state: 'SP',
-    address: 'Praça das Gaivotas, 5',
     description: 'Filhote alegre, adora crianças e aprende rápido. Ideal para quem quer um companheiro ativo.',
     photo: 'https://placedog.net/500/300?id=2',
     contact: { phone: '(13) 97777-2222', email: 'mimi@example.com' },
