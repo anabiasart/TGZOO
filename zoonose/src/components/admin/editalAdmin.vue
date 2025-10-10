@@ -24,16 +24,7 @@
       </div>
     </header>
 
-    <!-- Banner de Aviso -->
-    <div class="warning-banner">
-      <div class="warning-content">
-        <span class="warning-icon">⚠️</span>
-        <div>
-          <strong>Modo de Desenvolvimento:</strong>
-          Edição e exclusão funcionam apenas localmente. As alterações são perdidas ao recarregar a página.
-        </div>
-      </div>
-    </div>
+    
 
     <!-- Controles e Filtros -->
     <section class="controls-section">
@@ -716,7 +707,6 @@ onMounted(() => {
 </script>
 
 <style scoped>
-/* Mantém todos os estilos originais e adiciona novos */
 .admin-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -944,9 +934,9 @@ onMounted(() => {
 }
 
 .badge {
-  padding: 0.25rem 0.75rem;
+  padding: 0.3rem 0.85rem;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.813rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -1042,7 +1032,7 @@ onMounted(() => {
 }
 
 .card-title {
-  font-size: 1.125rem;
+  font-size: 1.25rem;
   font-weight: 600;
   color: #1e293b;
   margin: 0 0 0.5rem 0;
@@ -1051,7 +1041,8 @@ onMounted(() => {
 
 .card-description {
   color: #64748b;
-  line-height: 1.5;
+  line-height: 1.6;
+  font-size: 0.938rem;
   margin: 0 0 1rem 0;
 }
 
@@ -1084,7 +1075,7 @@ onMounted(() => {
   align-items: center;
   gap: 0.5rem;
   margin-bottom: 0.25rem;
-  font-size: 0.875rem;
+  font-size: 0.938rem;
   color: #475569;
 }
 
@@ -1108,7 +1099,7 @@ onMounted(() => {
 .card-meta {
   display: flex;
   gap: 1rem;
-  font-size: 0.75rem;
+  font-size: 0.813rem;
   color: #64748b;
 }
 
@@ -1120,7 +1111,13 @@ onMounted(() => {
 
 .card-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 0.4rem;
+}
+
+.card-actions .btn-sm {
+  padding: 0.35rem 0.65rem;
+  font-size: 0.75rem;
+  min-width: auto;
 }
 
 .empty-state {
@@ -1201,8 +1198,9 @@ onMounted(() => {
 }
 
 .btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.875rem;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.813rem;
+  white-space: nowrap;
 }
 
 .btn-close {

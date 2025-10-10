@@ -98,6 +98,7 @@ const route = useRoute()
 const { noticias: todasNoticias, carregarNoticias, buscarNoticiaPorId } = useNoticias()
 
 
+
 onMounted(async () => {
   try {
     const id = parseInt(route.params.id, 10)
@@ -107,10 +108,18 @@ onMounted(async () => {
       return
     }
     
+    // Garantir que as notícias estão carregadas
+    if (todasNoticias.value.length === 0) {
+      await carregarNoticias()
+    }
+    
+    // Buscar do backend (GET /news/{id} é público)
     const resultado = await buscarNoticiaPorId(id)
     
     if (resultado) {
       item.value = resultado
+    } else {
+      console.error('Notícia não encontrada')
     }
     
   } catch (error) {

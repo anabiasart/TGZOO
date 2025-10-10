@@ -12,6 +12,7 @@ import Footer from '../components/footer.vue'
 import Adocao from '../components/adocao.vue'
 import editalAdmin from '../components/admin/editalAdmin.vue'
 import Edital from '@/components/edital.vue'
+import EditalNoticias from '@/components/editalNoticias.vue'
 
 const routes = [
   // Rotas públicas
@@ -20,14 +21,21 @@ const routes = [
   { path: '/adocao', component: Adocao },
   { path: '/footer', component: Footer },
   
-  // Rotas de edital
+  // Rotas de edital (ORDEM IMPORTA!)
   { path: '/edital', redirect: '/edital/noticias' },
-  { path: '/edital/noticias', name: 'edital', component: Edital },
-  { path: '/edital/:id', name: 'edital-detalhes', component: Edital },
+  { 
+    path: '/edital/noticias', 
+    name: 'edital-noticias', 
+    component: EditalNoticias  // 👈 Listagem completa de TODAS as notícias
+  },
+  { 
+    path: '/edital/:id', 
+    name: 'edital-detalhes', 
+    component: Edital  // 👈 Detalhes de UMA notícia específica
+  },
   
   // Rotas de admin
   { 
-    //usando o requires para ele depender de ser autenticado
     path: '/admin', 
     component: adminHome, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
@@ -76,12 +84,11 @@ const router = createRouter({
   routes,
 })
 
-
 // Guard de navegação simplificado
 router.beforeEach((to, from, next) => {
   // Rotas públicas
   const publicPaths = ['/', '/login', '/adocao', '/footer'];
-  const isPublicEdital = to.path.startsWith('/edital') && !to.path.includes('admin');//editais sao publicos exceto se tiver admin no path
+  const isPublicEdital = to.path.startsWith('/edital') && !to.path.includes('admin');
   
   if (publicPaths.includes(to.path) || isPublicEdital) {
     return next();
@@ -91,23 +98,19 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
 
-  //debug
   console.log(`🔍 Token: ${token ? 'Presente' : 'Ausente'}`);
   console.log(`🔍 Role do usuário: ${userRole}`);
   console.log(`🔍 Role necessária: ${to.meta?.role}`);
 
   if (to.meta?.requiresAuth) {
-    // Sem autenticação
     if (!token || !userRole) {
       console.log('❌ Sem autenticação, redirecionando para login');
       return next('/login');
     }
 
-    // Verificar se a role do usuário corresponde à role necessária
     if (to.meta.role && userRole !== to.meta.role) {
       console.log(`❌ Role inválida. Usuário: ${userRole}, Necessária: ${to.meta.role}`);
       
-      // Redirecionar para a página correta baseada na role do usuário
       if (userRole === 'ROLE_ADMINISTRATOR') {
         console.log('🔄 Redirecionando admin para /admin');
         return next('/admin');
@@ -124,4 +127,5 @@ router.beforeEach((to, from, next) => {
   console.log('✅ Acesso permitido');
   next();
 });
+
 export default router
