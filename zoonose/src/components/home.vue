@@ -12,10 +12,14 @@ const noticias = ref([])
 const router = useRouter()
 const menuAberto = ref(false)
 
-onMounted (async => {
-  carregarNoticias()
+onMounted(async () => {
+  try {
+    await carregarNoticias()
+    console.log('Notícias carregadas:', todasNoticias.value)
+  } catch (erro) {
+    console.error('Erro ao carregar notícias:', erro)
+  }
 })
-
 // Função para pegar o título correto
 function getTitulo(item) {
   if (item.tipo === 'campanha') {
