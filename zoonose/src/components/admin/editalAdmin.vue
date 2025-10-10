@@ -4,8 +4,8 @@
     <header class="dashboard-header">
       <div class="header-content">
         <h1>
-          <span class="icon">⚙️</span>
-          Gerenciar Notícias
+          <span class="icon">📰</span>
+          Gerenciar Editais
         </h1>
         <div class="header-stats">
           <div class="stat-item">
@@ -13,12 +13,12 @@
             <span class="stat-label">Total</span>
           </div>
           <div class="stat-item success">
-            <span class="stat-number">{{ noticiasAtivas.length }}</span>
-            <span class="stat-label">Ativas</span>
+            <span class="stat-number">{{ campanhas.length }}</span>
+            <span class="stat-label">Campanhas</span>
           </div>
-          <div class="stat-item warning">
-            <span class="stat-number">{{ noticiasRascunho.length }}</span>
-            <span class="stat-label">Rascunhos</span>
+          <div class="stat-item info">
+            <span class="stat-number">{{ noticiasGerais.length }}</span>
+            <span class="stat-label">Notícias</span>
           </div>
         </div>
       </div>
@@ -42,7 +42,7 @@
           <input 
             v-model="filtros.busca" 
             type="text"
-            placeholder="🔍 Buscar notícias..."
+            placeholder="🔍 Buscar..."
             @input="aplicarFiltros"
             class="search-input"
           />
@@ -50,13 +50,13 @@
         
         <div class="filter-group">
           <select 
-            v-model="filtros.categoria" 
+            v-model="filtros.tipo" 
             @change="aplicarFiltros"
             class="filter-select"
           >
-            <option value="">Todas as categorias</option>
-            <option value="campanha">📢 Campanha</option>
-            <option value="geral">📝 Notícia</option>
+            <option value="">Todos os tipos</option>
+            <option value="campanha">📢 Campanhas</option>
+            <option value="noticia">📝 Notícias</option>
           </select>
           
           <select 
@@ -76,7 +76,7 @@
           class="btn-primary btn-add"
         >
           <span>➕</span>
-          Nova Notícia
+          Novo Item
         </button>
       </div>
     </section>
@@ -84,7 +84,7 @@
     <!-- Loading State -->
     <div v-if="carregando" class="loading-container">
       <div class="spinner"></div>
-      <p>Carregando notícias...</p>
+      <p>Carregando...</p>
     </div>
 
     <!-- Error State -->
@@ -96,7 +96,7 @@
       </div>
     </div>
 
-    <!-- Lista de Notícias -->
+    <!-- Lista de Itens -->
     <section class="noticias-grid" v-if="!carregando">
       <div 
         v-for="noticia in noticiasFiltradas" 
@@ -110,8 +110,8 @@
         <!-- Card Header -->
         <div class="card-header">
           <div class="card-badges">
-            <span class="badge" :class="`badge-${noticia.categoria || 'geral'}`">
-              {{ getCategoriaLabel(noticia.categoria) }}
+            <span class="badge" :class="`badge-${noticia.tipo || 'noticia'}`">
+              {{ getTipoLabel(noticia.tipo) }}
             </span>
             <span class="badge" :class="`badge-status-${noticia.status || 'ativo'}`">
               {{ getStatusLabel(noticia.status) }}
@@ -136,24 +136,26 @@
 
         <!-- Card Content -->
         <div class="card-content">
-          <h3 class="card-title">{{ noticia.titulo }}</h3>
-          <p class="card-description">{{ cortarTexto(noticia.resumo, 120) }}</p>
+          <h3 class="card-title">{{ getTitulo(noticia) }}</h3>
+          
+          <!-- Conteúdo Campanha -->
+          <div v-if="noticia.tipo === 'campanha'" class="card-details campanha-details">
+            <div class="detail-row" v-if="noticia.dataInicioCampanha">
+              <span class="detail-icon">📅</span>
+              <span class="detail-text">{{ noticia.dataInicioCampanha }} até {{ noticia.dataFimCampanha }}</span>
+            </div>
+            <div class="detail-row" v-if="noticia.horarioCampanha">
+              <span class="detail-icon">🕐</span>
+              <span class="detail-text">{{ noticia.horarioCampanha }}</span>
+            </div>
+          </div>
+
+          <!-- Conteúdo Notícia -->
+          <p v-else class="card-description">{{ cortarTexto(noticia.resumo, 120) }}</p>
           
           <!-- Imagem Preview -->
-          <div v-if="noticia.imagem" class="card-image">
-            <img :src="noticia.imagem" :alt="noticia.titulo" />
-          </div>
-          
-          <!-- Detalhes do Evento -->
-          <div v-if="temDetalhes(noticia)" class="card-details">
-            <div class="detail-row" v-if="noticia.detalhes?.data">
-              <span class="detail-icon">📅</span>
-              <span class="detail-text">{{ noticia.detalhes.data }}</span>
-            </div>
-            <div class="detail-row" v-if="noticia.detalhes?.local">
-              <span class="detail-icon">📍</span>
-              <span class="detail-text">{{ noticia.detalhes.local }}</span>
-            </div>
+          <div v-if="getImagem(noticia)" class="card-image">
+            <img :src="getImagem(noticia)" :alt="getTitulo(noticia)" />
           </div>
         </div>
 
@@ -176,7 +178,7 @@
               class="btn-secondary btn-sm"
               target="_blank"
             >
-              👁️ Visualizar
+              👁️ Ver
             </router-link>
             <button 
               @click="editarNoticia(noticia)" 
@@ -192,11 +194,11 @@
       <div v-if="noticiasFiltradas.length === 0" class="empty-state">
         <div class="empty-content">
           <span class="empty-icon">📰</span>
-          <h3>Nenhuma notícia encontrada</h3>
-          <p v-if="temFiltrosAtivos">Tente ajustar os filtros ou criar uma nova notícia.</p>
-          <p v-else>Comece criando sua primeira notícia!</p>
+          <h3>Nenhum item encontrado</h3>
+          <p v-if="temFiltrosAtivos">Tente ajustar os filtros ou criar um novo item.</p>
+          <p v-else>Comece criando seu primeiro item!</p>
           <button @click="abrirModalNoticia()" class="btn-primary">
-            ➕ Criar Primeira Notícia
+            ➕ Criar Primeiro Item
           </button>
         </div>
       </div>
@@ -208,40 +210,121 @@
         <div class="modal-content" @click.stop>
           <div class="modal-header">
             <h2>
-              {{ modoEdicao ? '✏️ Editar Notícia' : '➕ Nova Notícia' }}
+              {{ modoEdicao ? '✏️ Editar Item' : '➕ Novo Item' }}
             </h2>
             <button @click="fecharModal" class="btn-close">✕</button>
           </div>
 
-          <form @submit.prevent="salvarNoticia" class="modal-form">
-            <!-- Informações Básicas -->
+          <div class="modal-body">
+            <!-- Seletor de Tipo -->
             <div class="form-section">
-              <h3>📝 Informações Básicas</h3>
+              <h3>📋 Tipo de Publicação</h3>
+              <div class="form-group">
+                <div class="radio-group">
+                  <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'campanha' }">
+                    <input 
+                      type="radio" 
+                      v-model="noticiaForm.tipo" 
+                      value="campanha"
+                      class="radio-input"
+                    />
+                    <span class="radio-text">📢 Campanha</span>
+                  </label>
+                  <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'noticia' }">
+                    <input 
+                      type="radio" 
+                      v-model="noticiaForm.tipo" 
+                      value="noticia"
+                      class="radio-input"
+                    />
+                    <span class="radio-text">📝 Notícia</span>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Formulário CAMPANHA -->
+            <div v-if="noticiaForm.tipo === 'campanha'" class="form-section">
+              <h3>📢 Dados da Campanha</h3>
               
+              <div class="form-group">
+                <label for="nomeCampanha">Nome da Campanha *</label>
+                <input 
+                  id="nomeCampanha"
+                  v-model="noticiaForm.nomeCampanha" 
+                  type="text"
+                  placeholder="Ex: Vacinação Antirrábica 2024"
+                  required
+                  maxlength="100"
+                />
+                <small>{{ noticiaForm.nomeCampanha?.length || 0 }}/100 caracteres</small>
+              </div>
+
               <div class="form-row">
-                <div class="form-group flex-2">
-                  <label for="titulo">Título *</label>
+                <div class="form-group">
+                  <label for="dataInicioCampanha">Data Início *</label>
                   <input 
-                    id="titulo"
-                    v-model="noticiaForm.titulo" 
-                    type="text"
-                    placeholder="Digite o título da notícia"
-                    required 
-                    maxlength="100"
+                    id="dataInicioCampanha"
+                    v-model="noticiaForm.dataInicioCampanha" 
+                    type="date"
+                    required
                   />
-                  <small>{{ noticiaForm.titulo.length }}/100 caracteres</small>
                 </div>
                 
                 <div class="form-group">
-                  <label for="categoria">Categoria</label>
-                  <select id="categoria" v-model="noticiaForm.categoria">
-                    <option value="geral">📝 Geral</option>
-                    <option value="vacinacao">🏥 Vacinação</option>
-                    <option value="adocao">🐕 Adoção</option>
-                    <option value="campanha">📢 Campanha</option>
-                    <option value="evento">🎪 Evento</option>
-                  </select>
+                  <label for="dataFimCampanha">Data Fim *</label>
+                  <input 
+                    id="dataFimCampanha"
+                    v-model="noticiaForm.dataFimCampanha" 
+                    type="date"
+                    required
+                  />
                 </div>
+              </div>
+
+              <div class="form-group">
+                <label for="horarioCampanha">Horário da Campanha *</label>
+                <input 
+                  id="horarioCampanha"
+                  v-model="noticiaForm.horarioCampanha" 
+                  type="text"
+                  placeholder="Ex: 08:00 às 17:00"
+                  required
+                />
+              </div>
+
+              <div class="form-group">
+                <label for="urlImagem">URL da Imagem</label>
+                <input 
+                  id="urlImagem"
+                  v-model="noticiaForm.urlImagem" 
+                  type="url"
+                  placeholder="https://exemplo.com/imagem.jpg"
+                />
+              </div>
+
+              <!-- Preview da Imagem -->
+              <div v-if="noticiaForm.urlImagem" class="image-preview">
+                <img :src="noticiaForm.urlImagem" alt="Preview" @error="imagemComErro = true" />
+                <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
+              </div>
+            </div>
+
+            <!-- Formulário NOTÍCIA -->
+            <div v-else class="form-section">
+              <h3>📝 Dados da Notícia</h3>
+              
+              <div class="form-group">
+                <label for="nomeNoticia">Nome da Notícia *</label>
+                <input 
+                  id="nomeNoticia"
+                  v-model="noticiaForm.nomeNoticia" 
+                  type="text"
+                  placeholder="Ex: Novo Centro de Adoção Inaugurado"
+                  required
+                  maxlength="100"
+                />
+                <small>{{ noticiaForm.nomeNoticia?.length || 0 }}/100 caracteres</small>
               </div>
 
               <div class="form-group">
@@ -250,24 +333,36 @@
                   id="resumo"
                   v-model="noticiaForm.resumo" 
                   placeholder="Escreva um resumo da notícia"
-                  rows="3"
+                  rows="4"
                   maxlength="500"
                   required
                 ></textarea>
-                <small>{{ noticiaForm.resumo.length }}/500 caracteres</small>
+                <small>{{ noticiaForm.resumo?.length || 0 }}/500 caracteres</small>
               </div>
 
+              <div class="form-group">
+                <label for="urlImagemNoticia">URL da Imagem *</label>
+                <input 
+                  id="urlImagemNoticia"
+                  v-model="noticiaForm.urlImagemNoticia" 
+                  type="url"
+                  placeholder="https://exemplo.com/imagem.jpg"
+                  required
+                />
+              </div>
+
+              <!-- Preview da Imagem -->
+              <div v-if="noticiaForm.urlImagemNoticia" class="image-preview">
+                <img :src="noticiaForm.urlImagemNoticia" alt="Preview" @error="imagemComErro = true" />
+                <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
+              </div>
+            </div>
+
+            <!-- Informações Adicionais -->
+            <div class="form-section">
+              <h3>ℹ️ Informações Adicionais</h3>
+              
               <div class="form-row">
-                <div class="form-group">
-                  <label for="imagem">URL da Imagem</label>
-                  <input 
-                    id="imagem"
-                    v-model="noticiaForm.imagem" 
-                    type="url"
-                    placeholder="https://exemplo.com/imagem.jpg"
-                  />
-                </div>
-                
                 <div class="form-group">
                   <label for="autor">Autor</label>
                   <input 
@@ -277,81 +372,15 @@
                     placeholder="Nome do autor"
                   />
                 </div>
-              </div>
-
-              <!-- Preview da Imagem -->
-              <div v-if="noticiaForm.imagem" class="image-preview">
-                <img :src="noticiaForm.imagem" alt="Preview" @error="imagemComErro = true" />
-                <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
-              </div>
-            </div>
-
-            <!-- Detalhes do Evento -->
-            <div class="form-section">
-              <h3>📅 Detalhes do Evento (Opcional)</h3>
-              
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="data">Data</label>
-                  <input 
-                    id="data"
-                    v-model="noticiaForm.detalhes.data" 
-                    type="text"
-                    placeholder="Ex: 20/12/2024 ou 20 a 25/12/2024"
-                  />
-                </div>
                 
                 <div class="form-group">
-                  <label for="horario">Horário</label>
-                  <input 
-                    id="horario"
-                    v-model="noticiaForm.detalhes.horario" 
-                    type="text"
-                    placeholder="Ex: 08h às 17h"
-                  />
+                  <label for="status">Status</label>
+                  <select id="status" v-model="noticiaForm.status">
+                    <option value="ativo">✅ Ativo</option>
+                    <option value="rascunho">📝 Rascunho</option>
+                    <option value="arquivado">📦 Arquivado</option>
+                  </select>
                 </div>
-              </div>
-
-              <div class="form-group">
-                <label for="local">Local</label>
-                <input 
-                  id="local"
-                  v-model="noticiaForm.detalhes.local" 
-                  type="text"
-                  placeholder="Ex: Centro Veterinário Municipal"
-                />
-              </div>
-
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="publico">Público-alvo</label>
-                  <input 
-                    id="publico"
-                    v-model="noticiaForm.detalhes.publico" 
-                    type="text"
-                    placeholder="Ex: Pets cadastrados"
-                  />
-                </div>
-                
-                <div class="form-group">
-                  <label for="contato">Contato</label>
-                  <input 
-                    id="contato"
-                    v-model="noticiaForm.detalhes.contato" 
-                    type="text"
-                    placeholder="Ex: (11) 99999-0000"
-                  />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="inscricoes">Informações de Inscrição</label>
-                <input 
-                  id="inscricoes"
-                  v-model="noticiaForm.detalhes.inscricoes" 
-                  type="text"
-                  placeholder="Ex: Não é necessário agendamento"
-                />
               </div>
             </div>
 
@@ -360,11 +389,11 @@
               <button type="button" @click="fecharModal" class="btn-secondary">
                 Cancelar
               </button>
-              <button type="submit" class="btn-primary" :disabled="salvando">
-                {{ salvando ? 'Salvando...' : (modoEdicao ? 'Salvar Alterações' : 'Criar Notícia') }}
+              <button @click="salvarNoticia" class="btn-primary" :disabled="salvando">
+                {{ salvando ? 'Salvando...' : (modoEdicao ? 'Salvar Alterações' : 'Criar Item') }}
               </button>
             </div>
-          </form>
+          </div>
         </div>
       </div>
     </teleport>
@@ -378,8 +407,8 @@
           </div>
           
           <div class="modal-body">
-            <p>Tem certeza que deseja excluir permanentemente a notícia:</p>
-            <strong>"{{ modalExclusao.noticia?.titulo }}"</strong>
+            <p>Tem certeza que deseja excluir permanentemente:</p>
+            <strong>"{{ getTitulo(modalExclusao.noticia) }}"</strong>
             <p class="warning-text">⚠️ Esta ação não pode ser desfeita!</p>
           </div>
           
@@ -398,7 +427,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from "vue"
+import { ref, computed, onMounted } from "vue"
 import { useNoticias } from "@/data/noticiasData.js"
 
 // Composables
@@ -425,7 +454,7 @@ const menuAberto = ref(null)
 // Estados de filtro
 const filtros = ref({
   busca: '',
-  categoria: '',
+  tipo: '',
   status: ''
 })
 
@@ -437,28 +466,30 @@ const modalExclusao = ref({
 
 // Form da notícia
 const noticiaForm = ref({
-  titulo: '',
+  tipo: 'campanha',
+  // Campos Campanha
+  nomeCampanha: '',
+  dataInicioCampanha: '',
+  dataFimCampanha: '',
+  horarioCampanha: '',
+  urlImagem: '',
+  // Campos Notícia
+  nomeNoticia: '',
+  urlImagemNoticia: '',
   resumo: '',
-  imagem: '',
-  categoria: 'geral',
+  // Comuns
   autor: 'Administrador',
-  detalhes: {
-    data: '',
-    horario: '',
-    local: '',
-    publico: '',
-    contato: '',
-    inscricoes: ''
-  }
+  status: 'ativo',
+  dataPublicacao: new Date().toISOString().split('T')[0]
 })
 
 // Computed properties
-const noticiasAtivas = computed(() => 
-  noticias.value.filter(n => n.status === 'ativo' || !n.status)
+const campanhas = computed(() => 
+  noticias.value.filter(n => n.tipo === 'campanha')
 )
 
-const noticiasRascunho = computed(() => 
-  noticias.value.filter(n => n.status === 'rascunho')
+const noticiasGerais = computed(() => 
+  noticias.value.filter(n => n.tipo === 'noticia' || !n.tipo)
 )
 
 const noticiasFiltradas = computed(() => {
@@ -467,16 +498,17 @@ const noticiasFiltradas = computed(() => {
   // Filtro por busca
   if (filtros.value.busca.trim()) {
     const termo = filtros.value.busca.toLowerCase()
-    resultado = resultado.filter(n => 
-      n.titulo.toLowerCase().includes(termo) ||
-      n.resumo.toLowerCase().includes(termo) ||
-      (n.autor && n.autor.toLowerCase().includes(termo))
-    )
+    resultado = resultado.filter(n => {
+      const titulo = getTitulo(n).toLowerCase()
+      const resumo = (n.resumo || '').toLowerCase()
+      const autor = (n.autor || '').toLowerCase()
+      return titulo.includes(termo) || resumo.includes(termo) || autor.includes(termo)
+    })
   }
   
-  // Filtro por categoria
-  if (filtros.value.categoria) {
-    resultado = resultado.filter(n => n.categoria === filtros.value.categoria)
+  // Filtro por tipo
+  if (filtros.value.tipo) {
+    resultado = resultado.filter(n => (n.tipo || 'noticia') === filtros.value.tipo)
   }
   
   // Filtro por status
@@ -488,25 +520,24 @@ const noticiasFiltradas = computed(() => {
 })
 
 const temFiltrosAtivos = computed(() => 
-  filtros.value.busca || filtros.value.categoria || filtros.value.status
+  filtros.value.busca || filtros.value.tipo || filtros.value.status
 )
 
 // Métodos
 function resetarForm() {
   noticiaForm.value = {
-    titulo: '',
+    tipo: 'campanha',
+    nomeCampanha: '',
+    dataInicioCampanha: '',
+    dataFimCampanha: '',
+    horarioCampanha: '',
+    urlImagem: '',
+    nomeNoticia: '',
+    urlImagemNoticia: '',
     resumo: '',
-    imagem: '',
-    categoria: 'geral',
     autor: 'Administrador',
-    detalhes: {
-      data: '',
-      horario: '',
-      local: '',
-      publico: '',
-      contato: '',
-      inscricoes: ''
-    }
+    status: 'ativo',
+    dataPublicacao: new Date().toISOString().split('T')[0]
   }
   imagemComErro.value = false
   modoEdicao.value = false
@@ -515,12 +546,14 @@ function resetarForm() {
 
 function abrirModalNoticia(noticia = null) {
   if (noticia) {
-    // Modo edição
     noticiaForm.value = JSON.parse(JSON.stringify(noticia))
+    // Garantir que tem o tipo
+    if (!noticiaForm.value.tipo) {
+      noticiaForm.value.tipo = 'noticia'
+    }
     modoEdicao.value = true
     noticiaEditandoId.value = noticia.id
   } else {
-    // Modo criação
     resetarForm()
   }
   modalAberto.value = true
@@ -535,21 +568,26 @@ async function salvarNoticia() {
   try {
     salvando.value = true
     
+    // Preparar dados conforme o tipo
+    const dadosParaSalvar = {
+      ...noticiaForm.value,
+      dataPublicacao: noticiaForm.value.dataPublicacao || new Date().toISOString().split('T')[0]
+    }
+    
     if (modoEdicao.value) {
-      // Alerta sobre limitação
       if (!confirm('⚠️ ATENÇÃO: O backend não suporta edição. As alterações serão salvas apenas localmente e serão perdidas ao recarregar a página. Deseja continuar?')) {
         salvando.value = false
         return
       }
-      await editarNoticiaData(noticiaEditandoId.value, noticiaForm.value)
+      await editarNoticiaData(noticiaEditandoId.value, dadosParaSalvar)
     } else {
-      await adicionarNoticia(noticiaForm.value)
+      await adicionarNoticia(dadosParaSalvar)
     }
     
     fecharModal()
     
   } catch (error) {
-    console.error('Erro ao salvar notícia:', error)
+    console.error('Erro ao salvar:', error)
     alert('Erro ao salvar: ' + error.message)
   } finally {
     salvando.value = false
@@ -564,10 +602,17 @@ function editarNoticia(noticia) {
 function duplicarNoticia(noticia) {
   menuAberto.value = null
   const noticiaClone = { 
-    ...noticia, 
-    titulo: `${noticia.titulo} (Cópia)`,
-    id: undefined 
+    ...noticia
   }
+  
+  // Ajustar título conforme o tipo
+  if (noticia.tipo === 'campanha') {
+    noticiaClone.nomeCampanha = `${noticia.nomeCampanha} (Cópia)`
+  } else {
+    noticiaClone.nomeNoticia = `${noticia.nomeNoticia || noticia.titulo} (Cópia)`
+  }
+  
+  delete noticiaClone.id
   abrirModalNoticia(noticiaClone)
 }
 
@@ -597,15 +642,14 @@ function cancelarExclusao() {
 
 async function confirmarExclusaoFinal() {
   try {
-    // Alerta sobre limitação
-    if (!confirm('⚠️ ATENÇÃO: O backend não suporta exclusão. A notícia será removida apenas localmente e reaparecerá ao recarregar a página. Deseja continuar?')) {
+    if (!confirm('⚠️ ATENÇÃO: O backend não suporta exclusão. O item será removido apenas localmente e reaparecerá ao recarregar a página. Deseja continuar?')) {
       return
     }
     
     await removerNoticiaPorId(modalExclusao.value.noticia.id)
     cancelarExclusao()
   } catch (error) {
-    console.error('Erro ao excluir notícia:', error)
+    console.error('Erro ao excluir:', error)
     alert('Erro ao excluir: ' + error.message)
   }
 }
@@ -619,15 +663,12 @@ function aplicarFiltros() {
 }
 
 // Utility functions
-function getCategoriaLabel(categoria) {
+function getTipoLabel(tipo) {
   const labels = {
-    vacinacao: '🏥 Vacinação',
-    adocao: '🐕 Adoção',
     campanha: '📢 Campanha',
-    evento: '🎪 Evento',
-    geral: '📝 Geral'
+    noticia: '📝 Notícia'
   }
-  return labels[categoria] || '📝 Geral'
+  return labels[tipo] || '📝 Notícia'
 }
 
 function getStatusLabel(status) {
@@ -639,9 +680,20 @@ function getStatusLabel(status) {
   return labels[status] || '✅ Ativo'
 }
 
-function temDetalhes(noticia) {
-  const det = noticia.detalhes
-  return det && (det.data || det.horario || det.local || det.publico || det.contato)
+function getTitulo(noticia) {
+  if (!noticia) return ''
+  if (noticia.tipo === 'campanha') {
+    return noticia.nomeCampanha || noticia.titulo || 'Sem título'
+  }
+  return noticia.nomeNoticia || noticia.titulo || 'Sem título'
+}
+
+function getImagem(noticia) {
+  if (!noticia) return ''
+  if (noticia.tipo === 'campanha') {
+    return noticia.urlImagem || noticia.imagem
+  }
+  return noticia.urlImagemNoticia || noticia.imagem
 }
 
 function cortarTexto(texto, limite) {
@@ -657,10 +709,6 @@ function formatarData(dataISO) {
 // Lifecycle
 onMounted(() => {
   carregarNoticias()
-})
-
-// Fechar menus ao clicar fora
-onMounted(() => {
   document.addEventListener('click', () => {
     menuAberto.value = null
   })
@@ -668,13 +716,13 @@ onMounted(() => {
 </script>
 
 <style scoped>
+/* Mantém todos os estilos originais e adiciona novos */
 .admin-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Header */
 .dashboard-header {
   background: white;
   border-bottom: 1px solid #e2e8f0;
@@ -718,9 +766,9 @@ onMounted(() => {
   color: #166534;
 }
 
-.stat-item.warning {
-  background: #fef3c7;
-  color: #92400e;
+.stat-item.info {
+  background: #dbeafe;
+  color: #1e40af;
 }
 
 .stat-number {
@@ -737,7 +785,6 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
-/* Banner de Aviso */
 .warning-banner {
   background: #fef3c7;
   border-bottom: 2px solid #f59e0b;
@@ -758,7 +805,6 @@ onMounted(() => {
   flex-shrink: 0;
 }
 
-/* Controls */
 .controls-section {
   max-width: 1200px;
   margin: 0 auto;
@@ -813,7 +859,6 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* Loading & Error */
 .loading-container {
   text-align: center;
   padding: 4rem 2rem;
@@ -852,7 +897,6 @@ onMounted(() => {
   color: #dc2626;
 }
 
-/* Grid de Notícias */
 .noticias-grid {
   max-width: 1200px;
   margin: 0 auto;
@@ -862,7 +906,6 @@ onMounted(() => {
   gap: 1.5rem;
 }
 
-/* Card de Notícia */
 .noticia-card {
   background: white;
   border-radius: 16px;
@@ -909,15 +952,30 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
-.badge-vacinacao { background: #dcfce7; color: #166534; }
-.badge-adocao { background: #fed7aa; color: #9a3412; }
-.badge-campanha { background: #dbeafe; color: #1e40af; }
-.badge-evento { background: #fce7f3; color: #be185d; }
-.badge-geral { background: #f1f5f9; color: #475569; }
+.badge-campanha { 
+  background: #dbeafe; 
+  color: #1e40af; 
+}
 
-.badge-status-ativo { background: #dcfce7; color: #166534; }
-.badge-status-rascunho { background: #fef3c7; color: #92400e; }
-.badge-status-arquivado { background: #f1f5f9; color: #6b7280; }
+.badge-noticia { 
+  background: #f1f5f9; 
+  color: #475569; 
+}
+
+.badge-status-ativo { 
+  background: #dcfce7; 
+  color: #166534; 
+}
+
+.badge-status-rascunho { 
+  background: #fef3c7; 
+  color: #92400e; 
+}
+
+.badge-status-arquivado { 
+  background: #f1f5f9; 
+  color: #6b7280; 
+}
 
 .btn-menu {
   background: none;
@@ -932,6 +990,10 @@ onMounted(() => {
 .btn-menu:hover {
   background: #f1f5f9;
   color: #334155;
+}
+
+.card-menu {
+  position: relative;
 }
 
 .dropdown-menu {
@@ -1012,6 +1074,11 @@ onMounted(() => {
   margin: 1rem 0;
 }
 
+.campanha-details {
+  background: #eff6ff;
+  border: 1px solid #dbeafe;
+}
+
 .detail-row {
   display: flex;
   align-items: center;
@@ -1056,7 +1123,6 @@ onMounted(() => {
   gap: 0.5rem;
 }
 
-/* Empty State */
 .empty-state {
   grid-column: 1 / -1;
   text-align: center;
@@ -1085,7 +1151,6 @@ onMounted(() => {
   margin: 0 0 2rem 0;
 }
 
-/* Buttons */
 .btn-primary, .btn-secondary, .btn-danger, .btn-close {
   border: none;
   border-radius: 8px;
@@ -1155,7 +1220,6 @@ onMounted(() => {
   color: #374151;
 }
 
-/* Modal */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -1202,10 +1266,6 @@ onMounted(() => {
   padding: 1.5rem 2rem;
 }
 
-.modal-form {
-  padding: 1.5rem 2rem;
-}
-
 .modal-actions {
   padding: 1.5rem 2rem;
   border-top: 1px solid #e5e7eb;
@@ -1214,7 +1274,6 @@ onMounted(() => {
   gap: 1rem;
 }
 
-/* Form */
 .form-section {
   margin-bottom: 2rem;
 }
@@ -1237,10 +1296,7 @@ onMounted(() => {
 .form-group {
   display: flex;
   flex-direction: column;
-}
-
-.form-group.flex-2 {
-  grid-column: span 2;
+  margin-bottom: 1rem;
 }
 
 .form-group label {
@@ -1258,6 +1314,8 @@ onMounted(() => {
   border-radius: 8px;
   font-size: 1rem;
   transition: border-color 0.2s;
+  width: 100%;
+  box-sizing: border-box;
 }
 
 .form-group input:focus,
@@ -1272,6 +1330,43 @@ onMounted(() => {
   margin-top: 0.25rem;
   font-size: 0.75rem;
   color: #6b7280;
+}
+
+.radio-group {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.radio-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.75rem 1.5rem;
+  border: 2px solid #e5e7eb;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex: 1;
+  min-width: 150px;
+}
+
+.radio-label:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.radio-label.radio-active {
+  border-color: #3b82f6;
+  background: #eff6ff;
+}
+
+.radio-input {
+  cursor: pointer;
+}
+
+.radio-text {
+  font-weight: 500;
 }
 
 .image-preview {
@@ -1300,7 +1395,6 @@ onMounted(() => {
   margin: 1rem 0;
 }
 
-/* Responsive */
 @media (max-width: 768px) {
   .header-content {
     flex-direction: column;
@@ -1338,17 +1432,12 @@ onMounted(() => {
     grid-template-columns: 1fr;
   }
 
-  .form-group.flex-2 {
-    grid-column: span 1;
-  }
-
   .modal-content {
     margin: 1rem;
     max-width: none;
   }
 
   .modal-header,
-  .modal-form,
   .modal-body,
   .modal-actions {
     padding: 1rem;
@@ -1366,6 +1455,14 @@ onMounted(() => {
 
   .card-actions {
     justify-content: center;
+  }
+
+  .radio-group {
+    flex-direction: column;
+  }
+
+  .radio-label {
+    min-width: auto;
   }
 }
 

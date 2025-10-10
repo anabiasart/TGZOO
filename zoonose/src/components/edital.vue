@@ -3,65 +3,63 @@
     <!-- Loading State -->
     <div v-if="carregando" class="loading-container">
       <div class="spinner"></div>
-      <p>Carregando notícia...</p>
+      <p>Carregando...</p>
     </div>
 
-    <!-- Notícia Encontrada -->
-    <template v-else-if="noticia">
+    <!-- Item Encontrado -->
+    <template v-else-if="item">
       <header class="edital-header">
         <button class="btn-voltar" @click="$router.go(-1)">
           ← Voltar
         </button>
         <div class="header-content">
-          <h1>{{ noticia.titulo }}</h1>
+          <div class="header-badge">
+            <span :class="item.tipo === 'campanha' ? 'badge-campanha' : 'badge-noticia'">
+              {{ item.tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia' }}
+            </span>
+          </div>
+          <h1>{{ getTitulo() }}</h1>
           <p class="orgao">Prefeitura Municipal • Secretaria de Saúde • Centro Veterinário</p>
           <div class="metadata">
-            <span class="data-publicacao">📅 Publicado em: {{ formatarData(noticia.dataPublicacao) }}</span>
-            <span v-if="noticia.autor" class="autor">👤 Por: {{ noticia.autor }}</span>
+            <span class="data-publicacao">📅 Publicado em: {{ formatarData(item.dataPublicacao) }}</span>
+            <span v-if="item.autor" class="autor">👤 Por: {{ item.autor }}</span>
           </div>
         </div>
       </header>
 
-      <!-- Imagem da Notícia (se existir) -->
-      <div v-if="noticia.imagem" class="imagem-container">
-        <img :src="noticia.imagem" :alt="noticia.titulo" class="imagem-noticia" />
+      <!-- Imagem -->
+      <div v-if="getImagem()" class="imagem-container">
+        <img :src="getImagem()" :alt="getTitulo()" class="imagem-noticia" />
       </div>
 
       <main class="conteudo">
-        <section class="resumo">
-          <h2>📄 Conteúdo</h2>
-          <div class="conteudo-texto" v-html="formatarConteudo(noticia.resumo)"></div>
-        </section>
-
-        <!-- Detalhes do Edital -->
-        <section v-if="temDetalhes" class="detalhes">
-          <h2>📋 Informações Detalhadas</h2>
-          <div class="grid-detalhes">
-            <div v-if="noticia.detalhes.data" class="detalhe-item">
-              <strong>📅 Data:</strong>
-              <span>{{ noticia.detalhes.data }}</span>
+        <!-- Conteúdo CAMPANHA -->
+        <section v-if="item.tipo === 'campanha'" class="campanha-info">
+          <h2>📢 Informações da Campanha</h2>
+          <div class="grid-detalhes campanha-grid">
+            <div v-if="item.nomeCampanha" class="detalhe-item destaque">
+              <strong>📋 Nome da Campanha:</strong>
+              <span>{{ item.nomeCampanha }}</span>
             </div>
-            <div v-if="noticia.detalhes.horario" class="detalhe-item">
+            <div v-if="item.dataInicioCampanha" class="detalhe-item">
+              <strong>📅 Data Início:</strong>
+              <span>{{ item.dataInicioCampanha }}</span>
+            </div>
+            <div v-if="item.dataFimCampanha" class="detalhe-item">
+              <strong>📅 Data Fim:</strong>
+              <span>{{ item.dataFimCampanha }}</span>
+            </div>
+            <div v-if="item.horarioCampanha" class="detalhe-item">
               <strong>🕐 Horário:</strong>
-              <span>{{ noticia.detalhes.horario }}</span>
-            </div>
-            <div v-if="noticia.detalhes.local" class="detalhe-item">
-              <strong>📍 Local:</strong>
-              <span>{{ noticia.detalhes.local }}</span>
-            </div>
-            <div v-if="noticia.detalhes.publico" class="detalhe-item">
-              <strong>👥 Público-alvo:</strong>
-              <span>{{ noticia.detalhes.publico }}</span>
-            </div>
-            <div v-if="noticia.detalhes.contato" class="detalhe-item">
-              <strong>📞 Contato:</strong>
-              <span>{{ noticia.detalhes.contato }}</span>
-            </div>
-            <div v-if="noticia.detalhes.inscricoes" class="detalhe-item">
-              <strong>📝 Inscrições:</strong>
-              <span>{{ noticia.detalhes.inscricoes }}</span>
+              <span>{{ item.horarioCampanha }}</span>
             </div>
           </div>
+        </section>
+
+        <!-- Conteúdo NOTÍCIA -->
+        <section v-else class="resumo">
+          <h2>📄 Conteúdo</h2>
+          <div class="conteudo-texto" v-html="formatarConteudo(item.resumo)"></div>
         </section>
 
         <!-- Ações -->
@@ -76,11 +74,11 @@
       </main>
     </template>
 
-    <!-- Notícia Não Encontrada -->
+    <!-- Item Não Encontrado -->
     <div v-else class="erro-container">
       <div class="erro-content">
-        <h2>😔 Notícia não encontrada</h2>
-        <p>A notícia que você está procurando pode ter sido removida ou não existe.</p>
+        <h2>😔 Item não encontrado</h2>
+        <p>O item que você está procurando pode ter sido removido ou não existe.</p>
         <button class="btn-home" @click="$router.push('/')">
           🏠 Voltar ao Início
         </button>
@@ -90,72 +88,15 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue"
-import { useRoute, useRouter } from "vue-router"
+import { ref, onMounted } from "vue"
+import { useRoute } from "vue-router"
+import { useNoticias } from "@/data/noticiasData.js"
 
-const noticia = ref(null)
+const item = ref(null)
 const carregando = ref(true)
 const route = useRoute()
-const router = useRouter()
+const { noticias: todasNoticias, carregarNoticias, buscarNoticiaPorId } = useNoticias()
 
-const API_URL = 'http://localhost:8080/api/news'
-
-// Função para extrair detalhes do conteúdo
-const extrairDetalhes = (content) => {
-  const detalhes = {
-    data: '',
-    horario: '',
-    local: '',
-    publico: '',
-    contato: '',
-    inscricoes: ''
-  }
-  
-  if (!content) return detalhes
-  
-  // Buscar padrões no texto (case insensitive)
-  const dataMatch = content.match(/Data:\s*(.+?)(?:\n|$)/i)
-  const horarioMatch = content.match(/Horário:\s*(.+?)(?:\n|$)/i)
-  const localMatch = content.match(/Local:\s*(.+?)(?:\n|$)/i)
-  const publicoMatch = content.match(/Público:\s*(.+?)(?:\n|$)/i) || 
-                       content.match(/Público-alvo:\s*(.+?)(?:\n|$)/i)
-  const contatoMatch = content.match(/Contato:\s*(.+?)(?:\n|$)/i)
-  const inscricoesMatch = content.match(/Inscrições:\s*(.+?)(?:\n|$)/i) ||
-                          content.match(/Informações de Inscrição:\s*(.+?)(?:\n|$)/i)
-  
-  if (dataMatch) detalhes.data = dataMatch[1].trim()
-  if (horarioMatch) detalhes.horario = horarioMatch[1].trim()
-  if (localMatch) detalhes.local = localMatch[1].trim()
-  if (publicoMatch) detalhes.publico = publicoMatch[1].trim()
-  if (contatoMatch) detalhes.contato = contatoMatch[1].trim()
-  if (inscricoesMatch) detalhes.inscricoes = inscricoesMatch[1].trim()
-  
-  return detalhes
-}
-
-// Função para remover os detalhes do conteúdo principal
-const removerDetalhesDoConteudo = (content) => {
-  if (!content) return ''
-  
-  // Remove as linhas com os detalhes
-  return content
-    .replace(/\n\nData:.*$/gim, '')
-    .replace(/\nHorário:.*$/gim, '')
-    .replace(/\nLocal:.*$/gim, '')
-    .replace(/\nPúblico(-alvo)?:.*$/gim, '')
-    .replace(/\nContato:.*$/gim, '')
-    .replace(/\nInscrições:.*$/gim, '')
-    .replace(/\nInformações de Inscrição:.*$/gim, '')
-    .trim()
-}
-
-// Computed para verificar se tem detalhes válidos
-const temDetalhes = computed(() => {
-  if (!noticia.value?.detalhes) return false
-  const detalhes = noticia.value.detalhes
-  return detalhes.data || detalhes.horario || detalhes.local || 
-         detalhes.publico || detalhes.contato || detalhes.inscricoes
-})
 
 onMounted(async () => {
   try {
@@ -166,39 +107,37 @@ onMounted(async () => {
       return
     }
     
-    // Buscar notícia diretamente da API
-    const response = await fetch(`${API_URL}/${id}`)
+    const resultado = await buscarNoticiaPorId(id)
     
-    if (!response.ok) {
-      throw new Error('Notícia não encontrada')
-    }
-    
-    const data = await response.json()
-    
-    // Extrair detalhes do conteúdo
-    const detalhes = extrairDetalhes(data.content)
-    const conteudoLimpo = removerDetalhesDoConteudo(data.content)
-    
-    // Mapear dados do backend
-    noticia.value = {
-      id: data.id,
-      titulo: data.title,
-      resumo: conteudoLimpo || data.content,
-      imagem: data.imageUrl,
-      dataPublicacao: data.createdAt,
-      autor: data.user?.name || 'Sistema',
-      detalhes: detalhes
+    if (resultado) {
+      item.value = resultado
     }
     
   } catch (error) {
-    console.error('Erro ao carregar notícia:', error)
-    noticia.value = null
+    console.error('Erro ao carregar:', error)
+    item.value = null
   } finally {
     carregando.value = false
   }
 })
 
 // Funções utilitárias
+function getTitulo() {
+  if (!item.value) return ''
+  if (item.value.tipo === 'campanha') {
+    return item.value.nomeCampanha || item.value.titulo
+  }
+  return item.value.nomeNoticia || item.value.titulo
+}
+
+function getImagem() {
+  if (!item.value) return ''
+  if (item.value.tipo === 'campanha') {
+    return item.value.urlImagem || item.value.imagem
+  }
+  return item.value.urlImagemNoticia || item.value.imagem
+}
+
 function formatarData(data) {
   if (!data) return 'Data não disponível'
   return new Date(data).toLocaleDateString('pt-BR', {
@@ -210,7 +149,6 @@ function formatarData(data) {
 
 function formatarConteudo(texto) {
   if (!texto) return ''
-  // Converter quebras de linha em parágrafos
   return texto
     .split('\n\n')
     .map(paragrafo => `<p>${paragrafo.replace(/\n/g, '<br>')}</p>`)
@@ -220,14 +158,13 @@ function formatarConteudo(texto) {
 function compartilhar() {
   if (navigator.share) {
     navigator.share({
-      title: noticia.value.titulo,
-      text: noticia.value.resumo.substring(0, 200),
+      title: getTitulo(),
+      text: item.value.resumo?.substring(0, 200) || '',
       url: window.location.href
     }).catch(err => {
       console.log('Erro ao compartilhar:', err)
     })
   } else {
-    // Fallback para navegadores que não suportam Web Share API
     navigator.clipboard.writeText(window.location.href)
       .then(() => alert('Link copiado para a área de transferência!'))
       .catch(err => console.error('Erro ao copiar:', err))
@@ -298,6 +235,28 @@ function imprimir() {
   background: #047857;
 }
 
+.header-badge {
+  margin-bottom: 1rem;
+}
+
+.header-badge span {
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-campanha {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-noticia {
+  background: #f1f5f9;
+  color: #475569;
+}
+
 .header-content h1 {
   margin: 0 0 0.5rem 0;
   font-size: 2.5em;
@@ -348,7 +307,7 @@ function imprimir() {
   padding: 0 2rem 4rem;
 }
 
-.resumo, .detalhes, .acoes {
+.resumo, .campanha-info, .acoes {
   background: white;
   margin-bottom: 2rem;
   padding: 2rem;
@@ -356,7 +315,7 @@ function imprimir() {
   box-shadow: 0 4px 12px rgba(0,0,0,0.08);
 }
 
-.resumo h2, .detalhes h2 {
+.resumo h2, .campanha-info h2 {
   margin: 0 0 1rem 0;
   color: #059669;
   font-size: 1.5em;
@@ -387,11 +346,24 @@ function imprimir() {
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
 }
 
+.campanha-grid {
+  background: #eff6ff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  border: 2px solid #dbeafe;
+}
+
 .detalhe-item {
-  background: #f9fafb;
+  background: white;
   padding: 1rem;
   border-radius: 8px;
   border-left: 4px solid #059669;
+}
+
+.detalhe-item.destaque {
+  grid-column: 1 / -1;
+  border-left: 4px solid #1e40af;
+  background: #f0f9ff;
 }
 
 .detalhe-item strong {
@@ -399,6 +371,10 @@ function imprimir() {
   color: #059669;
   margin-bottom: 0.25rem;
   font-size: 0.95em;
+}
+
+.detalhe-item.destaque strong {
+  color: #1e40af;
 }
 
 .detalhe-item span {
@@ -495,7 +471,7 @@ function imprimir() {
     padding: 0 1rem 2rem;
   }
   
-  .resumo, .detalhes, .acoes {
+  .resumo, .campanha-info, .acoes {
     padding: 1.5rem;
   }
   
@@ -526,7 +502,7 @@ function imprimir() {
     background: white;
   }
   
-  .resumo, .detalhes {
+  .resumo, .campanha-info {
     box-shadow: none;
     border: 1px solid #e5e7eb;
   }

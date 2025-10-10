@@ -12,6 +12,38 @@ const noticias = ref([])
 const router = useRouter()
 const menuAberto = ref(false)
 
+onMounted (async => {
+  carregarNoticias()
+})
+
+// Função para pegar o título correto
+function getTitulo(item) {
+  if (item.tipo === 'campanha') {
+    return item.nomeCampanha || item.titulo
+  }
+  return item.nomeNoticia || item.titulo
+}
+
+// Função para pegar a imagem correta
+function getImagem(item) {
+  if (item.tipo === 'campanha') {
+    return item.urlImagem || vete
+  }
+  return item.urlImagemNoticia || item.imagem || vete
+}
+
+// Função para pegar o resumo correto
+function getResumo(item) {
+  if (item.tipo === 'campanha') {
+    let texto = `${item.dataInicioCampanha || ''} até ${item.dataFimCampanha || ''}`
+    if (item.horarioCampanha) {
+      texto += ` - ${item.horarioCampanha}`
+    }
+    return cortarTexto(texto, 80)
+  }
+  return cortarTexto(item.resumo || '', 80)
+}
+
 // Função para cortar texto
 function cortarTexto(texto, limite) {
   if (!texto) return '' 
@@ -23,18 +55,18 @@ function cortarTexto(texto, limite) {
   return cortado.slice(0, ultimoEspaco) + '…'
 }
 
-  onMounted(() => {
-  carregarNoticias()
-})
+
 
 watch(todasNoticias, () => {
   noticias.value = todasNoticias.value
     .slice(0, 4)
     .map(n => ({
       id: n.id,
-      titulo: n.titulo,
-      resumo: cortarTexto(n.resumo, 80),
-      imagem: n.imagem && n.imagem.trim() ? n.imagem : vete
+      tipo: n.tipo,
+      titulo: getTitulo(n),
+      resumo: getResumo(n),
+      imagem: getImagem(n),
+      badge: n.tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia'
     }))
 })
 
@@ -72,11 +104,10 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 </script>
 
 <template>
-
-<!--uma nav bar para enquadramento maior e uma responsiva para mobile--->  
 <nav class="navbar">
   <div class="navbar-logo" @click="router.push('/')">
-    <img :src="zoo" alt="ZoonoSys Logo" class="logo" /> </div>
+    <img :src="zoo" alt="ZoonoSys Logo" class="logo" />
+  </div>
 
   <ul class="navbar-links">
     <li @click="router.push('/')">Início</li>
@@ -84,7 +115,6 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
     <li @click="router.push('/adocao')">Adote um Amigo</li>
-
   </ul>
 
   <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>
@@ -94,84 +124,76 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <li @click="router.push('/edital/noticias')">Notícias</li> 
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
-
   </ul>
 </nav>
-<!-------carrossel com as imagens e texto animado-->
- <div class="carrossel-container">
-<img :src="imagens[indexAtual].src" alt="Carrossel" />
-     <transition name="fade" mode="out-in">
+
+<div class="carrossel-container">
+  <img :src="imagens[indexAtual].src" alt="Carrossel" />
+  <transition name="fade" mode="out-in">
     <div class="carrossel-texto" :key="indexAtual">
       <h2>{{ imagens[indexAtual].texto }}</h2>
     </div>
   </transition>
+  <button class="btn-prev" @click="anterior">‹</button>
+  <button class="btn-next" @click="proximo">›</button>
+</div>
 
-    <button class="btn-prev" @click="anterior">‹</button>
-    <button class="btn-next" @click="proximo">›</button>
-  </div>
 <div class="home-page">
-    <div class="content">
-
-
-      <div class="template2">
-
-        <main class="col-central">
-         
-
+  <div class="content">
+    <div class="template2">
+      <main class="col-central">
         <section class="noticias">
-  <h3 class="titulo">📰 Últimas Notícias & Editais</h3>
-
-  <div class="lista-noticias">
-    <div v-for="n in noticias" :key="n.id" class="card-noticia">
-      <img :src="n.imagem" alt="Imagem notícia" />
-      <div class="conteudo">
-        <h4>{{ n.titulo }}</h4>
-        <p>{{ n.resumo }}</p>
-        
-        <button class="btn-leia" @click="router.push(`/edital/${n.id}`)">Leia mais ›</button>
-      </div>
-    </div>
-  </div>
-</section>
-
-          
-      
-        </main>
-
-              <aside class="col-esquerda">
-
-                 <section class="texto-zoonoses">
-            <h2>Sobre as Zoonoses</h2>
-            <p>
-              Zoonoses são doenças que podem ser transmitidas de animais para humanos.
-              É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
-            </p>
-          </section>
-<!-----Seguido dos cards de serviços com icones-->
-          <div v-for="(s, i) in servicos" :key="i" class="service">
-            <component :is="s.icon" class="icon"/>
-            <h3>{{ s.titulo }}</h3>
-            <p>{{ s.desc }}</p>
-            <button class="btn-action" @click="s.acao">{{ s.label }}</button>
-          </div>
-
-          <!----Faq com perguntas basicas e animação de item aberto ou fechado-->
-                <section class="faq">
-            <h3>❓ Dúvidas Frequentes</h3>
-            <div v-for="(item, i) in faq" :key="i" class="faq-item">
-              <button class="faq-question" @click="toggleFaq(i)">
-                {{ item.pergunta }}
-                <span>{{ item.aberto ? '−' : '+' }}</span>
-              </button>
-              <p v-if="item.aberto" class="faq-answer">{{ item.resposta }}</p>
+          <h3 class="titulo">📰 Últimas Notícias & Campanhas</h3>
+          <div class="lista-noticias">
+            <div v-for="n in noticias" :key="n.id" class="card-noticia">
+              <div class="card-badge">
+                <span :class="n.tipo === 'campanha' ? 'badge-campanha' : 'badge-noticia'">
+                  {{ n.badge }}
+                </span>
+              </div>
+              <img :src="n.imagem" :alt="n.titulo" />
+              <div class="conteudo">
+                <h4>{{ n.titulo }}</h4>
+                <p>{{ n.resumo }}</p>
+                <button class="btn-leia" @click="router.push(`/edital/${n.id}`)">
+                  Leia mais ›
+                </button>
+              </div>
             </div>
-          </section>
-              </aside>
+          </div>
+        </section>
+      </main>
 
+      <aside class="col-esquerda">
+        <section class="texto-zoonoses">
+          <h2>Sobre as Zoonoses</h2>
+          <p>
+            Zoonoses são doenças que podem ser transmitidas de animais para humanos.
+            É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
+          </p>
+        </section>
 
-      </div>
+        <div v-for="(s, i) in servicos" :key="i" class="service">
+          <component :is="s.icon" class="icon"/>
+          <h3>{{ s.titulo }}</h3>
+          <p>{{ s.desc }}</p>
+          <button class="btn-action" @click="s.acao">{{ s.label }}</button>
+        </div>
+
+        <section class="faq">
+          <h3>❓ Dúvidas Frequentes</h3>
+          <div v-for="(item, i) in faq" :key="i" class="faq-item">
+            <button class="faq-question" @click="toggleFaq(i)">
+              {{ item.pergunta }}
+              <span>{{ item.aberto ? '−' : '+' }}</span>
+            </button>
+            <p v-if="item.aberto" class="faq-answer">{{ item.resposta }}</p>
+          </div>
+        </section>
+      </aside>
     </div>
   </div>
+</div>
 </template>
 
 <style>
@@ -184,7 +206,6 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
 }
 
-/* Container */
 .content {
   flex: 1; 
   display: flex;
@@ -192,7 +213,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   align-items: flex-start;
   padding: 2rem;
   width: 100%;
-  margin-top: 70px; /* Espaço para a navbar fixa */
+  margin-top: 70px;
 }
 
 .navbar {
@@ -218,8 +239,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 }
 
 .navbar-logo .logo {
-  height: 150px;       /* tamanho do logo */
-  width: auto;        /* mantém proporção */
+  height: 150px;
+  width: auto;
   transition: transform 0.3s ease;
 }
 
@@ -297,26 +318,6 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   .template2 {
     grid-template-columns: 1fr;
   }
-}
-
-.hero-text {
-  position: fixed;
-  top: 15px;
-  left: 15px;
-  z-index: 50;
-}
-
-.btn-adote {
-  background: linear-gradient(90deg, #38bdf8, #0ea5e9);
-  color: white;
-  font-weight: bold;
-  padding: 8px 16px;
-  border-radius: 9999px;
-  transition: transform 0.3s ease;
-}
-
-.btn-adote:hover {
-  transform: scale(1.05);
 }
 
 .col-esquerda {
@@ -410,6 +411,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   overflow: hidden;
   box-shadow: 0 4px 12px rgba(0,0,0,0.1);
   transition: transform 0.3s ease, box-shadow 0.3s ease;
+  position: relative;
 }
 
 .card-noticia:hover {
@@ -417,14 +419,52 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   box-shadow: 0 8px 20px rgba(0,0,0,0.2);
 }
 
+.card-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+.card-badge span {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  display: inline-block;
+}
+
+.badge-campanha {
+  background: #dbeafe;
+  color: #1e40af;
+}
+
+.badge-noticia {
+  background: #f1f5f9;
+  color: #475569;
+}
+
 .card-noticia img {
   height: 180px;
   object-fit: cover;
+  width: 100%;
 }
 
-.conteudo { padding: 16px; }
-.conteudo h4 { font-size: 18px; font-weight: bold; margin-bottom: 8px; }
-.conteudo p { font-size: 14px; color: #555; margin-bottom: 12px; }
+.conteudo {
+  padding: 16px;
+}
+
+.conteudo h4 {
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 8px;
+}
+
+.conteudo p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 12px;
+}
 
 .btn-leia {
   background: #2563eb;
@@ -433,9 +473,13 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   border-radius: 9999px;
   font-size: 14px;
   transition: background 0.2s;
+  border: none;
+  cursor: pointer;
 }
 
-.btn-leia:hover { background: #1e40af; }
+.btn-leia:hover {
+  background: #1e40af;
+}
 
 .carrossel-container {
   position: relative;
@@ -444,7 +488,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   height: 500px;            
   overflow: hidden;
   margin: 0;               
-  margin-top: 70px;        /* Espaço para a navbar fixa */
+  margin-top: 70px;
   border-radius: 0;         
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
@@ -512,7 +556,6 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   to { opacity: 1; transform: translate(-50%, 0); }
 }
 
-/* FAQ */
 .faq {
   background: white;
   padding: 20px;
@@ -527,7 +570,9 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   text-align: left;
 }
 
-.faq-item { margin-bottom: 10px; }
+.faq-item {
+  margin-bottom: 10px;
+}
 
 .faq-question {
   width: 100%;
@@ -540,9 +585,12 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   justify-content: space-between;
   cursor: pointer;
   transition: background 0.2s ease;
+  border: none;
 }
 
-.faq-question:hover { background: #e2e8f0; }
+.faq-question:hover {
+  background: #e2e8f0;
+}
 
 .faq-answer {
   margin-top: 8px;
