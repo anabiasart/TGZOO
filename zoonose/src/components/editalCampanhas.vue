@@ -1,13 +1,13 @@
 <template>
-  <div class="noticias-page">
+  <div class="campanhas-page">
     <!-- Header -->
     <header class="page-header">
       <button class="btn-voltar" @click="$router.go(-1)">
         ← Voltar
       </button>
       <div class="header-content">
-        <h1>📝 Notícias</h1>
-        <p>Fique por dentro de todas as novidades e informações importantes</p>
+        <h1>📢 Campanhas</h1>
+        <p>Confira todas as campanhas ativas e programadas</p>
       </div>
     </header>
 
@@ -18,7 +18,7 @@
           <input 
             v-model="filtros.busca" 
             type="text"
-            placeholder="🔍 Buscar notícias..."
+            placeholder="🔍 Buscar campanhas..."
             @input="aplicarFiltros"
           />
         </div>
@@ -28,38 +28,53 @@
     <!-- Loading -->
     <div v-if="carregando" class="loading-container">
       <div class="spinner"></div>
-      <p>Carregando notícias...</p>
+      <p>Carregando campanhas...</p>
     </div>
 
-    <!-- Lista de notícias -->
-    <main class="noticias-container" v-else>
-      <div v-if="noticiasFiltradas.length === 0" class="empty-state">
-        <span class="empty-icon">📝</span>
-        <h3>Nenhuma notícia encontrada</h3>
-        <p>Tente ajustar os filtros ou volte mais tarde para novas publicações.</p>
+    <!-- Lista de campanhas -->
+    <main class="campanhas-container" v-else>
+      <div v-if="campanhasFiltradas.length === 0" class="empty-state">
+        <span class="empty-icon">📢</span>
+        <h3>Nenhuma campanha encontrada</h3>
+        <p>Não há campanhas ativas no momento. Volte mais tarde!</p>
       </div>
 
-      <div v-else class="noticias-grid">
+      <div v-else class="campanhas-grid">
         <article 
-          v-for="noticia in noticiasFiltradas" 
-          :key="noticia.id"
-          class="noticia-card"
-          @click="verNoticia(noticia.id)"
+          v-for="campanha in campanhasFiltradas" 
+          :key="campanha.id"
+          class="campanha-card"
+          @click="verCampanha(campanha.id)"
         >
           <!-- Badge -->
           <div class="card-badge">
-            <span class="badge-noticia">📝 Notícia</span>
+            <span class="badge-campanha">📢 Campanha</span>
           </div>
 
           <!-- Imagem -->
           <div class="card-image">
-            <img :src="getImagem(noticia)" :alt="getTitulo(noticia)" />
+            <img :src="getImagem(campanha)" :alt="getTitulo(campanha)" />
           </div>
 
           <!-- Conteúdo -->
           <div class="card-content">
-            <h3>{{ getTitulo(noticia) }}</h3>
-            <p class="resumo">{{ cortarTexto(noticia.resumo, 120) }}</p>
+            <h3>{{ getTitulo(campanha) }}</h3>
+            
+            <!-- Info de Campanha -->
+            <div class="campanha-info">
+              <div class="info-item" v-if="campanha.dataInicioCampanha">
+                <span class="icon">📅</span>
+                <span>{{ campanha.dataInicioCampanha }} até {{ campanha.dataFimCampanha }}</span>
+              </div>
+              <div class="info-item" v-if="campanha.horarioCampanha">
+                <span class="icon">🕐</span>
+                <span>{{ campanha.horarioCampanha }}</span>
+              </div>
+              <div class="info-item" v-if="campanha.localCampanha">
+                <span class="icon">📍</span>
+                <span>{{ campanha.localCampanha }}</span>
+              </div>
+            </div>
           </div>
 
           <!-- Footer -->
@@ -67,11 +82,11 @@
             <div class="meta-info">
               <span class="meta-item">
                 <span class="icon">👤</span>
-                {{ noticia.autor || 'Sistema' }}
+                {{ campanha.autor || 'Sistema' }}
               </span>
               <span class="meta-item">
                 <span class="icon">📅</span>
-                {{ formatarData(noticia.dataPublicacao) }}
+                {{ formatarData(campanha.dataPublicacao) }}
               </span>
             </div>
             
@@ -102,17 +117,16 @@ onMounted(() => {
   carregarNoticias()
 })
 
-// Computed - Filtra apenas notícias
-const noticiasFiltradas = computed(() => {
-  let resultado = noticias.value.filter(n => (n.tipo || 'noticia') === 'noticia')
+// Computed - Filtra apenas campanhas
+const campanhasFiltradas = computed(() => {
+  let resultado = noticias.value.filter(n => n.tipo === 'campanha')
   
   // Filtro de busca
   if (filtros.value.busca.trim()) {
     const termo = filtros.value.busca.toLowerCase()
     resultado = resultado.filter(n => {
       const titulo = getTitulo(n).toLowerCase()
-      const resumo = (n.resumo || '').toLowerCase()
-      return titulo.includes(termo) || resumo.includes(termo)
+      return titulo.includes(termo)
     })
   }
   
@@ -120,22 +134,12 @@ const noticiasFiltradas = computed(() => {
 })
 
 // Funções
-function getTitulo(noticia) {
-  return noticia.nomeNoticia || noticia.titulo
+function getTitulo(campanha) {
+  return campanha.nomeCampanha || campanha.titulo
 }
 
-function getImagem(noticia) {
-  return noticia.urlImagemNoticia || noticia.imagem || vete
-}
-
-function cortarTexto(texto, limite) {
-  if (!texto) return ''
-  texto = texto.replace(/\s+/g, ' ').trim()
-  if (texto.length <= limite) return texto
-  const cortado = texto.slice(0, limite + 1)
-  const ultimoEspaco = cortado.lastIndexOf(' ')
-  if (ultimoEspaco <= 0) return texto.slice(0, limite) + '…'
-  return cortado.slice(0, ultimoEspaco) + '…'
+function getImagem(campanha) {
+  return campanha.urlImagem || vete
 }
 
 function formatarData(data) {
@@ -143,7 +147,7 @@ function formatarData(data) {
   return new Date(data).toLocaleDateString('pt-BR')
 }
 
-function verNoticia(id) {
+function verCampanha(id) {
   router.push(`/edital/${id}`)
 }
 
@@ -153,7 +157,7 @@ function aplicarFiltros() {
 </script>
 
 <style scoped>
-.noticias-page {
+.campanhas-page {
   min-height: 100vh;
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
@@ -215,21 +219,21 @@ function aplicarFiltros() {
 
 .search-box input:focus {
   outline: none;
-  border-color: #f97316;
-  box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+  border-color: #0ea5e9;
+  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
 }
 
 .loading-container {
   text-align: center;
   padding: 4rem 2rem;
-  color: #f97316;
+  color: #0ea5e9;
 }
 
 .spinner {
   width: 40px;
   height: 40px;
   border: 4px solid #e5e7eb;
-  border-top: 4px solid #f97316;
+  border-top: 4px solid #0ea5e9;
   border-radius: 50%;
   animation: spin 1s linear infinite;
   margin: 0 auto 1rem;
@@ -240,19 +244,19 @@ function aplicarFiltros() {
   100% { transform: rotate(360deg); }
 }
 
-.noticias-container {
+.campanhas-container {
   max-width: 1400px;
   margin: 0 auto;
   padding: 0 2rem 4rem;
 }
 
-.noticias-grid {
+.campanhas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 1.5rem;
 }
 
-.noticia-card {
+.campanha-card {
   background: white;
   border-radius: 20px;
   overflow: hidden;
@@ -262,26 +266,28 @@ function aplicarFiltros() {
   position: relative;
   display: flex;
   flex-direction: column;
+  border: 2px solid transparent;
 }
 
-.noticia-card:hover {
+.campanha-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  box-shadow: 0 8px 20px rgba(14, 165, 233, 0.2);
+  border-color: #0ea5e9;
 }
 
 .card-badge {
   position: absolute;
   top: 12px;
-  left: 12px;
+  right: 12px;
   z-index: 10;
 }
 
-.badge-noticia {
+.badge-campanha {
   padding: 6px 14px;
   border-radius: 20px;
   font-size: 0.75rem;
   font-weight: 700;
-  background: rgba(249, 115, 22, 0.95);
+  background: rgba(14, 165, 233, 0.95);
   color: white;
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
@@ -290,7 +296,7 @@ function aplicarFiltros() {
 .card-image {
   height: 200px;
   overflow: hidden;
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
 }
 
 .card-image img {
@@ -300,7 +306,7 @@ function aplicarFiltros() {
   transition: transform 0.4s ease;
 }
 
-.noticia-card:hover .card-image img {
+.campanha-card:hover .card-image img {
   transform: scale(1.08);
 }
 
@@ -313,15 +319,34 @@ function aplicarFiltros() {
   font-size: 1.25rem;
   font-weight: 700;
   color: #1e293b;
-  margin: 0 0 0.75rem 0;
+  margin: 0 0 1rem 0;
   line-height: 1.4;
 }
 
-.resumo {
-  color: #64748b;
-  line-height: 1.6;
-  margin: 0;
-  font-size: 0.938rem;
+.campanha-info {
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
+  padding: 1rem;
+  border-radius: 12px;
+  border: 1px solid #93c5fd;
+}
+
+.info-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
+  color: #1e40af;
+  font-weight: 500;
+}
+
+.info-item:last-child {
+  margin-bottom: 0;
+}
+
+.info-item .icon {
+  width: 18px;
+  text-align: center;
 }
 
 .card-footer {
@@ -348,7 +373,7 @@ function aplicarFiltros() {
 }
 
 .btn-ver-mais {
-  background: #f97316;
+  background: #0ea5e9;
   color: white;
   border: none;
   padding: 0.5rem 1.25rem;
@@ -360,7 +385,7 @@ function aplicarFiltros() {
 }
 
 .btn-ver-mais:hover {
-  background: #ea580c;
+  background: #0284c7;
   transform: translateX(3px);
 }
 
@@ -388,7 +413,7 @@ function aplicarFiltros() {
 }
 
 @media (max-width: 768px) {
-  .noticias-grid {
+  .campanhas-grid {
     grid-template-columns: 1fr;
   }
   

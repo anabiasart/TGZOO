@@ -709,12 +709,12 @@ onMounted(() => {
 <style scoped>
 .admin-dashboard {
   min-height: 100vh;
-  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .dashboard-header {
-  background: white;
+  background: linear-gradient(135deg, #3b6e54, #a5f3fc, #81b7f6);
   border-bottom: 1px solid #e2e8f0;
   padding: 2rem;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
@@ -775,11 +775,7 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
-.warning-banner {
-  background: #fef3c7;
-  border-bottom: 2px solid #f59e0b;
-  padding: 1rem 2rem;
-}
+
 
 .warning-content {
   max-width: 1200px;
@@ -825,6 +821,8 @@ onMounted(() => {
 .search-input:focus {
   outline: none;
   border-color: #3b82f6;
+      background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 

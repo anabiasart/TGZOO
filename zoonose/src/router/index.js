@@ -13,6 +13,7 @@ import Adocao from '../components/adocao.vue'
 import editalAdmin from '../components/admin/editalAdmin.vue'
 import Edital from '@/components/edital.vue'
 import EditalNoticias from '@/components/editalNoticias.vue'
+import EditalCampanhas from '../components/editalCampanhas.vue'
 
 const routes = [
   // Rotas públicas
@@ -21,17 +22,23 @@ const routes = [
   { path: '/adocao', component: Adocao },
   { path: '/footer', component: Footer },
   
-  // Rotas de edital (ORDEM IMPORTA!)
-  { path: '/edital', redirect: '/edital/noticias' },
+  // Rotas de edital - Notícias e Campanhas
   { 
     path: '/edital/noticias', 
     name: 'edital-noticias', 
-    component: EditalNoticias  // 👈 Listagem completa de TODAS as notícias
+    component: EditalNoticias  
   },
+  { 
+    path: '/edital/campanhas', 
+    name: 'edital-campanhas', 
+    component: EditalCampanhas  
+  },
+  
+  // Rota para detalhes de uma notícia/campanha específica
   { 
     path: '/edital/:id', 
     name: 'edital-detalhes', 
-    component: Edital  // 👈 Detalhes de UMA notícia específica
+    component: Edital
   },
   
   // Rotas de admin
@@ -84,7 +91,7 @@ const router = createRouter({
   routes,
 })
 
-// Guard de navegação simplificado
+// Guard de navegação
 router.beforeEach((to, from, next) => {
   // Rotas públicas
   const publicPaths = ['/', '/login', '/adocao', '/footer'];

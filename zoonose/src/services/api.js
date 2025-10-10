@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const API_BASE_URL = "http://localhost:8080/api";
+const API_BASE_URL = "http://localhost:8080/api"; 
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -9,6 +9,7 @@ const api = axios.create({
     "Content-Type": "application/json",
     "Accept": "application/json",
   },
+  withCredentials: true 
 });
 
 // Interceptor de Request
@@ -22,7 +23,7 @@ api.interceptors.request.use(
         : `Bearer ${token}`;
     }
     
-    console.log(`📤 ${config.method?.toUpperCase()} ${config.url}`);
+    console.log(`📤 ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => {
@@ -35,18 +36,17 @@ api.interceptors.request.use(
 api.interceptors.response.use(
   (response) => {
     console.log(`✅ ${response.status} ${response.config.url}`);
-        // Só atualizar token em endpoints de autenticação
+    
     const isAuthEndpoint = response.config.url?.includes('/login') || 
                           response.config.url?.includes('/register');
     
-     if (isAuthEndpoint) {
+    if (isAuthEndpoint) {
       const newToken = response.headers["authorization"];
       if (newToken) {
-        console.log("🔄 Atualizando token de autenticação:", newToken);
+        console.log("🔄 Atualizando token de autenticação");
         localStorage.setItem("token", newToken);
       }
     }
-    
     
     return response;
   },
@@ -54,9 +54,10 @@ api.interceptors.response.use(
     if (error.response) {
       console.error(`❌ Erro ${error.response.status}:`, error.response.data);
       
-      // Limpar dados em caso de token inválido
       if ([401, 403].includes(error.response.status)) {
+        console.warn("🔒 Token inválido - limpando localStorage");
         localStorage.clear();
+        window.location.href = '/login';
       }
     } else {
       console.error("🌐 Erro de rede:", error.message);
@@ -67,14 +68,12 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  // Login
   login: async (credentials) => {
-    const response = await api.post("/users/login", {
+    const response = await api.post("/users/login", { 
       email: credentials.email,
       password: credentials.password,
     });
 
-    // Processar resposta se houver dados adicionais
     if (response.data) {
       const { user, role, token } = response.data;
       if (user) localStorage.setItem("user", JSON.stringify(user));
@@ -85,23 +84,20 @@ export const authAPI = {
     return response;
   },
 
-  // Registro
   register: async (userData) => {
-     const response = await api.post("/users/register", {
+    const response = await api.post("/users/register", { 
       email: userData.email,
       password: userData.password,
       role: userData.role,
       name: userData.name,
       cpf: userData.cpf,       
       phone: userData.phone, 
-      sexo: userData.sexo || undefined, //opcional
-      //campos opcionais
+      sexo: userData.sexo || undefined,
       secundaryPhone: undefined,
       secundarEmail: undefined,
       address: undefined,
     });
 
-       // Garantir que o role cadastrado seja mantido
     if (response.data) {
       response.data.registeredRole = userData.role;
     }
@@ -109,8 +105,6 @@ export const authAPI = {
     return response;
   },
 
-
-  // Logout
   logout: async () => {
     try {
       await api.post("/users/logout");
@@ -122,13 +116,9 @@ export const authAPI = {
     }
   },
 
-  // Helpers
   isAuthenticated: () => !!localStorage.getItem("token"),
-  
   getToken: () => localStorage.getItem("token"),
-  
   getUserRole: () => localStorage.getItem("role"),
-  
   getUser: () => {
     try {
       const user = localStorage.getItem("user");
@@ -139,6 +129,15 @@ export const authAPI = {
   },
 };
 
+// ← NOVO: API para gerenciar usuários
+export const userAPI = {
+  getAllUsers: async () => {
+    return await api.get('/users'); // ← http://localhost:8080/users
+  },
 
+  getUserById: async (id) => {
+    return await api.get(`/users/${id}`);
+  }
+};
 
 export default api;
