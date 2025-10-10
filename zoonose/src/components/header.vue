@@ -16,13 +16,24 @@
       <nav class="nav">
         <ul>
           <li><a href="/">Página Inicial</a></li>
-          <li><a href="/animal">Animais</a></li>
-          <li><a href="/especie">Espécies</a></li>
-          <li><a href="/protocolo">Protocolo</a></li>
-          <li><a href="/atendimento">Atendimento</a></li>
-          <li><router-link to="/edital-admin"> Post Edital</router-link></li>
-        <li><router-link to="/agenda">Agenda</router-link></li>        
-    </ul>
+          <li><router-link to="/edital-admin">Postagens</router-link></li>
+
+          <!-- Botão para mostrar mais opções -->
+          <li>
+            <button class="btn-mais-opcoes" @click="toggleOpcoesExtras">
+              {{ opcoesExtrasVisiveis ? '☰ Fechar' : '☰ Trabalho' }}
+            </button>
+          </li>
+        </ul>
+
+        <!-- Opções extras (aparecem quando clicar no botão) -->
+        <ul v-if="opcoesExtrasVisiveis" class="navbar-links-extras">
+          <li><router-link to="/animal">Animais</router-link></li>
+          <li><router-link to="/especie">Espécies</router-link></li>
+          <li><router-link to="/protocolo">Protocolo</router-link></li>
+          <li><router-link to="/atendimento">Atendimento</router-link></li>
+          <li><router-link to="/agenda">Agenda</router-link></li>
+        </ul>
       </nav>
     </div>
   </header>
@@ -35,6 +46,16 @@ export default {
     usuario: {
       type: String,
       default: "Admin"
+    }
+  },
+  data() {
+    return {
+      opcoesExtrasVisiveis: false
+    }
+  },
+  methods: {
+    toggleOpcoesExtras() {
+      this.opcoesExtrasVisiveis = !this.opcoesExtrasVisiveis
     }
   }
 }
@@ -72,7 +93,7 @@ export default {
 
 /* Navbar principal */
 .navbar {
-  position: sticky; /* não precisa ser fixed, assim não sobrepõe */
+  position: sticky;
   top: 0;
   left: 0;
   width: 100%;
@@ -118,6 +139,7 @@ export default {
   gap: 2rem;
   margin: 0;
   padding: 0;
+  align-items: center;
 }
 
 .nav a, .nav router-link {
@@ -148,4 +170,61 @@ export default {
   width: 100%;
 }
 
+/* Botão "Mais opções" */
+.btn-mais-opcoes {
+  background: #81b7f6;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.btn-mais-opcoes:hover {
+  background: #0284c7;
+  transform: scale(1.05);
+}
+
+/* Menu de opções extras (dropdown) */
+.navbar-links-extras {
+  position: absolute;
+  top: 100%; /* Ajustado para aparecer logo abaixo do navbar */
+  right: 2rem;
+  background: white;
+  list-style: none;
+  font-size: 18px;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 200px;
+  z-index: 100;
+  margin-top: 8px;
+}
+
+.navbar-links-extras li {
+  padding: 10px 14px;
+  cursor: pointer;
+  border-radius: 8px;
+  transition: all 0.2s ease;
+}
+
+.navbar-links-extras li:hover {
+  background: #f1f5f9;
+}
+
+.navbar-links-extras a {
+  color: #333;
+  text-decoration: none;
+  font-weight: 500;
+  display: block;
+}
+
+.navbar-links-extras a:hover {
+  color: #0ea5e9;
+}
 </style>
