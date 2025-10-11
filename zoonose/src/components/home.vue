@@ -126,6 +126,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   <ul v-if="menuAberto" class="navbar-mobile">
     <li @click="router.push('/')">Início</li>
     <li @click="router.push('/edital/noticias')">Notícias</li> 
+    <li @click="router.push('/edital/campanhas')">Campanhas</li>
     <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
   </ul>

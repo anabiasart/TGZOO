@@ -24,7 +24,13 @@
       </div>
     </header>
 
-    
+    <!-- Toast Notification -->
+    <transition name="toast">
+      <div v-if="toast.mostrar" class="toast" :class="toast.tipo">
+        <span class="toast-icon">{{ toast.tipo === 'success' ? '✅' : '❌' }}</span>
+        <span class="toast-message">{{ toast.mensagem }}</span>
+      </div>
+    </transition>
 
     <!-- Controles e Filtros -->
     <section class="controls-section">
@@ -33,7 +39,7 @@
           <input 
             v-model="filtros.busca" 
             type="text"
-            placeholder="🔍 Buscar..."
+            placeholder="🔍 Buscar por título, autor..."
             @input="aplicarFiltros"
             class="search-input"
           />
@@ -111,16 +117,27 @@
           <div class="card-menu">
             <button @click="toggleMenuCard(noticia.id)" class="btn-menu">⋮</button>
             <div v-if="menuAberto === noticia.id" class="dropdown-menu">
-              <button @click="editarNoticia(noticia)">✏️ Editar</button>
-              <button @click="duplicarNoticia(noticia)">📋 Duplicar</button>
+              <button @click="editarNoticia(noticia)">
+                <span class="menu-icon">✏️</span>
+                Editar
+              </button>
+              <button @click="duplicarNoticia(noticia)">
+                <span class="menu-icon">📋</span>
+                Duplicar
+              </button>
               <button v-if="noticia.status === 'ativo'" @click="alterarStatus(noticia.id, 'arquivado')">
-                📦 Arquivar
+                <span class="menu-icon">📦</span>
+                Arquivar
               </button>
               <button v-else @click="alterarStatus(noticia.id, 'ativo')">
-                ✅ Ativar
+                <span class="menu-icon">✅</span>
+                Ativar
               </button>
               <hr>
-              <button @click="confirmarExclusao(noticia)" class="btn-danger">🗑️ Excluir</button>
+              <button @click="confirmarExclusao(noticia)" class="btn-danger">
+                <span class="menu-icon">🗑️</span>
+                Excluir
+              </button>
             </div>
           </div>
         </div>
@@ -133,7 +150,7 @@
           <div v-if="noticia.tipo === 'campanha'" class="card-details campanha-details">
             <div class="detail-row" v-if="noticia.dataInicioCampanha">
               <span class="detail-icon">📅</span>
-              <span class="detail-text">{{ noticia.dataInicioCampanha }} até {{ noticia.dataFimCampanha }}</span>
+              <span class="detail-text">{{ formatarDataSimples(noticia.dataInicioCampanha) }} até {{ formatarDataSimples(noticia.dataFimCampanha) }}</span>
             </div>
             <div class="detail-row" v-if="noticia.horarioCampanha">
               <span class="detail-icon">🕐</span>
@@ -155,11 +172,15 @@
           <div class="card-meta">
             <span class="meta-item">
               <span class="meta-icon">👤</span>
-              {{ noticia.autor || 'Sistema' }}
+              {{ noticia.autor || getAutorNoticia(noticia) }}
             </span>
             <span class="meta-item">
               <span class="meta-icon">📅</span>
               {{ formatarData(noticia.dataPublicacao) }}
+            </span>
+            <span class="meta-item" v-if="noticia.createdAt">
+              <span class="meta-icon">🕐</span>
+              {{ formatarHorario(noticia.createdAt) }}
             </span>
           </div>
           
@@ -197,222 +218,240 @@
 
     <!-- Modal de Criação/Edição -->
     <teleport to="body">
-      <div v-if="modalAberto" class="modal-overlay" @click="fecharModal">
-        <div class="modal-content" @click.stop>
-          <div class="modal-header">
-            <h2>
-              {{ modoEdicao ? '✏️ Editar Item' : '➕ Novo Item' }}
-            </h2>
-            <button @click="fecharModal" class="btn-close">✕</button>
-          </div>
-
-          <div class="modal-body">
-            <!-- Seletor de Tipo -->
-            <div class="form-section">
-              <h3>📋 Tipo de Publicação</h3>
-              <div class="form-group">
-                <div class="radio-group">
-                  <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'campanha' }">
-                    <input 
-                      type="radio" 
-                      v-model="noticiaForm.tipo" 
-                      value="campanha"
-                      class="radio-input"
-                    />
-                    <span class="radio-text">📢 Campanha</span>
-                  </label>
-                  <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'noticia' }">
-                    <input 
-                      type="radio" 
-                      v-model="noticiaForm.tipo" 
-                      value="noticia"
-                      class="radio-input"
-                    />
-                    <span class="radio-text">📝 Notícia</span>
-                  </label>
-                </div>
-              </div>
+      <transition name="modal">
+        <div v-if="modalAberto" class="modal-overlay" @click="fecharModal">
+          <div class="modal-content" @click.stop>
+            <div class="modal-header">
+              <h2>
+                {{ modoEdicao ? '✏️ Editar Item' : '➕ Novo Item' }}
+              </h2>
+              <button @click="fecharModal" class="btn-close">✕</button>
             </div>
 
-            <!-- Formulário CAMPANHA -->
-            <div v-if="noticiaForm.tipo === 'campanha'" class="form-section">
-              <h3>📢 Dados da Campanha</h3>
-              
-              <div class="form-group">
-                <label for="nomeCampanha">Nome da Campanha *</label>
-                <input 
-                  id="nomeCampanha"
-                  v-model="noticiaForm.nomeCampanha" 
-                  type="text"
-                  placeholder="Ex: Vacinação Antirrábica 2024"
-                  required
-                  maxlength="100"
-                />
-                <small>{{ noticiaForm.nomeCampanha?.length || 0 }}/100 caracteres</small>
+            <div class="modal-body">
+              <!-- Seletor de Tipo -->
+              <div class="form-section">
+                <h3>📋 Tipo de Publicação</h3>
+                <div class="form-group">
+                  <div class="radio-group">
+                    <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'campanha' }">
+                      <input 
+                        type="radio" 
+                        v-model="noticiaForm.tipo" 
+                        value="campanha"
+                        class="radio-input"
+                      />
+                      <span class="radio-text">📢 Campanha</span>
+                    </label>
+                    <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'noticia' }">
+                      <input 
+                        type="radio" 
+                        v-model="noticiaForm.tipo" 
+                        value="noticia"
+                        class="radio-input"
+                      />
+                      <span class="radio-text">📝 Notícia</span>
+                    </label>
+                  </div>
+                </div>
               </div>
 
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="dataInicioCampanha">Data Início *</label>
-                  <input 
-                    id="dataInicioCampanha"
-                    v-model="noticiaForm.dataInicioCampanha" 
-                    type="date"
-                    required
-                  />
-                </div>
+              <!-- Formulário CAMPANHA -->
+              <div v-if="noticiaForm.tipo === 'campanha'" class="form-section">
+                <h3>📢 Dados da Campanha</h3>
                 
                 <div class="form-group">
-                  <label for="dataFimCampanha">Data Fim *</label>
+                  <label for="nomeCampanha">Nome da Campanha *</label>
                   <input 
-                    id="dataFimCampanha"
-                    v-model="noticiaForm.dataFimCampanha" 
-                    type="date"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div class="form-group">
-                <label for="horarioCampanha">Horário da Campanha *</label>
-                <input 
-                  id="horarioCampanha"
-                  v-model="noticiaForm.horarioCampanha" 
-                  type="text"
-                  placeholder="Ex: 08:00 às 17:00"
-                  required
-                />
-              </div>
-
-              <div class="form-group">
-                <label for="urlImagem">URL da Imagem</label>
-                <input 
-                  id="urlImagem"
-                  v-model="noticiaForm.urlImagem" 
-                  type="url"
-                  placeholder="https://exemplo.com/imagem.jpg"
-                />
-              </div>
-
-              <!-- Preview da Imagem -->
-              <div v-if="noticiaForm.urlImagem" class="image-preview">
-                <img :src="noticiaForm.urlImagem" alt="Preview" @error="imagemComErro = true" />
-                <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
-              </div>
-            </div>
-
-            <!-- Formulário NOTÍCIA -->
-            <div v-else class="form-section">
-              <h3>📝 Dados da Notícia</h3>
-              
-              <div class="form-group">
-                <label for="nomeNoticia">Nome da Notícia *</label>
-                <input 
-                  id="nomeNoticia"
-                  v-model="noticiaForm.nomeNoticia" 
-                  type="text"
-                  placeholder="Ex: Novo Centro de Adoção Inaugurado"
-                  required
-                  maxlength="100"
-                />
-                <small>{{ noticiaForm.nomeNoticia?.length || 0 }}/100 caracteres</small>
-              </div>
-
-              <div class="form-group">
-                <label for="resumo">Resumo *</label>
-                <textarea 
-                  id="resumo"
-                  v-model="noticiaForm.resumo" 
-                  placeholder="Escreva um resumo da notícia"
-                  rows="4"
-                  maxlength="500"
-                  required
-                ></textarea>
-                <small>{{ noticiaForm.resumo?.length || 0 }}/500 caracteres</small>
-              </div>
-
-              <div class="form-group">
-                <label for="urlImagemNoticia">URL da Imagem *</label>
-                <input 
-                  id="urlImagemNoticia"
-                  v-model="noticiaForm.urlImagemNoticia" 
-                  type="url"
-                  placeholder="https://exemplo.com/imagem.jpg"
-                  required
-                />
-              </div>
-
-              <!-- Preview da Imagem -->
-              <div v-if="noticiaForm.urlImagemNoticia" class="image-preview">
-                <img :src="noticiaForm.urlImagemNoticia" alt="Preview" @error="imagemComErro = true" />
-                <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
-              </div>
-            </div>
-
-            <!-- Informações Adicionais -->
-            <div class="form-section">
-              <h3>ℹ️ Informações Adicionais</h3>
-              
-              <div class="form-row">
-                <div class="form-group">
-                  <label for="autor">Autor</label>
-                  <input 
-                    id="autor"
-                    v-model="noticiaForm.autor" 
+                    id="nomeCampanha"
+                    v-model="noticiaForm.nomeCampanha" 
                     type="text"
-                    placeholder="Nome do autor"
+                    placeholder="Ex: Vacinação Antirrábica 2025"
+                    required
+                    maxlength="100"
+                  />
+                  <small>{{ noticiaForm.nomeCampanha?.length || 0 }}/100 caracteres</small>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="dataInicioCampanha">Data Início *</label>
+                    <input 
+                      id="dataInicioCampanha"
+                      v-model="noticiaForm.dataInicioCampanha" 
+                      type="date"
+                      required
+                    />
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="dataFimCampanha">Data Fim *</label>
+                    <input 
+                      id="dataFimCampanha"
+                      v-model="noticiaForm.dataFimCampanha" 
+                      type="date"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="horarioCampanha">Horário da Campanha *</label>
+                  <input 
+                    id="horarioCampanha"
+                    v-model="noticiaForm.horarioCampanha" 
+                    type="text"
+                    placeholder="Ex: 08:00 às 17:00"
+                    required
                   />
                 </div>
-                
+
                 <div class="form-group">
-                  <label for="status">Status</label>
-                  <select id="status" v-model="noticiaForm.status">
-                    <option value="ativo">✅ Ativo</option>
-                    <option value="rascunho">📝 Rascunho</option>
-                    <option value="arquivado">📦 Arquivado</option>
-                  </select>
+                  <label for="urlImagem">URL da Imagem</label>
+                  <input 
+                    id="urlImagem"
+                    v-model="noticiaForm.urlImagem" 
+                    type="url"
+                    placeholder="https://exemplo.com/imagem.jpg"
+                  />
+                </div>
+
+                <!-- Preview da Imagem -->
+                <div v-if="noticiaForm.urlImagem" class="image-preview">
+                  <img :src="noticiaForm.urlImagem" alt="Preview" @error="imagemComErro = true" />
+                  <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
                 </div>
               </div>
-            </div>
 
-            <!-- Actions -->
-            <div class="modal-actions">
-              <button type="button" @click="fecharModal" class="btn-secondary">
-                Cancelar
-              </button>
-              <button @click="salvarNoticia" class="btn-primary" :disabled="salvando">
-                {{ salvando ? 'Salvando...' : (modoEdicao ? 'Salvar Alterações' : 'Criar Item') }}
-              </button>
+              <!-- Formulário NOTÍCIA -->
+              <div v-else class="form-section">
+                <h3>📝 Dados da Notícia</h3>
+                
+                <div class="form-group">
+                  <label for="nomeNoticia">Nome da Notícia *</label>
+                  <input 
+                    id="nomeNoticia"
+                    v-model="noticiaForm.nomeNoticia" 
+                    type="text"
+                    placeholder="Ex: Novo Centro de Adoção Inaugurado"
+                    required
+                    maxlength="100"
+                  />
+                  <small>{{ noticiaForm.nomeNoticia?.length || 0 }}/100 caracteres</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="resumo">Resumo *</label>
+                  <textarea 
+                    id="resumo"
+                    v-model="noticiaForm.resumo" 
+                    placeholder="Escreva um resumo da notícia"
+                    rows="4"
+                    maxlength="500"
+                    required
+                  ></textarea>
+                  <small>{{ noticiaForm.resumo?.length || 0 }}/500 caracteres</small>
+                </div>
+
+                <div class="form-group">
+                  <label for="urlImagemNoticia">URL da Imagem *</label>
+                  <input 
+                    id="urlImagemNoticia"
+                    v-model="noticiaForm.urlImagemNoticia" 
+                    type="url"
+                    placeholder="https://exemplo.com/imagem.jpg"
+                    required
+                  />
+                </div>
+
+                <!-- Preview da Imagem -->
+                <div v-if="noticiaForm.urlImagemNoticia" class="image-preview">
+                  <img :src="noticiaForm.urlImagemNoticia" alt="Preview" @error="imagemComErro = true" />
+                  <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
+                </div>
+              </div>
+
+              <!-- Informações Adicionais -->
+              <div class="form-section">
+                <h3>ℹ️ Informações Adicionais</h3>
+                
+                <div class="form-row">
+                  <div class="form-group">
+                    <label for="autor">Autor</label>
+                    <input 
+                      id="autor"
+                      v-model="noticiaForm.autor" 
+                      type="text"
+                      placeholder="Nome do autor"
+                    />
+                  </div>
+                  
+                  <div class="form-group">
+                    <label for="status">Status</label>
+                    <select id="status" v-model="noticiaForm.status">
+                      <option value="ativo">✅ Ativo</option>
+                      <option value="rascunho">📝 Rascunho</option>
+                      <option value="arquivado">📦 Arquivado</option>
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Actions -->
+              <div class="modal-actions">
+                <div class="modal-actions-left">
+                  <button 
+                    v-if="modoEdicao" 
+                    type="button" 
+                    @click="excluirDoModal" 
+                    class="btn-danger"
+                  >
+                    🗑️ Excluir
+                  </button>
+                </div>
+                <div class="modal-actions-right">
+                  <button type="button" @click="fecharModal" class="btn-secondary">
+                    Cancelar
+                  </button>
+                  <button @click="salvarNoticia" class="btn-primary" :disabled="salvando">
+                    <span v-if="salvando" class="spinner-small"></span>
+                    {{ salvando ? 'Salvando...' : (modoEdicao ? 'Salvar Alterações' : 'Criar Item') }}
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </transition>
     </teleport>
 
     <!-- Modal de Confirmação de Exclusão -->
     <teleport to="body">
-      <div v-if="modalExclusao.aberto" class="modal-overlay" @click="cancelarExclusao">
-        <div class="modal-content modal-small" @click.stop>
-          <div class="modal-header">
-            <h2>🗑️ Confirmar Exclusão</h2>
-          </div>
-          
-          <div class="modal-body">
-            <p>Tem certeza que deseja excluir permanentemente:</p>
-            <strong>"{{ getTitulo(modalExclusao.noticia) }}"</strong>
-            <p class="warning-text">⚠️ Esta ação não pode ser desfeita!</p>
-          </div>
-          
-          <div class="modal-actions">
-            <button @click="cancelarExclusao" class="btn-secondary">
-              Cancelar
-            </button>
-            <button @click="confirmarExclusaoFinal" class="btn-danger">
-              Sim, Excluir
-            </button>
+      <transition name="modal">
+        <div v-if="modalExclusao.aberto" class="modal-overlay" @click="cancelarExclusao">
+          <div class="modal-content modal-small" @click.stop>
+            <div class="modal-header">
+              <h2>🗑️ Confirmar Exclusão</h2>
+            </div>
+            
+            <div class="modal-body">
+              <p>Tem certeza que deseja excluir permanentemente:</p>
+              <strong class="item-destaque">"{{ getTitulo(modalExclusao.noticia) }}"</strong>
+              <p class="warning-text">⚠️ Esta ação não pode ser desfeita!</p>
+            </div>
+            
+            <div class="modal-actions">
+              <button @click="cancelarExclusao" class="btn-secondary">
+                Cancelar
+              </button>
+              <button @click="confirmarExclusaoFinal" class="btn-danger" :disabled="excluindo">
+                <span v-if="excluindo" class="spinner-small"></span>
+                {{ excluindo ? 'Excluindo...' : 'Sim, Excluir' }}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      </transition>
     </teleport>
   </div>
 </template>
@@ -439,8 +478,16 @@ const modalAberto = ref(false)
 const modoEdicao = ref(false)
 const noticiaEditandoId = ref(null)
 const salvando = ref(false)
+const excluindo = ref(false)
 const imagemComErro = ref(false)
 const menuAberto = ref(null)
+
+// Toast notification
+const toast = ref({
+  mostrar: false,
+  tipo: 'success',
+  mensagem: ''
+})
 
 // Estados de filtro
 const filtros = ref({
@@ -458,17 +505,14 @@ const modalExclusao = ref({
 // Form da notícia
 const noticiaForm = ref({
   tipo: 'campanha',
-  // Campos Campanha
   nomeCampanha: '',
   dataInicioCampanha: '',
   dataFimCampanha: '',
   horarioCampanha: '',
   urlImagem: '',
-  // Campos Notícia
   nomeNoticia: '',
   urlImagemNoticia: '',
   resumo: '',
-  // Comuns
   autor: 'Administrador',
   status: 'ativo',
   dataPublicacao: new Date().toISOString().split('T')[0]
@@ -486,7 +530,6 @@ const noticiasGerais = computed(() =>
 const noticiasFiltradas = computed(() => {
   let resultado = [...noticias.value]
   
-  // Filtro por busca
   if (filtros.value.busca.trim()) {
     const termo = filtros.value.busca.toLowerCase()
     resultado = resultado.filter(n => {
@@ -497,12 +540,10 @@ const noticiasFiltradas = computed(() => {
     })
   }
   
-  // Filtro por tipo
   if (filtros.value.tipo) {
     resultado = resultado.filter(n => (n.tipo || 'noticia') === filtros.value.tipo)
   }
   
-  // Filtro por status
   if (filtros.value.status) {
     resultado = resultado.filter(n => (n.status || 'ativo') === filtros.value.status)
   }
@@ -515,6 +556,13 @@ const temFiltrosAtivos = computed(() =>
 )
 
 // Métodos
+function mostrarToast(tipo, mensagem) {
+  toast.value = { mostrar: true, tipo, mensagem }
+  setTimeout(() => {
+    toast.value.mostrar = false
+  }, 3000)
+}
+
 function resetarForm() {
   noticiaForm.value = {
     tipo: 'campanha',
@@ -538,7 +586,6 @@ function resetarForm() {
 function abrirModalNoticia(noticia = null) {
   if (noticia) {
     noticiaForm.value = JSON.parse(JSON.stringify(noticia))
-    // Garantir que tem o tipo
     if (!noticiaForm.value.tipo) {
       noticiaForm.value.tipo = 'noticia'
     }
@@ -559,27 +606,24 @@ async function salvarNoticia() {
   try {
     salvando.value = true
     
-    // Preparar dados conforme o tipo
     const dadosParaSalvar = {
       ...noticiaForm.value,
       dataPublicacao: noticiaForm.value.dataPublicacao || new Date().toISOString().split('T')[0]
     }
     
     if (modoEdicao.value) {
-      if (!confirm('⚠️ ATENÇÃO: O backend não suporta edição. As alterações serão salvas apenas localmente e serão perdidas ao recarregar a página. Deseja continuar?')) {
-        salvando.value = false
-        return
-      }
       await editarNoticiaData(noticiaEditandoId.value, dadosParaSalvar)
+      mostrarToast('success', '✅ Item atualizado com sucesso!')
     } else {
       await adicionarNoticia(dadosParaSalvar)
+      mostrarToast('success', '✅ Item criado com sucesso!')
     }
     
     fecharModal()
     
   } catch (error) {
     console.error('Erro ao salvar:', error)
-    alert('Erro ao salvar: ' + error.message)
+    mostrarToast('error', '❌ ' + error.message)
   } finally {
     salvando.value = false
   }
@@ -592,11 +636,8 @@ function editarNoticia(noticia) {
 
 function duplicarNoticia(noticia) {
   menuAberto.value = null
-  const noticiaClone = { 
-    ...noticia
-  }
+  const noticiaClone = { ...noticia }
   
-  // Ajustar título conforme o tipo
   if (noticia.tipo === 'campanha') {
     noticiaClone.nomeCampanha = `${noticia.nomeCampanha} (Cópia)`
   } else {
@@ -611,37 +652,42 @@ async function alterarStatus(id, novoStatus) {
   try {
     await alterarStatusNoticia(id, novoStatus)
     menuAberto.value = null
+    mostrarToast('success', `✅ Status alterado para ${novoStatus}`)
   } catch (error) {
     console.error('Erro ao alterar status:', error)
+    mostrarToast('error', '❌ ' + error.message)
   }
 }
 
 function confirmarExclusao(noticia) {
-  modalExclusao.value = {
-    aberto: true,
-    noticia
-  }
+  modalExclusao.value = { aberto: true, noticia }
   menuAberto.value = null
 }
 
-function cancelarExclusao() {
-  modalExclusao.value = {
-    aberto: false,
-    noticia: null
+function excluirDoModal() {
+  const noticiaAtual = {
+    id: noticiaEditandoId.value,
+    ...noticiaForm.value
   }
+  fecharModal()
+  confirmarExclusao(noticiaAtual)
+}
+
+function cancelarExclusao() {
+  modalExclusao.value = { aberto: false, noticia: null }
 }
 
 async function confirmarExclusaoFinal() {
   try {
-    if (!confirm('⚠️ ATENÇÃO: O backend não suporta exclusão. O item será removido apenas localmente e reaparecerá ao recarregar a página. Deseja continuar?')) {
-      return
-    }
-    
+    excluindo.value = true
     await removerNoticiaPorId(modalExclusao.value.noticia.id)
+    mostrarToast('success', '✅ Item excluído com sucesso!')
     cancelarExclusao()
   } catch (error) {
     console.error('Erro ao excluir:', error)
-    alert('Erro ao excluir: ' + error.message)
+    mostrarToast('error', '❌ ' + error.message)
+  } finally {
+    excluindo.value = false
   }
 }
 
@@ -653,13 +699,8 @@ function aplicarFiltros() {
   menuAberto.value = null
 }
 
-// Utility functions
 function getTipoLabel(tipo) {
-  const labels = {
-    campanha: '📢 Campanha',
-    noticia: '📝 Notícia'
-  }
-  return labels[tipo] || '📝 Notícia'
+  return tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia'
 }
 
 function getStatusLabel(status) {
@@ -673,18 +714,16 @@ function getStatusLabel(status) {
 
 function getTitulo(noticia) {
   if (!noticia) return ''
-  if (noticia.tipo === 'campanha') {
-    return noticia.nomeCampanha || noticia.titulo || 'Sem título'
-  }
-  return noticia.nomeNoticia || noticia.titulo || 'Sem título'
+  return noticia.tipo === 'campanha' 
+    ? (noticia.nomeCampanha || noticia.titulo || 'Sem título')
+    : (noticia.nomeNoticia || noticia.titulo || 'Sem título')
 }
 
 function getImagem(noticia) {
   if (!noticia) return ''
-  if (noticia.tipo === 'campanha') {
-    return noticia.urlImagem || noticia.imagem
-  }
-  return noticia.urlImagemNoticia || noticia.imagem
+  return noticia.tipo === 'campanha'
+    ? (noticia.urlImagem || noticia.imagem)
+    : (noticia.urlImagemNoticia || noticia.imagem)
 }
 
 function cortarTexto(texto, limite) {
@@ -694,7 +733,21 @@ function cortarTexto(texto, limite) {
 
 function formatarData(dataISO) {
   if (!dataISO) return 'Data não definida'
-  return new Date(dataISO).toLocaleDateString('pt-BR')
+  try {
+    return new Date(dataISO).toLocaleDateString('pt-BR')
+  } catch {
+    return 'Data inválida'
+  }
+}
+
+function formatarDataSimples(data) {
+  if (!data) return ''
+  try {
+    const [ano, mes, dia] = data.split('-')
+    return `${dia}/${mes}/${ano}`
+  } catch {
+    return data
+  }
 }
 
 // Lifecycle
@@ -709,7 +762,7 @@ onMounted(() => {
 <style scoped>
 .admin-dashboard {
   min-height: 100vh;
-    background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
@@ -775,20 +828,52 @@ onMounted(() => {
   letter-spacing: 0.5px;
 }
 
-
-
-.warning-content {
-  max-width: 1200px;
-  margin: 0 auto;
+/* Toast Notifications */
+.toast {
+  position: fixed;
+  top: 2rem;
+  right: 2rem;
+  background: white;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
   display: flex;
   align-items: center;
-  gap: 1rem;
-  color: #92400e;
+  gap: 0.75rem;
+  z-index: 1000;
+  min-width: 300px;
+  border-left: 4px solid;
 }
 
-.warning-icon {
+.toast.success {
+  border-left-color: #10b981;
+}
+
+.toast.error {
+  border-left-color: #ef4444;
+}
+
+.toast-icon {
   font-size: 1.5rem;
-  flex-shrink: 0;
+}
+
+.toast-message {
+  font-weight: 500;
+  color: #374151;
+}
+
+.toast-enter-active, .toast-leave-active {
+  transition: all 0.3s ease;
+}
+
+.toast-enter-from {
+  transform: translateX(100%);
+  opacity: 0;
+}
+
+.toast-leave-to {
+  transform: translateX(100%);
+  opacity: 0;
 }
 
 .controls-section {
@@ -821,8 +906,7 @@ onMounted(() => {
 .search-input:focus {
   outline: none;
   border-color: #3b82f6;
-      background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
-
+  background: white;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -838,6 +922,18 @@ onMounted(() => {
   background: white;
   font-size: 0.9rem;
   min-width: 150px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.filter-select:hover {
+  border-color: #cbd5e1;
+}
+
+.filter-select:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .btn-add {
@@ -863,6 +959,17 @@ onMounted(() => {
   margin: 0 auto 1rem;
 }
 
+.spinner-small {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top: 2px solid white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
@@ -885,6 +992,10 @@ onMounted(() => {
   color: #dc2626;
 }
 
+.error-icon {
+  font-size: 1.5rem;
+}
+
 .noticias-grid {
   max-width: 1200px;
   margin: 0 auto;
@@ -904,8 +1015,8 @@ onMounted(() => {
 }
 
 .noticia-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  transform: translateY(-4px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
 }
 
 .noticia-card.status-rascunho {
@@ -934,7 +1045,7 @@ onMounted(() => {
 .badge {
   padding: 0.3rem 0.85rem;
   border-radius: 20px;
-  font-size: 0.813rem;
+  font-size: 0.75rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
@@ -968,11 +1079,12 @@ onMounted(() => {
 .btn-menu {
   background: none;
   border: none;
-  padding: 0.25rem;
-  border-radius: 4px;
+  padding: 0.5rem;
+  border-radius: 8px;
   cursor: pointer;
   color: #64748b;
-  position: relative;
+  font-size: 1.25rem;
+  transition: all 0.2s;
 }
 
 .btn-menu:hover {
@@ -990,21 +1102,26 @@ onMounted(() => {
   right: 0;
   background: white;
   border: 1px solid #e2e8f0;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  min-width: 150px;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+  min-width: 160px;
   z-index: 10;
+  overflow: hidden;
 }
 
 .dropdown-menu button {
   width: 100%;
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   border: none;
   background: none;
   text-align: left;
   cursor: pointer;
   font-size: 0.875rem;
   color: #374151;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: background 0.2s;
 }
 
 .dropdown-menu button:hover {
@@ -1025,6 +1142,11 @@ onMounted(() => {
   border-top: 1px solid #e5e7eb;
 }
 
+.menu-icon {
+  width: 20px;
+  text-align: center;
+}
+
 .card-content {
   padding: 1rem;
 }
@@ -1033,7 +1155,7 @@ onMounted(() => {
   font-size: 1.25rem;
   font-weight: 600;
   color: #1e293b;
-  margin: 0 0 0.5rem 0;
+  margin: 0 0 0.75rem 0;
   line-height: 1.4;
 }
 
@@ -1045,22 +1167,27 @@ onMounted(() => {
 }
 
 .card-image {
-  margin: 1rem 0;
+  margin: 1rem 0 0 0;
   border-radius: 8px;
   overflow: hidden;
 }
 
 .card-image img {
   width: 100%;
-  height: 150px;
+  height: 180px;
   object-fit: cover;
+  transition: transform 0.3s;
+}
+
+.noticia-card:hover .card-image img {
+  transform: scale(1.05);
 }
 
 .card-details {
   background: #f8fafc;
   padding: 0.75rem;
   border-radius: 8px;
-  margin: 1rem 0;
+  margin: 0.75rem 0;
 }
 
 .campanha-details {
@@ -1072,8 +1199,8 @@ onMounted(() => {
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  margin-bottom: 0.25rem;
-  font-size: 0.938rem;
+  margin-bottom: 0.5rem;
+  font-size: 0.875rem;
   color: #475569;
 }
 
@@ -1082,7 +1209,7 @@ onMounted(() => {
 }
 
 .detail-icon {
-  width: 16px;
+  width: 20px;
   text-align: center;
 }
 
@@ -1092,6 +1219,7 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  gap: 1rem;
 }
 
 .card-meta {
@@ -1099,6 +1227,7 @@ onMounted(() => {
   gap: 1rem;
   font-size: 0.813rem;
   color: #64748b;
+  flex-wrap: wrap;
 }
 
 .meta-item {
@@ -1107,15 +1236,13 @@ onMounted(() => {
   gap: 0.25rem;
 }
 
-.card-actions {
-  display: flex;
-  gap: 0.4rem;
+.meta-icon {
+  width: 16px;
 }
 
-.card-actions .btn-sm {
-  padding: 0.35rem 0.65rem;
-  font-size: 0.75rem;
-  min-width: auto;
+.card-actions {
+  display: flex;
+  gap: 0.5rem;
 }
 
 .empty-state {
@@ -1133,6 +1260,7 @@ onMounted(() => {
   font-size: 4rem;
   display: block;
   margin-bottom: 1rem;
+  opacity: 0.5;
 }
 
 .empty-content h3 {
@@ -1157,6 +1285,7 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
+  font-size: 0.938rem;
 }
 
 .btn-primary {
@@ -1164,9 +1293,10 @@ onMounted(() => {
   color: white;
 }
 
-.btn-primary:hover {
+.btn-primary:hover:not(:disabled) {
   background: #2563eb;
-  transform: translateY(-1px);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
 }
 
 .btn-primary:disabled {
@@ -1184,6 +1314,7 @@ onMounted(() => {
 
 .btn-secondary:hover {
   background: #e2e8f0;
+  border-color: #cbd5e1;
 }
 
 .btn-danger {
@@ -1191,12 +1322,18 @@ onMounted(() => {
   color: white;
 }
 
-.btn-danger:hover {
+.btn-danger:hover:not(:disabled) {
   background: #b91c1c;
+  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
+}
+
+.btn-danger:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
 }
 
 .btn-sm {
-  padding: 0.4rem 0.75rem;
+  padding: 0.5rem 1rem;
   font-size: 0.813rem;
   white-space: nowrap;
 }
@@ -1205,10 +1342,10 @@ onMounted(() => {
   background: none;
   color: #6b7280;
   padding: 0.5rem;
-  font-size: 1.25rem;
+  font-size: 1.5rem;
   border-radius: 50%;
-  width: 2rem;
-  height: 2rem;
+  width: 2.5rem;
+  height: 2.5rem;
 }
 
 .btn-close:hover {
@@ -1228,6 +1365,7 @@ onMounted(() => {
   justify-content: center;
   z-index: 50;
   padding: 1rem;
+  backdrop-filter: blur(2px);
 }
 
 .modal-content {
@@ -1241,7 +1379,7 @@ onMounted(() => {
 }
 
 .modal-small {
-  max-width: 400px;
+  max-width: 450px;
 }
 
 .modal-header {
@@ -1250,6 +1388,10 @@ onMounted(() => {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
 }
 
 .modal-header h2 {
@@ -1266,8 +1408,35 @@ onMounted(() => {
   padding: 1.5rem 2rem;
   border-top: 1px solid #e5e7eb;
   display: flex;
-  justify-content: flex-end;
+  justify-content: space-between;
+  align-items: center;
   gap: 1rem;
+  position: sticky;
+  bottom: 0;
+  background: white;
+}
+
+.modal-actions-left {
+  flex: 0;
+}
+
+.modal-actions-right {
+  display: flex;
+  gap: 1rem;
+  margin-left: auto;
+}
+
+.modal-enter-active, .modal-leave-active {
+  transition: all 0.3s ease;
+}
+
+.modal-enter-from, .modal-leave-to {
+  opacity: 0;
+}
+
+.modal-enter-from .modal-content,
+.modal-leave-to .modal-content {
+  transform: scale(0.9) translateY(20px);
 }
 
 .form-section {
@@ -1279,7 +1448,10 @@ onMounted(() => {
   font-size: 1.125rem;
   color: #374151;
   padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 2px solid #e5e7eb;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .form-row {
@@ -1309,9 +1481,10 @@ onMounted(() => {
   border: 2px solid #e5e7eb;
   border-radius: 8px;
   font-size: 1rem;
-  transition: border-color 0.2s;
+  transition: all 0.2s;
   width: 100%;
   box-sizing: border-box;
+  font-family: inherit;
 }
 
 .form-group input:focus,
@@ -1320,6 +1493,11 @@ onMounted(() => {
   outline: none;
   border-color: #3b82f6;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-group textarea {
+  resize: vertical;
+  min-height: 100px;
 }
 
 .form-group small {
@@ -1369,12 +1547,12 @@ onMounted(() => {
   margin: 1rem 0;
   border-radius: 8px;
   overflow: hidden;
-  border: 1px solid #e5e7eb;
+  border: 2px solid #e5e7eb;
 }
 
 .image-preview img {
   width: 100%;
-  height: 200px;
+  height: 250px;
   object-fit: cover;
 }
 
@@ -1383,12 +1561,29 @@ onMounted(() => {
   font-size: 0.875rem;
   margin: 0.5rem 0;
   text-align: center;
+  padding: 0.5rem;
+  background: #fef2f2;
+  border-radius: 6px;
 }
 
 .warning-text {
   color: #d97706;
-  font-size: 0.875rem;
+  font-size: 0.938rem;
   margin: 1rem 0;
+  padding: 0.75rem;
+  background: #fef3c7;
+  border-radius: 8px;
+  text-align: center;
+}
+
+.item-destaque {
+  display: block;
+  color: #1f2937;
+  margin: 1rem 0;
+  padding: 0.75rem;
+  background: #f3f4f6;
+  border-radius: 8px;
+  font-size: 1.125rem;
 }
 
 @media (max-width: 768px) {
@@ -1400,14 +1595,6 @@ onMounted(() => {
 
   .header-stats {
     justify-content: center;
-  }
-
-  .warning-banner {
-    padding: 1rem;
-  }
-
-  .warning-content {
-    font-size: 0.875rem;
   }
 
   .search-filters {
@@ -1439,6 +1626,46 @@ onMounted(() => {
     padding: 1rem;
   }
 
+  .modal-actions {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .modal-actions-left,
+  .modal-actions-right {
+    width: 100%;
+  }
+
+  .modal-actions-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+
+  .modal-actions {
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .modal-actions-left,
+  .modal-actions-right {
+    width: 100%;
+  }
+
+  .modal-actions-right {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  .modal-actions button {
+    width: 100%;
+  }
+
   .card-footer {
     flex-direction: column;
     gap: 1rem;
@@ -1460,6 +1687,12 @@ onMounted(() => {
   .radio-label {
     min-width: auto;
   }
+
+  .toast {
+    right: 1rem;
+    left: 1rem;
+    min-width: auto;
+  }
 }
 
 @media (max-width: 480px) {
@@ -1473,6 +1706,23 @@ onMounted(() => {
 
   .btn-add span {
     display: none;
+  }
+
+  .dashboard-header h1 {
+    font-size: 1.5rem;
+  }
+
+  .stat-item {
+    min-width: 70px;
+    padding: 0.5rem 0.75rem;
+  }
+
+  .stat-number {
+    font-size: 1.25rem;
+  }
+
+  .header-stats {
+    gap: 1rem;
   }
 }
 </style>

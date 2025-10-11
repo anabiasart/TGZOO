@@ -57,10 +57,10 @@
           </div>
 
           <!-- Conteúdo -->
-          <div class="card-content">
-            <h3>{{ getTitulo(noticia) }}</h3>
-            <p class="resumo">{{ cortarTexto(noticia.resumo, 120) }}</p>
-          </div>
+         <div class="card-content">
+  <h3>{{ getTitulo(noticia) }}</h3>
+  <p class="resumo">{{ noticia.resumo }}</p>
+</div>
 
           <!-- Footer -->
           <div class="card-footer">
@@ -70,14 +70,11 @@
                 {{ noticia.autor || 'Sistema' }}
               </span>
               <span class="meta-item">
-                <span class="icon">📅</span>
+                <span class="icon">📅</span>  
                 {{ formatarData(noticia.dataPublicacao) }}
               </span>
             </div>
             
-            <button class="btn-ver-mais">
-              Ver detalhes →
-            </button>
           </div>
         </article>
       </div>
@@ -241,32 +238,36 @@ function aplicarFiltros() {
 }
 
 .noticias-container {
-  max-width: 1400px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 0 2rem 4rem;
+  padding: 0 0rem 20rem;
 }
-
 .noticias-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(550px, 1fr));
+  gap:2rem;
 }
 
 .noticia-card {
   background: white;
-  border-radius: 20px;
+  border-radius: 10px;
   overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 8px rgba(0,0,0,0.08);
   transition: all 0.3s ease;
   cursor: pointer;
   position: relative;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-column: auto;
+  height: 100%;
+  border: 1px solid transparent;
+
 }
 
 .noticia-card:hover {
   transform: translateY(-4px);
   box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+    border-color: #0ea5e9;
+
 }
 
 .card-badge {
@@ -277,24 +278,23 @@ function aplicarFiltros() {
 }
 
 .badge-noticia {
-  padding: 6px 14px;
+  padding: 6px 34px;
   border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: rgba(249, 115, 22, 0.95);
-  color: white;
+  font-size: 0.999rem;
+  font-weight: 500;
+  background: linear-gradient(135deg, #b0d5ff, #6488ff, #93c5fd); 
+  color: rgb(235, 235, 235);
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
-
 .card-image {
-  height: 200px;
+  height: 300px;
   overflow: hidden;
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #dbeafe, #bfdbfe);
 }
 
 .card-image img {
-  width: 100%;
+  width: 1000%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.4s ease;
@@ -305,79 +305,71 @@ function aplicarFiltros() {
 }
 
 .card-content {
-  padding: 1.5rem;
-  flex: 1;
+  padding: 0.999rem;
+  flex:1;
 }
 
 .card-content h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 450;
   color: #1e293b;
-  margin: 0 0 0.75rem 0;
-  line-height: 1.4;
+  margin: 0 0 1rem 0;
+  line-height: 1;
 }
+
 
 .resumo {
   color: #64748b;
-  line-height: 1.6;
-  margin: 0;
-  font-size: 0.938rem;
+  line-height: 1;
+  font-size: 1.5rem;
 }
 
 .card-footer {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #f1f5f9;
+  padding: 1rem 2rem;
+  border-top: 1px solid #a5d2ff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #f8fafc;
+  background: #feffff;
 }
 
 .meta-info {
   display: flex;
   gap: 1rem;
-  font-size: 0.813rem;
+  font-size: 0.8rem;
   color: #94a3b8;
 }
 
 .meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-weight: 500;
+  display:flex;
+  align-items:normal;
+  gap: 1rem;
+  font-size: 1.1rem;
+  font-weight: 350;
+   margin:0;
+  
 }
 
-.btn-ver-mais {
-  background: #f97316;
-  color: white;
-  border: none;
-  padding: 0.5rem 1.25rem;
-  border-radius: 20px;
-  font-size: 0.813rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.2s;
+.meta-item .icon{
+  width:25px;
+  text-align: flex;
 }
 
-.btn-ver-mais:hover {
-  background: #ea580c;
-  transform: translateX(3px);
-}
 
 .empty-state {
   text-align: center;
-  padding: 4rem 2rem;
-  grid-column: 1 / -1;
+  padding: 4rem 1rem;
+  grid-column:auto;
 }
 
 .empty-icon {
-  font-size: 4rem;
+  font-size: 1rem;
   display: block;
-  margin-bottom: 1rem;
+  margin-bottom: 13rem;
 }
 
 .empty-state h3 {
-  font-size: 1.5rem;
+  font-size: 6.5rem;
   color: #374151;
   margin: 0 0 0.5rem 0;
 }

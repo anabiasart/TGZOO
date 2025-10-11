@@ -245,15 +245,15 @@ function aplicarFiltros() {
 }
 
 .campanhas-container {
-  max-width: 1400px;
+  max-width: 1000px;
   margin: 0 auto;
-  padding: 0 2rem 4rem;
+  padding: 0 0rem 20rem;
 }
 
 .campanhas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(470px, 1fr));
+  gap:2rem;
 }
 
 .campanha-card {
@@ -266,6 +266,8 @@ function aplicarFiltros() {
   position: relative;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
+  height: 100%;
   border: 2px solid transparent;
 }
 
@@ -283,12 +285,12 @@ function aplicarFiltros() {
 }
 
 .badge-campanha {
-  padding: 6px 14px;
+  padding: 6px 34px;
   border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  background: rgba(14, 165, 233, 0.95);
-  color: white;
+  font-size: 0.999rem;
+  font-weight: 500;
+   background: linear-gradient(135deg, #b0d5ff, #6488ff, #93c5fd); 
+  color: rgb(235, 235, 235);
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
@@ -311,47 +313,43 @@ function aplicarFiltros() {
 }
 
 .card-content {
-  padding: 1.5rem;
-  flex: 1;
+  padding:0.999rem;
+  flex:0.9rem;
 }
 
 .card-content h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
+  font-size: 2rem;
+  font-weight: 450;
   color: #1e293b;
-  margin: 0 0 1rem 0;
-  line-height: 1.4;
+  margin: 0 0 2rem 0;
+  line-height: 1;
 }
 
 .campanha-info {
   background: linear-gradient(135deg, #dbeafe, #bfdbfe);
   padding: 1rem;
-  border-radius: 12px;
-  border: 1px solid #93c5fd;
+  border-radius: 10px;
+  border: 0px solid #93c5fd;
 }
 
 .info-item {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  align-items: left;
+  gap: 0.3rem;
+  margin-bottom: 0.2rem;
+  font-size: 1.558rem;
   color: #1e40af;
-  font-weight: 500;
+  font-weight: 600;
 }
 
 .info-item:last-child {
-  margin-bottom: 0;
+  margin-bottom: 10px;
 }
 
-.info-item .icon {
-  width: 18px;
-  text-align: center;
-}
 
 .card-footer {
-  padding: 1rem 1.5rem;
-  border-top: 1px solid #f1f5f9;
+  padding: 1rem 2rem;
+  border-top: 1px solid #a5d2ff;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -366,10 +364,20 @@ function aplicarFiltros() {
 }
 
 .meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-weight: 500;
+  
+  display:flex;
+  align-items:normal;
+  gap: 1rem;
+  font-size: 1.1rem;
+  font-weight: 350;
+   margin:0;
+  
+}
+
+.meta-item .icon{
+  width:25px;
+  text-align: flex;
+  flex-grow: 1;
 }
 
 .btn-ver-mais {

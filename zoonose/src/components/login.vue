@@ -348,10 +348,7 @@ const cadastrar = async () => {
     
     };
 
-    //debug
-    console.log("📤 Enviando dados de cadastro:", dadosCadastro);
-    console.log("📍 URL:", `${API_BASE_URL}/users/register`);
-    console.log("📋 CPF limpo:", cpfLimpo, "Telefone limpo:", telLimpo, "Nome:", form.name,);
+   
 
 
     

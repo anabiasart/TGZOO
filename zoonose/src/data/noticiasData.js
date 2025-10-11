@@ -16,7 +16,6 @@ const getAuthToken = () => {
 const getAuthHeaders = () => {
   const token = getAuthToken()
   console.log('🔑 Token encontrado:', token ? 'SIM ✅' : 'NÃO ❌')
-  console.log('🔑 Token completo:', token)
   
   const headers = {
     'Content-Type': 'application/json',
@@ -152,36 +151,36 @@ const mapFrontendToBackend = (frontendNews) => {
 
 export function useNoticias() {
 
-const carregarNoticias = async () => {
-  carregando.value = true
-  erro.value = null
-  
-  try {
-    // GET /news é público, não precisa de token
-    const response = await fetch(`${API_URL}?size=100&sort=createdAt,desc`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      mode: 'cors'
-    })
+  const carregarNoticias = async () => {
+    carregando.value = true
+    erro.value = null
     
-    if (!response.ok) {
-      throw new Error(`Erro HTTP: ${response.status}`)
+    try {
+      // GET /news é público, não precisa de token
+      const response = await fetch(`${API_URL}?size=100&sort=createdAt,desc`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors'
+      })
+      
+      if (!response.ok) {
+        throw new Error(`Erro HTTP: ${response.status}`)
+      }
+      
+      const data = await response.json()
+      noticias.value = data.content.map(mapBackendToFrontend)
+      
+    } catch (error) {
+      erro.value = `Erro ao carregar notícias: ${error.message}`
+      console.error('Erro ao carregar notícias:', error)
+      noticias.value = []
+    } finally {
+      carregando.value = false
     }
-    
-    const data = await response.json()
-    noticias.value = data.content.map(mapBackendToFrontend)
-    
-  } catch (error) {
-    erro.value = `Erro ao carregar notícias: ${error.message}`
-    console.error('Erro ao carregar notícias:', error)
-    noticias.value = []
-  } finally {
-    carregando.value = false
   }
-}
 
   // Adicionar nova notícia ou campanha
   const adicionarNoticia = async (noticiaForm) => {
@@ -195,6 +194,7 @@ const carregarNoticias = async () => {
       }
 
       const payload = mapFrontendToBackend(noticiaForm)
+      console.log('📤 Enviando payload:', payload)
       
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -206,40 +206,134 @@ const carregarNoticias = async () => {
       
       if (!response.ok) {
         const errorText = await response.text()
+        if (response.status === 401) {
+          throw new Error('Não autorizado. Faça login novamente.')
+        }
+        if (response.status === 403) {
+          throw new Error('Sem permissão. Apenas administradores podem criar notícias.')
+        }
         throw new Error(errorText || 'Erro ao criar item')
       }
       
       const novoItem = await response.json()
       noticias.value.unshift(mapBackendToFrontend(novoItem))
       
+      console.log('✅ Notícia criada com sucesso:', novoItem.id)
+      
     } catch (error) {
       erro.value = error.message
-      console.error('Erro ao adicionar:', error)
+      console.error('❌ Erro ao adicionar:', error)
       throw error
     } finally {
       carregando.value = false
     }
   }
 
-  // Editar notícia (apenas localmente)
+  // ✨ EDITAR notícia - AGORA COM INTEGRAÇÃO REAL
   const editarNoticia = async (id, noticiaForm) => {
-    const index = noticias.value.findIndex(n => n.id === id)
-    if (index !== -1) {
-      noticias.value[index] = {
-        ...noticias.value[index],
-        ...noticiaForm,
-        id: noticias.value[index].id,
-        dataPublicacao: noticias.value[index].dataPublicacao
+    carregando.value = true
+    erro.value = null
+    
+    try {
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Você precisa estar autenticado como administrador')
       }
+
+      const payload = mapFrontendToBackend(noticiaForm)
+      console.log('📝 Editando notícia ID:', id)
+      console.log('📤 Enviando payload:', payload)
+      
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'PUT',
+        headers: getAuthHeaders(),
+        mode: 'cors',
+        credentials: 'include',
+        body: JSON.stringify(payload)
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        if (response.status === 401) {
+          throw new Error('Não autorizado. Faça login novamente.')
+        }
+        if (response.status === 403) {
+          throw new Error('Sem permissão. Apenas administradores podem editar notícias.')
+        }
+        if (response.status === 404) {
+          throw new Error('Notícia não encontrada.')
+        }
+        throw new Error(errorText || 'Erro ao atualizar item')
+      }
+      
+      const itemAtualizado = await response.json()
+      
+      // Atualizar na lista local
+      const index = noticias.value.findIndex(n => n.id === id)
+      if (index !== -1) {
+        noticias.value[index] = mapBackendToFrontend(itemAtualizado)
+      }
+      
+      console.log('✅ Notícia atualizada com sucesso:', id)
+      
+    } catch (error) {
+      erro.value = error.message
+      console.error('❌ Erro ao editar:', error)
+      throw error
+    } finally {
+      carregando.value = false
     }
   }
 
-  // Remover notícia (apenas localmente)
+  // ✨ REMOVER notícia - AGORA COM INTEGRAÇÃO REAL
   const removerNoticiaPorId = async (id) => {
-    noticias.value = noticias.value.filter(n => n.id !== id)
+    carregando.value = true
+    erro.value = null
+    
+    try {
+      const token = getAuthToken()
+      if (!token) {
+        throw new Error('Você precisa estar autenticado como administrador')
+      }
+
+      console.log('🗑️ Removendo notícia ID:', id)
+      
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'DELETE',
+        headers: getAuthHeaders(),
+        mode: 'cors',
+        credentials: 'include'
+      })
+      
+      if (!response.ok) {
+        const errorText = await response.text()
+        if (response.status === 401) {
+          throw new Error('Não autorizado. Faça login novamente.')
+        }
+        if (response.status === 403) {
+          throw new Error('Sem permissão. Apenas administradores podem excluir notícias.')
+        }
+        if (response.status === 404) {
+          throw new Error('Notícia não encontrada.')
+        }
+        throw new Error(errorText || 'Erro ao excluir item')
+      }
+      
+      // Remover da lista local
+      noticias.value = noticias.value.filter(n => n.id !== id)
+      
+      console.log('✅ Notícia removida com sucesso:', id)
+      
+    } catch (error) {
+      erro.value = error.message
+      console.error('❌ Erro ao remover:', error)
+      throw error
+    } finally {
+      carregando.value = false
+    }
   }
 
-  // Alterar status (apenas localmente)
+  // Alterar status (apenas localmente - backend não tem este campo)
   const alterarStatusNoticia = async (id, novoStatus) => {
     const index = noticias.value.findIndex(n => n.id === id)
     if (index !== -1) {
@@ -248,31 +342,31 @@ const carregarNoticias = async () => {
   }
 
   // Buscar notícia por ID
-const buscarNoticiaPorId = async (id) => {
-  try {
-    // GET /news/{id} é público também, não precisa de token
-    const response = await fetch(`${API_URL}/${id}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Accept': 'application/json'
-      },
-      mode: 'cors'
-    })
-    
-    if (!response.ok) {
-      console.error(`Erro ao buscar notícia: ${response.status}`)
+  const buscarNoticiaPorId = async (id) => {
+    try {
+      // GET /news/{id} é público também, não precisa de token
+      const response = await fetch(`${API_URL}/${id}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        mode: 'cors'
+      })
+      
+      if (!response.ok) {
+        console.error(`Erro ao buscar notícia: ${response.status}`)
+        return null
+      }
+      
+      const noticia = await response.json()
+      return mapBackendToFrontend(noticia)
+      
+    } catch (error) {
+      console.error('Erro ao buscar notícia:', error)
       return null
     }
-    
-    const noticia = await response.json()
-    return mapBackendToFrontend(noticia)
-    
-  } catch (error) {
-    console.error('Erro ao buscar notícia:', error)
-    return null
   }
-}
 
   // Limpar erro
   const limparErro = () => {
@@ -291,4 +385,4 @@ const buscarNoticiaPorId = async (id) => {
     buscarNoticiaPorId,
     limparErro
   }
-}
+} 
