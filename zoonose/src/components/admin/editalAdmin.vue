@@ -172,15 +172,11 @@
           <div class="card-meta">
             <span class="meta-item">
               <span class="meta-icon">👤</span>
-              {{ noticia.autor || getAutorNoticia(noticia) }}
+              {{ noticia.autor || 'Sistema' }}
             </span>
             <span class="meta-item">
               <span class="meta-icon">📅</span>
               {{ formatarData(noticia.dataPublicacao) }}
-            </span>
-            <span class="meta-item" v-if="noticia.createdAt">
-              <span class="meta-icon">🕐</span>
-              {{ formatarHorario(noticia.createdAt) }}
             </span>
           </div>
           
@@ -762,15 +758,15 @@ onMounted(() => {
 <style scoped>
 .admin-dashboard {
   min-height: 100vh;
-  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 .dashboard-header {
-  background: linear-gradient(135deg, #3b6e54, #a5f3fc, #81b7f6);
-  border-bottom: 1px solid #e2e8f0;
+   background: linear-gradient(150deg, white, #a5f3fc); 
+  backdrop-filter: blur(100px);
   padding: 2rem;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  border-radius: 0rem 10rem 0rem;
 }
 
 .header-content {
@@ -1624,26 +1620,6 @@ onMounted(() => {
   .modal-body,
   .modal-actions {
     padding: 1rem;
-  }
-
-  .modal-actions {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .modal-actions-left,
-  .modal-actions-right {
-    width: 100%;
-  }
-
-  .modal-actions-right {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .modal-actions button {
-    width: 100%;
   }
 
   .modal-actions {

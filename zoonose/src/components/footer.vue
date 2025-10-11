@@ -61,42 +61,45 @@ const ano = new Date().getFullYear()
 
 <style scoped>
 .footer {
-  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
   color: #333;
   padding: 2rem 1rem 1rem 1rem;
+  backdrop-filter: blur(100px);
+
   margin-top: 0; /* <- tira o buraco branco */
-  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+  box-shadow: 0 -2px 10px rgba(255, 252, 252, 0.1);
 }
 
 .footer-container {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 2rem;
-  max-width: 1200px;
+  max-width: 1100px;
   margin: 0 auto;
 }
-
-.footer-title {
-  font-size: 1.4rem;
+.footer-section p{
+  font-size: 1.1rem;
   font-weight: bold;
-  color: #0ea5e9;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.1rem;
 }
 
+
+
 .footer-subtitle {
-  font-size: 1.1rem;
-  font-weight: 600;
-  color: #059669;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #88bfff;
   margin-bottom: 0.75rem;
 }
 
 .footer-links {
   list-style: none;
-  padding: 0;
+  padding: 1;
 }
 .footer-links li {
   margin-bottom: 0.5rem;
   cursor: pointer;
+  font-size: 1.4rem;
   transition: color 0.2s ease;
 }
 .footer-links li:hover {
@@ -105,9 +108,11 @@ const ano = new Date().getFullYear()
 
 .footer-icon {
   display: inline-block;
-  width: 20px;
-  height: 20px;
+  width: 35px;
+  height: 35px;
   margin-right: 6px;
+  font-size: 2rem;
+
   color: #0ea5e9;
 }
 

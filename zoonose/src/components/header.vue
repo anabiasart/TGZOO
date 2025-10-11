@@ -73,7 +73,7 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #3b6e54, #a5f3fc, #81b7f6);
+  background: linear-gradient(135deg, #81b7f6, #a5f3fc, #81b7f6);
   color: #fff;
   padding: 0.5rem 2rem;
   font-size: 0.95rem;

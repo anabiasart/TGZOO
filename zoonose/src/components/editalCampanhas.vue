@@ -167,11 +167,11 @@ function aplicarFiltros() {
   background: #0ea5e9;
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
+  padding: 0.166rem 0.25rem 0rem;
   border-radius: 8px;
   cursor: pointer;
-  font-size: 0.9rem;
-  margin: 2rem 2rem 0;
+  font-size: 1.3rem;
+  margin-bottom: 0rem;
   transition: background 0.2s;
 }
 
@@ -180,22 +180,26 @@ function aplicarFiltros() {
 }
 
 .page-header {
-  background: white;
-  padding: 3rem 2rem;
-  text-align: center;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+   background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
+  padding: 2rem;
+  position: relative;
+  
 }
 
 .header-content h1 {
   font-size: 2.5rem;
   color: #0ea5e9;
-  margin: 0 0 1rem 0;
+  margin: 0 1rem 0rem;
+  text-align: center;
 }
 
 .header-content p {
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   color: #64748b;
   margin: 0;
+  text-align: center;
+
 }
 
 .filtros-section {
@@ -428,6 +432,8 @@ function aplicarFiltros() {
   .page-header {
     padding: 2rem 1rem;
   }
+ 
+  
   
   .header-content h1 {
     font-size: 2rem;
