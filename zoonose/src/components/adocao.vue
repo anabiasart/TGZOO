@@ -72,11 +72,7 @@
             <p class="meta">{{ selected.age }} • {{ selected.size }}</p>
             <p class="desc">{{ selected.description }}</p>
 
-            <div class="contact">
-              <h4>Contato para adoção</h4>
-              <p>Telefone: {{ selected.contact.phone }}</p>
-              <p>E‑mail: <a :href="`mailto:${selected.contact.email}`">{{ selected.contact.email }}</a></p>
-            </div>
+          
 
             <div class="modal-actions">
               <button class="btn primary" @click="confirmAdoption(selected)">Enviar pedido de adoção</button>

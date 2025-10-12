@@ -2,11 +2,10 @@
   <header class="header">
     <!-- Barra superior -->
     <div class="topbar">
-      <h1 class="painel">Painel do Administrador</h1>
       <p class="bemvindo">Bem-vindo(a), {{ usuario }}</p>
     </div>
 
-    <!-- Logo + Navegação -->
+    <!-- Logo + Navegação --> 
     <div class="navbar">
       <div class="logo">
         <h1><a href="/home">ZoonoSys</a></h1>
@@ -16,7 +15,7 @@
       <nav class="nav">
         <ul>
           <li><a href="/">Página Inicial</a></li>
-          <li><router-link to="/edital-admin">Postagens</router-link></li>
+      <li><router-link to="/edital-admin">Postagens</router-link></li>
 
           <!-- Botão para mostrar mais opções -->
           <li>
