@@ -110,12 +110,13 @@
             <span class="badge" :class="`badge-${noticia.tipo || 'noticia'}`">
               {{ getTipoLabel(noticia.tipo) }}
             </span>
+            </div>
+            <div class="card-badges-left">
             <span class="badge" :class="`badge-status-${noticia.status || 'ativo'}`">
               {{ getStatusLabel(noticia.status) }}
             </span>
           </div>
           <div class="card-menu">
-            <button @click="toggleMenuCard(noticia.id)" class="btn-menu">⋮</button>
             <div v-if="menuAberto === noticia.id" class="dropdown-menu">
               <button @click="editarNoticia(noticia)">
                 <span class="menu-icon">✏️</span>
@@ -778,7 +779,7 @@ onMounted(() => {
 }
 
 .dashboard-header h1 {
-  font-size: 2rem;
+  font-size: 2.5rem;
   font-weight: 700;
   color: #1e293b;
   display: flex;
@@ -789,12 +790,12 @@ onMounted(() => {
 
 .header-stats {
   display: flex;
-  gap: 2rem;
+  gap: 1rem;
 }
 
 .stat-item {
   text-align: center;
-  padding: 0.75rem 1rem;
+  padding: 0.9rem 2.5rem;
   background: #f1f5f9;
   border-radius: 12px;
   min-width: 80px;
@@ -812,16 +813,16 @@ onMounted(() => {
 
 .stat-number {
   display: block;
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   font-weight: 700;
 }
 
 .stat-label {
   display: block;
-  font-size: 0.75rem;
-  opacity: 0.8;
+  font-size: 0.999rem;
+  opacity: 0.9;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0px;
 }
 
 /* Toast Notifications */
@@ -887,15 +888,18 @@ onMounted(() => {
 
 .search-box {
   flex: 1;
-  min-width: 250px;
+  min-width: 150px;
+  align-items: last baseline;
+
 }
 
 .search-input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
+  border: 0px solid white;
+   background: linear-gradient(135deg, white, #bfdbfe7e);
   border-radius: 12px;
-  font-size: 1rem;
+  font-size: 1.5rem;
   transition: all 0.2s;
 }
 
@@ -908,15 +912,15 @@ onMounted(() => {
 
 .filter-group {
   display: flex;
-  gap: 0.75rem;
+  gap: 1.75rem;
 }
 
 .filter-select {
-  padding: 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
+  padding: 0.9rem 1.5rem;
+  border: 0px solid #e2e8f0;
+  border-radius: 10px;
   background: white;
-  font-size: 0.9rem;
+  font-size: 1.2rem;
   min-width: 150px;
   cursor: pointer;
   transition: all 0.2s;
@@ -928,7 +932,7 @@ onMounted(() => {
 
 .filter-select:focus {
   outline: none;
-  border-color: #3b82f6;
+  border-color: #bfdbfe;
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
@@ -993,21 +997,26 @@ onMounted(() => {
 }
 
 .noticias-grid {
-  max-width: 1200px;
+  max-width: 1300px;
   margin: 0 auto;
-  padding: 0 2rem 2rem;
+  padding: 2rem 1rem;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fill, minmax(450px, 2fr));
+  gap: 0.999rem;
 }
 
 .noticia-card {
   background: white;
-  border-radius: 16px;
-  border: 1px solid #e2e8f0;
+  border-radius: 20px;
+  border: 2px solid transparent;
   overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  height: 100%;
   transition: all 0.3s ease;
+   cursor: pointer;
   position: relative;
+  justify-content: space-between;
+
 }
 
 .noticia-card:hover {
@@ -1025,31 +1034,43 @@ onMounted(() => {
 }
 
 .card-header {
-  padding: 1rem;
+  padding: 1.2rem;
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
-  border-bottom: 1px solid #f1f5f9;
+  border-bottom: 3px solid #f1f5f9;
 }
 
 .card-badges {
-  display: flex;
-  gap: 0.5rem;
-  flex-wrap: wrap;
+  display: inline-flex;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+}
+
+
+.card-badges-left {
+  display: inline-flex;
+  position: absolute;
+  top: 12px;
+  left: 12px; 
+  z-index: 10;
 }
 
 .badge {
-  padding: 0.3rem 0.85rem;
+  padding: 3px 14px;
   border-radius: 20px;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.999rem;
+  font-weight: 400;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
 }
 
 .badge-campanha { 
-  background: #dbeafe; 
-  color: #1e40af; 
+  background: linear-gradient(135deg, #b0d5ff, #6488ff, #93c5fd); 
+  color: rgb(235, 235, 235);
 }
 
 .badge-noticia { 
@@ -1144,35 +1165,39 @@ onMounted(() => {
 }
 
 .card-content {
-  padding: 1rem;
-}
+  padding:0.999rem;
+  overflow: hidden;
+  }
 
 .card-title {
-  font-size: 1.25rem;
-  font-weight: 600;
+  font-size: 2rem;
+  font-weight: 200;
   color: #1e293b;
-  margin: 0 0 0.75rem 0;
-  line-height: 1.4;
+  margin: 0.5rem 1rem 1.2rem;
+  line-height: 1.2;
 }
 
 .card-description {
   color: #64748b;
-  line-height: 1.6;
-  font-size: 0.938rem;
-  margin: 0 0 1rem 0;
+  line-height: 1.2;
+  font-size: 1.5rem;
+  margin: 0 auto;
+  padding: 0rem 0rem 0rem;
+
 }
 
 .card-image {
-  margin: 1rem 0 0 0;
-  border-radius: 8px;
+  margin: 1rem 0 0;
+  border-radius: 6px;
   overflow: hidden;
 }
 
 .card-image img {
   width: 100%;
-  height: 180px;
   object-fit: cover;
   transition: transform 0.3s;
+   height: 250px;
+  overflow: hidden;
 }
 
 .noticia-card:hover .card-image img {
@@ -1181,22 +1206,23 @@ onMounted(() => {
 
 .card-details {
   background: #f8fafc;
-  padding: 0.75rem;
+  padding: 0.999rem;
   border-radius: 8px;
   margin: 0.75rem 0;
 }
 
 .campanha-details {
   background: #eff6ff;
-  border: 1px solid #dbeafe;
-}
+  border: 2px solid transparent;
+} 
 
 .detail-row {
   display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  align-items: normal;
+ gap: 1rem;
+  font-size: 1.1rem;
+  font-weight: 350;
+   margin:0;
   color: #475569;
 }
 
@@ -1205,40 +1231,46 @@ onMounted(() => {
 }
 
 .detail-icon {
-  width: 20px;
-  text-align: center;
+   width:25px;
+  text-align: flex;
+  flex-grow: 1;
 }
 
 .card-footer {
-  padding: 1rem;
-  border-top: 1px solid #f1f5f9;
+ padding: 1rem 2rem;
+  border-top: 1px solid #a5d2ff;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  background: #f8fafc;
 }
 
 .card-meta {
-  display: flex;
+ display: flex;
   gap: 1rem;
   font-size: 0.813rem;
-  color: #64748b;
-  flex-wrap: wrap;
+  color: #94a3b8;
 }
 
 .meta-item {
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
+   display:flex;
+  align-items:normal;
+  gap: 1rem;
+  font-size: 1.1rem;
+  font-weight: 350;
+   margin:0;
+  
 }
-
-.meta-icon {
-  width: 16px;
+.meta-item .icon{
+  width:25px;
+  text-align: flex;
+  flex-grow: 1;
 }
 
 .card-actions {
   display: flex;
-  gap: 0.5rem;
+  gap: 1.5rem;
+  
 }
 
 .empty-state {
@@ -1272,16 +1304,16 @@ onMounted(() => {
 
 .btn-primary, .btn-secondary, .btn-danger, .btn-close {
   border: none;
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
+  border-radius: 5px;
+  padding: 0.5rem 2rem;
+  font-weight: 550;
   cursor: pointer;
   transition: all 0.2s;
   display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  align-items: flex-end;
+  justify-content: flex-end;
   gap: 0.5rem;
-  font-size: 0.938rem;
+  font-size: 1.2rem;
 }
 
 .btn-primary {
@@ -1360,15 +1392,15 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   z-index: 50;
-  padding: 1rem;
+  padding: 2rem;
   backdrop-filter: blur(2px);
 }
 
 .modal-content {
   background: white;
-  border-radius: 16px;
+  border-radius: 36px;
   width: 100%;
-  max-width: 800px;
+  max-width: 1000px;
   max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
@@ -1379,7 +1411,7 @@ onMounted(() => {
 }
 
 .modal-header {
-  padding: 1.5rem 2rem;
+  padding: 1.9rem 1.9rem;
   border-bottom: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
@@ -1392,21 +1424,21 @@ onMounted(() => {
 
 .modal-header h2 {
   margin: 0;
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   color: #1f2937;
 }
 
 .modal-body {
-  padding: 1.5rem 2rem;
+  padding: 2rem 2rem;
 }
 
 .modal-actions {
-  padding: 1.5rem 2rem;
+  padding: 1rem 1rem;
   border-top: 1px solid #e5e7eb;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 1rem;
+  gap: 0.5rem;
   position: sticky;
   bottom: 0;
   background: white;
@@ -1441,7 +1473,7 @@ onMounted(() => {
 
 .form-section h3 {
   margin: 0 0 1rem 0;
-  font-size: 1.125rem;
+  font-size: 1.9rem;
   color: #374151;
   padding-bottom: 0.5rem;
   border-bottom: 2px solid #e5e7eb;
@@ -1467,7 +1499,7 @@ onMounted(() => {
   font-weight: 600;
   color: #374151;
   margin-bottom: 0.5rem;
-  font-size: 0.875rem;
+  font-size: 1.5rem;
 }
 
 .form-group input,
@@ -1476,7 +1508,7 @@ onMounted(() => {
   padding: 0.75rem;
   border: 2px solid #e5e7eb;
   border-radius: 8px;
-  font-size: 1rem;
+  font-size: 1.2rem;
   transition: all 0.2s;
   width: 100%;
   box-sizing: border-box;

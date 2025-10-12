@@ -66,6 +66,7 @@ export default {
 .header {
   width: 100%;
   font-family: "Segoe UI", Roboto, sans-serif;
+  
 }
 
 /* Barra superior */
@@ -73,9 +74,10 @@ export default {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: linear-gradient(135deg, #81b7f6, #a5f3fc, #81b7f6);
-  color: #fff;
-  padding: 0.5rem 2rem;
+  background: linear-gradient(150deg, white, #a5f3fc); 
+  backdrop-filter: blur(100px);
+  padding: 2rem;
+  border-radius: 0rem 10rem 0rem;
   font-size: 0.95rem;
   letter-spacing: 0.5px;
 }
@@ -96,14 +98,12 @@ export default {
   position: sticky;
   top: 0;
   left: 0;
-  width: 100%;
   backdrop-filter: blur(10px);
-  background: rgba(255, 255, 255, 0.8);
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0.8rem 2rem;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+  border-radius: 0.9rem 1.5rem 1.5rem;
+  box-shadow: 0 1px 10px rgba(0,0,0,0.08);
   z-index: 99;
 }
 

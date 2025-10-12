@@ -12,17 +12,28 @@
         <button class="btn-voltar" @click="$router.go(-1)">
           ← Voltar
         </button>
+        
         <div class="header-content">
-          <div class="header-badge">
-            <span :class="item.tipo === 'campanha' ? 'badge-campanha' : 'badge-noticia'">
-              {{ item.tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia' }}
-            </span>
+          <div class="header-top">
+            <h1>{{ getTitulo() }}</h1>
+            <div class="header-badge">
+              <span :class="item.tipo === 'campanha' ? 'badge-campanha' : 'badge-noticia'">
+                {{ item.tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia' }}
+              </span>
+            </div>
           </div>
-          <h1>{{ getTitulo() }}</h1>
+          
           <p class="orgao">Prefeitura Municipal • Secretaria de Saúde • Centro Veterinário</p>
+          
           <div class="metadata">
-            <span class="data-publicacao">📅 Publicado em: {{ formatarData(item.dataPublicacao) }}</span>
-            <span v-if="item.autor" class="autor">👤 Por: {{ item.autor }}</span>
+            <span class="data-publicacao">
+              <span class="icon">📅</span>
+              Publicado em: {{ formatarData(item.dataPublicacao) }}
+            </span>
+            <span v-if="item.autor" class="autor">
+              <span class="icon">👤</span>
+              Por: {{ item.autor }}
+            </span>
           </div>
         </div>
       </header>
@@ -38,19 +49,19 @@
           <h2>📢 Informações da Campanha</h2>
           <div class="grid-detalhes campanha-grid">
             <div v-if="item.nomeCampanha" class="detalhe-item destaque">
-              <strong>📋 Nome da Campanha:</strong>
+              <strong>📋 Nome da Campanha</strong>
               <span>{{ item.nomeCampanha }}</span>
             </div>
             <div v-if="item.dataInicioCampanha" class="detalhe-item">
-              <strong>📅 Data Início:</strong>
+              <strong>📅 Data Início</strong>
               <span>{{ item.dataInicioCampanha }}</span>
             </div>
             <div v-if="item.dataFimCampanha" class="detalhe-item">
-              <strong>📅 Data Fim:</strong>
+              <strong>📅 Data Fim</strong>
               <span>{{ item.dataFimCampanha }}</span>
             </div>
             <div v-if="item.horarioCampanha" class="detalhe-item">
-              <strong>🕐 Horário:</strong>
+              <strong>🕐 Horário</strong>
               <span>{{ item.horarioCampanha }}</span>
             </div>
           </div>
@@ -97,8 +108,6 @@ const carregando = ref(true)
 const route = useRoute()
 const { noticias: todasNoticias, carregarNoticias, buscarNoticiaPorId } = useNoticias()
 
-
-
 onMounted(async () => {
   try {
     const id = parseInt(route.params.id, 10)
@@ -108,12 +117,10 @@ onMounted(async () => {
       return
     }
     
-    // Garantir que as notícias estão carregadas
     if (todasNoticias.value.length === 0) {
       await carregarNoticias()
     }
     
-    // Buscar do backend (GET /news/{id} é público)
     const resultado = await buscarNoticiaPorId(id)
     
     if (resultado) {
@@ -130,7 +137,6 @@ onMounted(async () => {
   }
 })
 
-// Funções utilitárias
 function getTitulo() {
   if (!item.value) return ''
   if (item.value.tipo === 'campanha') {
@@ -195,7 +201,7 @@ function imprimir() {
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
 }
 
-/* Loading */
+/* ========== LOADING ========== */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -206,8 +212,8 @@ function imprimir() {
 }
 
 .spinner {
-  width: 40px;
-  height: 40px;
+  width: 50px;
+  height: 50px;
   border: 4px solid #e5e7eb;
   border-top: 4px solid #059669;
   border-radius: 50%;
@@ -220,124 +226,166 @@ function imprimir() {
   100% { transform: rotate(360deg); }
 }
 
-/* Header */
+/* ========== HEADER ========== */
 .edital-header {
-  background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 2rem;
   position: relative;
+  background: rgba(255, 255, 255, 0.98);
+  backdrop-filter: blur(10px);
+  padding: 1.5rem 2rem 2rem;
+  box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
+  border-radius: 0 0 24px 24px;
+  margin-bottom: 2rem;
 }
 
 .btn-voltar {
-  background: #059669;
+  background: linear-gradient(135deg, #0ea5e9, #0284c7);
   color: white;
   border: none;
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
+ padding: 0.6rem 03rem 0rem;
+  border-radius: 0rem 10rem 0rem;
   cursor: pointer;
-  font-size: 0.9rem;
-  margin-bottom: 1rem;
-  transition: background 0.2s;
+  font-size: 2rem;
+  font-weight: 500;
+  margin-bottom: 1.5rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
 }
 
 .btn-voltar:hover {
-  background: #047857;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.4);
 }
 
-.header-badge {
+.header-content {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 2rem;
   margin-bottom: 1rem;
 }
 
+.header-content h1 {
+  margin: 0;
+  font-size: 2.5rem;
+  color: #059669;
+  line-height: 1.3;
+  font-weight: 700;
+  flex: 1;
+}
+
+.header-badge {
+  flex-shrink: 0;
+}
+
 .header-badge span {
-  padding: 0.5rem 1rem;
-  border-radius: 20px;
-  font-size: 0.875rem;
+  padding: 0.6rem 1.5rem;
+  border-radius: 50px;
+  font-size: 0.95rem;
   font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   display: inline-block;
+  white-space: nowrap;
 }
 
 .badge-campanha {
-  background: #dbeafe;
+  background: linear-gradient(135deg, #dbeafe, #93c5fd);
   color: #1e40af;
 }
 
 .badge-noticia {
-  background: #f1f5f9;
+  background: linear-gradient(135deg, #f1f5f9, #e2e8f0);
   color: #475569;
-}
-
-.header-content h1 {
-  margin: 0 0 0.5rem 0;
-  font-size: 2.5em;
-  color: #059669;
-  line-height: 1.2;
 }
 
 .orgao {
   color: #6b7280;
-  font-size: 1.1em;
-  margin: 0.5rem 0;
+  font-size: 1.6rem;
+  margin: 1rem 0;
+  font-weight: 300;
 }
 
 .metadata {
-  margin-top: 1rem;
-  padding-top: 1rem;
-  border-top: 1px solid #e5e7eb;
+  margin-top: 1.5rem;
+  padding-top: 1.5rem;
+  border-top: 2px solid #e5e7eb;
   display: flex;
-  gap: 2rem;
+  gap: 3rem;
   flex-wrap: wrap;
 }
 
 .data-publicacao,
 .autor {
-  color: #6b7280;
-  font-size: 0.9em;
+  color: #4b5563;
+  font-size: 1.3rem;
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  font-weight: 500;
 }
 
-/* Imagem */
+.metadata .icon {
+  font-size: 1.6rem;
+}
+
+/* ========== IMAGEM ========== */
 .imagem-container {
   max-width: 900px;
   margin: 2rem auto;
-  padding: 0 2rem;
+  padding: 0 1rem;
 }
 
 .imagem-noticia {
   width: 100%;
-  height: 300px;
+  height: 450px;
   object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
 }
 
-/* Conteúdo */
+/* ========== CONTEÚDO ========== */
 .conteudo {
   max-width: 900px;
-  margin: 2rem auto;
-  padding: 0 2rem 4rem;
+  margin: 0 auto;
+  padding: 0 1rem 4rem;
 }
 
-.resumo, .campanha-info, .acoes {
+.resumo, 
+.campanha-info, 
+.acoes {
   background: white;
   margin-bottom: 2rem;
-  padding: 2rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  padding: 2.5rem;
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
 }
 
-.resumo h2, .campanha-info h2 {
-  margin: 0 0 1rem 0;
+.resumo h2, 
+.campanha-info h2 {
+  margin: 0 0 1.5rem 0;
   color: #059669;
-  font-size: 1.5em;
+  font-size: 1.75rem;
+  font-weight: 700;
 }
 
 .conteudo-texto {
   color: #374151;
   line-height: 1.8;
-  font-size: 1.05em;
+  font-size: 1.1rem;
 }
 
 .conteudo-texto :deep(p) {
-  margin: 1rem 0;
+  margin: 1.2rem 0;
 }
 
 .conteudo-texto :deep(p:first-child) {
@@ -348,7 +396,7 @@ function imprimir() {
   margin-bottom: 0;
 }
 
-/* Grid de Detalhes */
+/* ========== GRID DE DETALHES ========== */
 .grid-detalhes {
   display: grid;
   gap: 1rem;
@@ -356,74 +404,87 @@ function imprimir() {
 }
 
 .campanha-grid {
-  background: #eff6ff;
+  background: linear-gradient(135deg, #eff6ff, #dbeafe);
   padding: 1.5rem;
   border-radius: 12px;
-  border: 2px solid #dbeafe;
+  border: 2px solid #bfdbfe;
 }
 
 .detalhe-item {
   background: white;
-  padding: 1rem;
-  border-radius: 8px;
-  border-left: 4px solid #059669;
+  padding: 1.25rem;
+  border-radius: 10px;
+  border-left: 4px solid #10b981;
+  transition: all 0.3s ease;
+}
+
+.detalhe-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .detalhe-item.destaque {
   grid-column: 1 / -1;
-  border-left: 4px solid #1e40af;
-  background: #f0f9ff;
+  border-left: 4px solid #3b82f6;
+  background: linear-gradient(135deg, #f0f9ff, #e0f2fe);
 }
 
 .detalhe-item strong {
   display: block;
   color: #059669;
-  margin-bottom: 0.25rem;
-  font-size: 0.95em;
+  margin-bottom: 0.5rem;
+  font-size: 0.95rem;
+  font-weight: 600;
 }
 
 .detalhe-item.destaque strong {
-  color: #1e40af;
+  color: #2563eb;
 }
 
 .detalhe-item span {
-  color: #374151;
-  font-size: 1.05em;
+  color: #1f2937;
+  font-size: 1.1rem;
+  font-weight: 500;
 }
 
-/* Ações */
+/* ========== AÇÕES ========== */
 .acoes {
   display: flex;
   gap: 1rem;
   justify-content: center;
+  padding: 2rem;
 }
 
-.btn-compartilhar, .btn-imprimir {
-  background: #059669;
+.btn-compartilhar, 
+.btn-imprimir {
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: 1rem 2rem;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 1rem;
-  transition: all 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.75rem;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
-.btn-compartilhar:hover, .btn-imprimir:hover {
-  background: #047857;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+.btn-compartilhar:hover, 
+.btn-imprimir:hover {
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-3px);
+  box-shadow: 0 6px 25px rgba(16, 185, 129, 0.4);
 }
 
-/* Erro */
+/* ========== ERRO ========== */
 .erro-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 50vh;
+  min-height: 60vh;
   padding: 2rem;
 }
 
@@ -431,56 +492,76 @@ function imprimir() {
   text-align: center;
   background: white;
   padding: 3rem;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  border-radius: 16px;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
   max-width: 500px;
 }
 
 .erro-content h2 {
   color: #ef4444;
   margin-bottom: 1rem;
+  font-size: 2rem;
 }
 
 .erro-content p {
   color: #6b7280;
   margin-bottom: 2rem;
   line-height: 1.6;
+  font-size: 1.1rem;
 }
 
 .btn-home {
-  background: #059669;
+  background: linear-gradient(135deg, #10b981, #059669);
   color: white;
   border: none;
-  padding: 0.75rem 1.5rem;
-  border-radius: 8px;
+  padding: 1rem 2rem;
+  border-radius: 12px;
   cursor: pointer;
   font-size: 1rem;
-  transition: background 0.2s;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
 }
 
 .btn-home:hover {
-  background: #047857;
+  background: linear-gradient(135deg, #059669, #047857);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
 }
 
-/* Responsivo */
+/* ========== RESPONSIVO ========== */
 @media (max-width: 768px) {
   .edital-header {
     padding: 1rem;
+    border-radius: 0 0 16px 16px;
+  }
+  
+  .header-top {
+    flex-direction: column;
+    gap: 1rem;
   }
   
   .header-content h1 {
-    font-size: 1.8em;
+    font-size: 1.75rem;
+  }
+  
+  .header-badge span {
+    font-size: 0.85rem;
+    padding: 0.5rem 1rem;
   }
   
   .metadata {
-    gap: 1rem;
+    gap: 1.5rem;
+    flex-direction: column;
   }
   
   .conteudo {
     padding: 0 1rem 2rem;
   }
   
-  .resumo, .campanha-info, .acoes {
+  .resumo, 
+  .campanha-info, 
+  .acoes {
     padding: 1.5rem;
   }
   
@@ -492,18 +573,19 @@ function imprimir() {
     flex-direction: column;
   }
   
-  .imagem-container {
-    padding: 0 1rem;
+  .imagem-noticia {
+    height: 250px;
   }
   
-  .imagem-noticia {
-    height: 200px;
+  .conteudo-texto {
+    font-size: 1rem;
   }
 }
 
-/* Print styles */
+/* ========== PRINT ========== */
 @media print {
-  .btn-voltar, .acoes {
+  .btn-voltar, 
+  .acoes {
     display: none;
   }
   
@@ -511,7 +593,8 @@ function imprimir() {
     background: white;
   }
   
-  .resumo, .campanha-info {
+  .resumo, 
+  .campanha-info {
     box-shadow: none;
     border: 1px solid #e5e7eb;
   }

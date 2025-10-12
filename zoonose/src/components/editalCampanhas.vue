@@ -167,8 +167,8 @@ function aplicarFiltros() {
   background: #0ea5e9;
   color: white;
   border: none;
-  padding: 0.166rem 0.25rem 0rem;
-  border-radius: 8px;
+ padding: 0.166rem 05rem 0rem;
+  border-radius: 0rem 10rem 0rem;
   cursor: pointer;
   font-size: 1.3rem;
   margin-bottom: 0rem;
@@ -184,6 +184,8 @@ function aplicarFiltros() {
   backdrop-filter: blur(10px);
   padding: 2rem;
   position: relative;
+  border-radius: 0rem 10rem 0rem;
+
   
 }
 
@@ -215,16 +217,18 @@ function aplicarFiltros() {
 .search-box input {
   width: 100%;
   padding: 0.75rem 1rem;
-  border: 2px solid #e2e8f0;
+  border: 0px solid rgb(217, 242, 255);
+   background: linear-gradient(135deg, white, #bfdbfe7e);
   border-radius: 12px;
-  font-size: 1rem;
-  transition: border-color 0.2s;
+  font-size: 1.5rem;
+  transition: all 0.2s;
 }
 
 .search-box input:focus {
   outline: none;
-  border-color: #0ea5e9;
-  box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.1);
+  border-color: #3b82f6;
+  background: white;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
 .loading-container {
