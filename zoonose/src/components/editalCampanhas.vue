@@ -147,6 +147,48 @@ function getImagem(campanha) {
   return campanha.urlImagem || vete
 }
 
+function getResumo(campanha) {
+  if (campanha.resumo) {
+    return cortarTexto(campanha.resumo, 120)
+  }
+  
+  if (campanha.description) {
+    return cortarTexto(campanha.description, 120)
+  }
+  
+  // Fallback: criar um resumo básico
+  let resumo = `Campanha ${campanha.nomeCampanha || 'sem nome'}`
+  if (campanha.dataInicioCampanha) {
+    resumo += ` agendada para ${campanha.dataInicioCampanha}`
+  }
+  return resumo
+}
+
+// Função para cortar texto
+function cortarTexto(texto, limite) {
+  if (!texto) return '' 
+  texto = texto.replace(/\s+/g, ' ').trim()
+  if (texto.length <= limite) return texto
+  const cortado = texto.slice(0, limite + 1)
+  const ultimoEspaco = cortado.lastIndexOf(' ')
+  if (ultimoEspaco <= 0) return texto.slice(0, limite) + '…'
+  return cortado.slice(0, ultimoEspaco) + '…'
+}
+
+// Nova função para formatar período de forma mais limpa
+function formatarPeriodo(campanha) {
+  if (!campanha.dataInicioCampanha) return ''
+  
+  const inicio = campanha.dataInicioCampanha
+  const fim = campanha.dataFimCampanha
+  
+  if (!fim || fim === inicio) {
+    return inicio
+  }
+  
+  return `${inicio} até ${fim}`
+}
+
 function formatarData(data) {
   if (!data) return ''
   return new Date(data).toLocaleDateString('pt-BR')

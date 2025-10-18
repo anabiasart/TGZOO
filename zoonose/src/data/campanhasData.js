@@ -32,34 +32,83 @@ const getAuthHeaders = () => {
   return headers
 }
 
-// Mapear backend -> frontend
+// Função auxiliar para formatar data ISO para dd/mm/yyyy
+const formatarDataParaExibicao = (dataISO) => {
+  if (!dataISO) return ''
+  try {
+    const data = new Date(dataISO)
+    return data.toLocaleDateString('pt-BR')
+  } catch (error) {
+    console.error('Erro ao formatar data:', error)
+    return ''
+  }
+}
+
+// Função auxiliar para extrair horário limpo
+const extractTimeFromDateTime = (startDateTime, endDateTime) => {
+  if (!startDateTime) return ''
+  
+  try {
+    const startDate = new Date(startDateTime)
+    const endDate = endDateTime ? new Date(endDateTime) : null
+    
+    const startTime = startDate.toLocaleTimeString('pt-BR', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })
+    
+    if (endDate) {
+      const endTime = endDate.toLocaleTimeString('pt-BR', { 
+        hour: '2-digit', 
+        minute: '2-digit' 
+      })
+      return `${startTime} às ${endTime}`
+    }
+    
+    return `A partir das ${startTime}`
+  } catch (error) {
+    console.error('Erro ao extrair horário:', error)
+    return ''
+  }
+}
+
+// Mapear backend -> frontend (VERSÃO CORRIGIDA)
 const mapBackendToFrontend = (backendCampaign) => {
+  const dataInicio = formatarDataParaExibicao(backendCampaign.startDateTime)
+  const dataFim = formatarDataParaExibicao(backendCampaign.endDateTime)
+  const horario = extractTimeFromDateTime(backendCampaign.startDateTime, backendCampaign.endDateTime)
+  
+  // Criar uma descrição resumida se não existir
+  let descricaoResumo = backendCampaign.description || ''
+  if (!descricaoResumo || descricaoResumo.length < 10) {
+    descricaoResumo = `Campanha ${backendCampaign.name} agendada para ${dataInicio}`
+    if (dataFim && dataFim !== dataInicio) {
+      descricaoResumo += ` até ${dataFim}`
+    }
+    if (horario) {
+      descricaoResumo += `. Horário: ${horario}`
+    }
+  }
+  
   return {
     id: backendCampaign.id,
     tipo: 'campanha',
     nomeCampanha: backendCampaign.name,
-    dataInicioCampanha: backendCampaign.startDateTime ? backendCampaign.startDateTime.split(' ')[0] : '',
-    dataFimCampanha: backendCampaign.endDateTime ? backendCampaign.endDateTime.split(' ')[0] : '',
-    horarioCampanha: extractTimeFromDateTime(backendCampaign.startDateTime, backendCampaign.endDateTime),
+    dataInicioCampanha: dataInicio,
+    dataFimCampanha: dataFim,
+    horarioCampanha: horario,
     urlImagem: backendCampaign.imageUrl,
     description: backendCampaign.description,
-    // Campos comuns
-    titulo: backendCampaign.name, // Mantém para compatibilidade
+    resumo: descricaoResumo, // ✅ Adicionar resumo para exibição
+    localCampanha: backendCampaign.location || '', // ✅ Local se existir
+    
+    // Campos comuns para compatibilidade
+    titulo: backendCampaign.name,
     categoria: 'campanha',
     status: 'ativo',
     autor: backendCampaign.user?.name || 'Sistema',
-    dataPublicacao: backendCampaign.createdAt
+    dataPublicacao: backendCampaign.createdAt || new Date().toISOString()
   }
-}
-
-// Função auxiliar para extrair horário
-const extractTimeFromDateTime = (startDateTime, endDateTime) => {
-  if (!startDateTime) return ''
-  
-  const startTime = startDateTime.split(' ')[1] || '08:00:00'
-  const endTime = endDateTime ? (endDateTime.split(' ')[1] || '17:00:00') : '17:00:00'
-  
-  return `${startTime.substring(0, 5)} às ${endTime.substring(0, 5)}`
 }
 
 // Mapear frontend -> backend
@@ -149,6 +198,7 @@ export function useCampanhas() {
       campanhas.value = data.content.map(mapBackendToFrontend)
       
       console.log('✅ Campanhas carregadas:', campanhas.value.length)
+      console.log('📋 IDs das campanhas:', campanhas.value.map(c => c.id))
       
     } catch (error) {
       erro.value = `Erro ao carregar campanhas: ${error.message}`
@@ -313,7 +363,8 @@ export function useCampanhas() {
   // Buscar campanha por ID
   const buscarCampanhaPorId = async (id) => {
     try {
-      // GET /campaigns/{id} é público também, não precisa de token
+      console.log('🔍 [campanhasData] Buscando campanha por ID:', id)
+      
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'GET',
         headers: {
@@ -323,16 +374,23 @@ export function useCampanhas() {
         mode: 'cors'
       })
       
+      console.log('📡 Response status:', response.status)
+      
       if (!response.ok) {
-        console.error(`Erro ao buscar campanha: ${response.status}`)
+        console.error(`❌ Erro ao buscar campanha: ${response.status}`)
         return null
       }
       
       const campanha = await response.json()
-      return mapBackendToFrontend(campanha)
+      console.log('✅ Campanha bruta do backend:', campanha)
+      
+      const campanhaFormatada = mapBackendToFrontend(campanha)
+      console.log('✅ Campanha formatada:', campanhaFormatada)
+      
+      return campanhaFormatada
       
     } catch (error) {
-      console.error('Erro ao buscar campanha:', error)
+      console.error('❌ Erro ao buscar campanha:', error)
       return null
     }
   }
