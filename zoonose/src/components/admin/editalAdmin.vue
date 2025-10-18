@@ -269,28 +269,42 @@
                   />
                   <small>{{ noticiaForm.nomeCampanha?.length || 0 }}/100 caracteres</small>
                 </div>
+                <div class="form-group">
+  <label for="descricaoCampanha">Descrição da Campanha *</label>
+  <textarea 
+    id="descricaoCampanha"
+    v-model="noticiaForm.description" 
+    placeholder="Descreva a campanha..."
+    rows="3"
+    maxlength="500"
+    required
+  ></textarea>
+  <small>{{ noticiaForm.description?.length || 0 }}/500 caracteres</small>
+</div>
 
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="dataInicioCampanha">Data Início *</label>
-                    <input 
-                      id="dataInicioCampanha"
-                      v-model="noticiaForm.dataInicioCampanha" 
-                      type="date"
-                      required
-                    />
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="dataFimCampanha">Data Fim *</label>
-                    <input 
-                      id="dataFimCampanha"
-                      v-model="noticiaForm.dataFimCampanha" 
-                      type="date"
-                      required
-                    />
-                  </div>
-                </div>
+               <div class="form-row">
+  <div class="form-group">
+    <label for="dataInicioCampanha">Data Início *</label>
+    <input 
+      id="dataInicioCampanha"
+      v-model="noticiaForm.dataInicioCampanha" 
+      type="date"
+      required
+    />
+    <small>Selecione a data de início da campanha</small>
+  </div>
+  
+  <div class="form-group">
+    <label for="dataFimCampanha">Data Fim *</label>
+    <input 
+      id="dataFimCampanha"
+      v-model="noticiaForm.dataFimCampanha" 
+      type="date"
+      required
+    />
+    <small>Selecione a data de término da campanha</small>
+  </div>
+</div>
 
                 <div class="form-group">
                   <label for="horarioCampanha">Horário da Campanha *</label>
@@ -455,20 +469,13 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue"
-import { useNoticias } from "@/data/noticiasData.js"
+import { useEditais } from "@/data/editaisData.js"
 
 // Composables
-const { 
-  noticias, 
-  carregando, 
-  erro,
-  carregarNoticias,
-  adicionarNoticia,
-  editarNoticia: editarNoticiaData,
-  removerNoticiaPorId,
-  alterarStatusNoticia,
-  limparErro
-} = useNoticias()
+const { todosItens: noticias, carregando, erro, carregarTodos: carregarNoticias, adicionarItem: adicionarNoticia, editarItem: editarNoticiaData, removerItem: removerNoticiaPorId, alterarStatus: alterarStatusNoticia, limparErro 
+
+} = useEditais()
+
 
 // Estados do componente
 const modalAberto = ref(false)
@@ -503,6 +510,7 @@ const modalExclusao = ref({
 const noticiaForm = ref({
   tipo: 'campanha',
   nomeCampanha: '',
+  description: '', 
   dataInicioCampanha: '',
   dataFimCampanha: '',
   horarioCampanha: '',
@@ -521,9 +529,8 @@ const campanhas = computed(() =>
 )
 
 const noticiasGerais = computed(() => 
-  noticias.value.filter(n => n.tipo === 'noticia' || !n.tipo)
+  noticias.value.filter(n => n.tipo === 'noticia')
 )
-
 const noticiasFiltradas = computed(() => {
   let resultado = [...noticias.value]
   
@@ -564,6 +571,7 @@ function resetarForm() {
   noticiaForm.value = {
     tipo: 'campanha',
     nomeCampanha: '',
+    description: '', 
     dataInicioCampanha: '',
     dataFimCampanha: '',
     horarioCampanha: '',
@@ -647,7 +655,10 @@ function duplicarNoticia(noticia) {
 
 async function alterarStatus(id, novoStatus) {
   try {
-    await alterarStatusNoticia(id, novoStatus)
+    const item = noticias.value.find(n => n.id === id)
+    const tipo = item ? item.tipo : 'noticia'
+    
+    await alterarStatusNoticia(id, novoStatus, tipo) 
     menuAberto.value = null
     mostrarToast('success', `✅ Status alterado para ${novoStatus}`)
   } catch (error) {
@@ -655,7 +666,6 @@ async function alterarStatus(id, novoStatus) {
     mostrarToast('error', '❌ ' + error.message)
   }
 }
-
 function confirmarExclusao(noticia) {
   modalExclusao.value = { aberto: true, noticia }
   menuAberto.value = null
@@ -740,8 +750,23 @@ function formatarData(dataISO) {
 function formatarDataSimples(data) {
   if (!data) return ''
   try {
-    const [ano, mes, dia] = data.split('-')
-    return `${dia}/${mes}/${ano}`
+    if (data.includes('-') && data.length >= 10) {
+      const [ano, mes, dia] = data.split('-')
+      return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`
+    }
+    
+    
+    if (data.includes('/')) {
+      return data
+    }
+    
+    // Tenta converter usando Date
+    const date = new Date(data)
+    if (!isNaN(date.getTime())) {
+      return date.toLocaleDateString('pt-BR')
+    }
+    
+    return data
   } catch {
     return data
   }

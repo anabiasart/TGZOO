@@ -103,37 +103,42 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useNoticias } from '@/data/noticiasData.js'
+import { useCampanhas } from '@/data/campanhasData.js'
 import vete from '@/assets/img/vete.jpg'
 
 const router = useRouter()
-const { noticias, carregando, carregarNoticias } = useNoticias()
+// ✅ Correção: usar nomes mais claros para evitar confusão
+const { 
+  campanhas, 
+  carregando, 
+  carregarCampanhas 
+} = useCampanhas()
 
 const filtros = ref({
   busca: ''
 })
 
 onMounted(() => {
-  carregarNoticias()
+  carregarCampanhas()
 })
 
-// Computed - Filtra apenas campanhas
+// ✅ Usar 'campanhas' em vez de 'noticias'
 const campanhasFiltradas = computed(() => {
-  let resultado = noticias.value.filter(n => n.tipo === 'campanha')
+  let resultado = [...campanhas.value] 
   
   // Filtro de busca
   if (filtros.value.busca.trim()) {
     const termo = filtros.value.busca.toLowerCase()
-    resultado = resultado.filter(n => {
-      const titulo = getTitulo(n).toLowerCase()
+    resultado = resultado.filter(campanha => {
+      const titulo = getTitulo(campanha).toLowerCase()
       return titulo.includes(termo)
     })
   }
   
   return resultado
 })
-
-// Funções
+  
+// Funções permanecem iguais
 function getTitulo(campanha) {
   return campanha.nomeCampanha || campanha.titulo
 }
@@ -151,8 +156,9 @@ function verCampanha(id) {
   router.push(`/edital/${id}`)
 }
 
+
+
 function aplicarFiltros() {
-  // Os filtros são aplicados automaticamente pelo computed
 }
 </script>
 

@@ -101,7 +101,7 @@
 
   // Computed - Filtra apenas notícias
   const noticiasFiltradas = computed(() => {
-    let resultado = noticias.value.filter(n => (n.tipo || 'noticia') === 'noticia')
+    let resultado = [...noticias.value]
     
     // Filtro de busca
     if (filtros.value.busca.trim()) {

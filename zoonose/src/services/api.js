@@ -129,10 +129,9 @@ export const authAPI = {
   },
 };
 
-// ← NOVO: API para gerenciar usuários
 export const userAPI = {
   getAllUsers: async () => {
-    return await api.get('/users'); // ← http://localhost:8080/users
+    return await api.get('/users'); 
   },
 
   getUserById: async (id) => {

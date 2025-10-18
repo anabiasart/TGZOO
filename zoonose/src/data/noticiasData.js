@@ -32,120 +32,29 @@ const getAuthHeaders = () => {
   return headers
 }
 
-// Função para detectar se é campanha ou notícia baseado no conteúdo
-const detectarTipo = (content, title) => {
-  if (!content) return 'noticia'
-  
-  // Se tem campos de campanha, é campanha
-  const temCamposCampanha = /Data Início:|Data Fim:|Horário da Campanha:/i.test(content)
-  const temTituloCampanha = /campanha|vacinação|mutirão/i.test(title || '')
-  
-  return (temCamposCampanha || temTituloCampanha) ? 'campanha' : 'noticia'
-}
-
-// Função para extrair dados de CAMPANHA
-const extrairDadosCampanha = (content, title) => {
-  const dataInicioMatch = content.match(/Data Início:\s*(.+?)(?:\n|$)/i)
-  const dataFimMatch = content.match(/Data Fim:\s*(.+?)(?:\n|$)/i)
-  const horarioMatch = content.match(/Horário da Campanha:\s*(.+?)(?:\n|$)/i)
-  
-  return {
-    tipo: 'campanha',
-    nomeCampanha: title,
-    dataInicioCampanha: dataInicioMatch ? dataInicioMatch[1].trim() : '',
-    dataFimCampanha: dataFimMatch ? dataFimMatch[1].trim() : '',
-    horarioCampanha: horarioMatch ? horarioMatch[1].trim() : '',
-    urlImagem: null
-  }
-}
-
-// Função para extrair dados de NOTÍCIA
-const extrairDadosNoticia = (content, title) => {
-  return {
-    tipo: 'noticia',
-    nomeNoticia: title,
-    urlImagemNoticia: null,
-    resumo: content
-  }
-}
-
-// Função para limpar o conteúdo de metadados
-const limparConteudo = (content) => {
-  if (!content) return ''
-  
-  return content
-    .replace(/\n\nData Início:.*$/gim, '')
-    .replace(/\nData Fim:.*$/gim, '')
-    .replace(/\nHorário da Campanha:.*$/gim, '')
-    .replace(/\n\nData:.*$/gim, '')
-    .replace(/\nHorário:.*$/gim, '')
-    .replace(/\nLocal:.*$/gim, '')
-    .replace(/\nPúblico(-alvo)?:.*$/gim, '')
-    .replace(/\nContato:.*$/gim, '')
-    .replace(/\nInscrições:.*$/gim, '')
-    .trim()
-}
-
-// Mapear backend -> frontend
+// Mapear backend -> frontend para NOTÍCIAS
 const mapBackendToFrontend = (backendNews) => {
-  const tipo = detectarTipo(backendNews.content, backendNews.title)
-  const conteudoLimpo = limparConteudo(backendNews.content)
-  
-  let dadosEspecificos = {}
-  
-  if (tipo === 'campanha') {
-    dadosEspecificos = extrairDadosCampanha(backendNews.content, backendNews.title)
-    dadosEspecificos.urlImagem = backendNews.imageUrl
-  } else {
-    dadosEspecificos = extrairDadosNoticia(conteudoLimpo, backendNews.title)
-    dadosEspecificos.urlImagemNoticia = backendNews.imageUrl
-    dadosEspecificos.resumo = conteudoLimpo
-  }
-  
   return {
     id: backendNews.id,
-    tipo: tipo,
-    ...dadosEspecificos,
+    tipo: 'noticia',
+    nomeNoticia: backendNews.title,
+    urlImagemNoticia: backendNews.imageUrl,
+    resumo: backendNews.content,
     // Campos comuns
     titulo: backendNews.title, // Mantém para compatibilidade
-    categoria: tipo === 'campanha' ? 'campanha' : 'geral',
+    categoria: 'geral',
     status: 'ativo',
     autor: backendNews.user?.name || 'Sistema',
     dataPublicacao: backendNews.createdAt
   }
 }
 
-// Mapear frontend -> backend
+// Mapear frontend -> backend para NOTÍCIAS
 const mapFrontendToBackend = (frontendNews) => {
-  let content = ''
-  let title = ''
-  let imageUrl = ''
-  
-  if (frontendNews.tipo === 'campanha') {
-    title = frontendNews.nomeCampanha
-    imageUrl = frontendNews.urlImagem
-    
-    // Montar conteúdo da campanha
-    content = `Campanha: ${frontendNews.nomeCampanha}`
-    if (frontendNews.dataInicioCampanha) {
-      content += `\n\nData Início: ${frontendNews.dataInicioCampanha}`
-    }
-    if (frontendNews.dataFimCampanha) {
-      content += `\nData Fim: ${frontendNews.dataFimCampanha}`
-    }
-    if (frontendNews.horarioCampanha) {
-      content += `\nHorário da Campanha: ${frontendNews.horarioCampanha}`
-    }
-  } else {
-    title = frontendNews.nomeNoticia
-    imageUrl = frontendNews.urlImagemNoticia
-    content = frontendNews.resumo || ''
-  }
-  
   return {
-    title: title,
-    content: content,
-    imageUrl: imageUrl || undefined
+    title: frontendNews.nomeNoticia,
+    content: frontendNews.resumo || '',
+    imageUrl: frontendNews.urlImagemNoticia || undefined
   }
 }
 
@@ -173,6 +82,8 @@ export function useNoticias() {
       const data = await response.json()
       noticias.value = data.content.map(mapBackendToFrontend)
       
+      console.log('✅ Notícias carregadas:', noticias.value.length)
+      
     } catch (error) {
       erro.value = `Erro ao carregar notícias: ${error.message}`
       console.error('Erro ao carregar notícias:', error)
@@ -182,7 +93,7 @@ export function useNoticias() {
     }
   }
 
-  // Adicionar nova notícia ou campanha
+  // Adicionar nova notícia
   const adicionarNoticia = async (noticiaForm) => {
     carregando.value = true
     erro.value = null
@@ -194,7 +105,7 @@ export function useNoticias() {
       }
 
       const payload = mapFrontendToBackend(noticiaForm)
-      console.log('📤 Enviando payload:', payload)
+      console.log('📤 Enviando payload de notícia:', payload)
       
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -212,24 +123,24 @@ export function useNoticias() {
         if (response.status === 403) {
           throw new Error('Sem permissão. Apenas administradores podem criar notícias.')
         }
-        throw new Error(errorText || 'Erro ao criar item')
+        throw new Error(errorText || 'Erro ao criar notícia')
       }
       
-      const novoItem = await response.json()
-      noticias.value.unshift(mapBackendToFrontend(novoItem))
+      const novaNoticia = await response.json()
+      noticias.value.unshift(mapBackendToFrontend(novaNoticia))
       
-      console.log('✅ Notícia criada com sucesso:', novoItem.id)
+      console.log('✅ Notícia criada com sucesso:', novaNoticia.id)
       
     } catch (error) {
       erro.value = error.message
-      console.error('❌ Erro ao adicionar:', error)
+      console.error('❌ Erro ao adicionar notícia:', error)
       throw error
     } finally {
       carregando.value = false
     }
   }
 
-  // ✨ EDITAR notícia - AGORA COM INTEGRAÇÃO REAL
+  // Editar notícia
   const editarNoticia = async (id, noticiaForm) => {
     carregando.value = true
     erro.value = null
@@ -263,29 +174,29 @@ export function useNoticias() {
         if (response.status === 404) {
           throw new Error('Notícia não encontrada.')
         }
-        throw new Error(errorText || 'Erro ao atualizar item')
+        throw new Error(errorText || 'Erro ao atualizar notícia')
       }
       
-      const itemAtualizado = await response.json()
+      const noticiaAtualizada = await response.json()
       
       // Atualizar na lista local
       const index = noticias.value.findIndex(n => n.id === id)
       if (index !== -1) {
-        noticias.value[index] = mapBackendToFrontend(itemAtualizado)
+        noticias.value[index] = mapBackendToFrontend(noticiaAtualizada)
       }
       
       console.log('✅ Notícia atualizada com sucesso:', id)
       
     } catch (error) {
       erro.value = error.message
-      console.error('❌ Erro ao editar:', error)
+      console.error('❌ Erro ao editar notícia:', error)
       throw error
     } finally {
       carregando.value = false
     }
   }
 
-  // ✨ REMOVER notícia - AGORA COM INTEGRAÇÃO REAL
+  // Remover notícia
   const removerNoticiaPorId = async (id) => {
     carregando.value = true
     erro.value = null
@@ -316,7 +227,7 @@ export function useNoticias() {
         if (response.status === 404) {
           throw new Error('Notícia não encontrada.')
         }
-        throw new Error(errorText || 'Erro ao excluir item')
+        throw new Error(errorText || 'Erro ao excluir notícia')
       }
       
       // Remover da lista local
@@ -326,18 +237,10 @@ export function useNoticias() {
       
     } catch (error) {
       erro.value = error.message
-      console.error('❌ Erro ao remover:', error)
+      console.error('❌ Erro ao remover notícia:', error)
       throw error
     } finally {
       carregando.value = false
-    }
-  }
-
-  // Alterar status (apenas localmente - backend não tem este campo)
-  const alterarStatusNoticia = async (id, novoStatus) => {
-    const index = noticias.value.findIndex(n => n.id === id)
-    if (index !== -1) {
-      noticias.value[index].status = novoStatus
     }
   }
 
@@ -368,6 +271,14 @@ export function useNoticias() {
     }
   }
 
+  // Alterar status (apenas localmente - backend não tem este campo)
+  const alterarStatusNoticia = async (id, novoStatus) => {
+    const index = noticias.value.findIndex(n => n.id === id)
+    if (index !== -1) {
+      noticias.value[index].status = novoStatus
+    }
+  }
+
   // Limpar erro
   const limparErro = () => {
     erro.value = null
@@ -385,4 +296,4 @@ export function useNoticias() {
     buscarNoticiaPorId,
     limparErro
   }
-} 
+}

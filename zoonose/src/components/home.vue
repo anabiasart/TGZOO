@@ -2,12 +2,13 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Syringe, User, Calendar } from 'lucide-vue-next'
-import { useNoticias } from "@/data/noticiasData.js"
 import vete from "../assets/img/vete.jpg"
 import pata from "../assets/img/pata.jpg"
 import zoo from "../assets/img/zoo.png"
+import { useEditais } from "@/data/editaisData.js"
 
-const { noticias: todasNoticias, carregarNoticias } = useNoticias()
+const { todosItens: todasNoticias, carregarTodos: carregarNoticias } = useEditais()
+
 const noticias = ref([])
 const router = useRouter()
 const menuAberto = ref(false)
