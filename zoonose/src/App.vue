@@ -9,7 +9,6 @@ import Footer from "@/components/Footer.vue"
     <!-- Conteúdo da página atual -->
     <router-view />
 
-    <!-- Footer global -->
     <Footer/>
   </div>
 </template>

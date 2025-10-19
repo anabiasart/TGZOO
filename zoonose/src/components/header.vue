@@ -1,11 +1,9 @@
 <template>
   <header class="header">
-    <!-- Barra superior -->
     <div class="topbar">
       <p class="bemvindo">Bem-vindo(a), {{ usuario }}</p>
     </div>
 
-    <!-- Logo + Navegação --> 
     <div class="navbar">
       <div class="logo">
         <h1><a href="/home">ZoonoSys</a></h1>
@@ -17,7 +15,6 @@
           <li><a href="/">Página Inicial</a></li>
       <li><router-link to="/edital-admin">Postagens</router-link></li>
 
-          <!-- Botão para mostrar mais opções -->
           <li>
             <button class="btn-mais-opcoes" @click="toggleOpcoesExtras">
               {{ opcoesExtrasVisiveis ? '☰ Fechar' : '☰ Trabalho' }}
@@ -25,7 +22,6 @@
           </li>
         </ul>
 
-        <!-- Opções extras (aparecem quando clicar no botão) -->
         <ul v-if="opcoesExtrasVisiveis" class="navbar-links-extras">
           <li><router-link to="/animal">Animais</router-link></li>
           <li><router-link to="/especie">Espécies</router-link></li>
@@ -61,14 +57,12 @@ export default {
 </script>
 
 <style scoped>
-/* Container geral */
 .header {
   width: 100%;
   font-family: "Segoe UI", Roboto, sans-serif;
   
 }
 
-/* Barra superior */
 .topbar {
   display: flex;
   justify-content: space-between;
@@ -92,7 +86,6 @@ export default {
   font-style: italic;
 }
 
-/* Navbar principal */
 .navbar {
   position: sticky;
   top: 0;
@@ -106,7 +99,6 @@ export default {
   z-index: 99;
 }
 
-/* Logo */
 .logo h1 {
   font-size: 1.6rem;
   margin: 0;
@@ -131,7 +123,6 @@ export default {
   color: #333;
 }
 
-/* Menu */
 .nav ul {
   display: flex;
   list-style: none;
@@ -153,7 +144,6 @@ export default {
   color: #5c906e;
 }
 
-/* Efeito underline animado */
 .nav a::after, .nav router-link::after {
   content: "";
   position: absolute;
@@ -169,7 +159,6 @@ export default {
   width: 100%;
 }
 
-/* Botão "Mais opções" */
 .btn-mais-opcoes {
   background: #81b7f6;
   color: white;
@@ -187,10 +176,9 @@ export default {
   transform: scale(1.05);
 }
 
-/* Menu de opções extras (dropdown) */
 .navbar-links-extras {
   position: absolute;
-  top: 100%; /* Ajustado para aparecer logo abaixo do navbar */
+  top: 100%;
   right: 2rem;
   background: white;
   list-style: none;

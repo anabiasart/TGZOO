@@ -1,6 +1,5 @@
   <template>
     <div class="noticias-page">
-      <!-- Header -->
       <header class="page-header">
         <button class="btn-voltar" @click="$router.go(-1)">
           ← Voltar
@@ -11,7 +10,6 @@
         </div>
       </header>
 
-      <!-- Filtros -->
       <section class="filtros-section">
         <div class="filtros-container">
           <div class="search-box">
@@ -25,13 +23,11 @@
         </div>
       </section>
 
-      <!-- Loading -->
       <div v-if="carregando" class="loading-container">
         <div class="spinner"></div>
         <p>Carregando notícias...</p>
       </div>
 
-      <!-- Lista de notícias -->
       <main class="noticias-container" v-else>
         <div v-if="noticiasFiltradas.length === 0" class="empty-state">
           <span class="empty-icon">📝</span>
@@ -46,17 +42,14 @@
             class="noticia-card"
             @click="verNoticia(noticia.id)"
           >
-            <!-- Badge -->
             <div class="card-badge">
               <span class="badge-noticia">📝 Notícia</span>
             </div>
 
-            <!-- Imagem -->
             <div class="card-image">
               <img :src="getImagem(noticia)" :alt="getTitulo(noticia)" />
             </div>
 
-            <!-- Conteúdo -->
           <div class="card-content">
     <h3>{{ getTitulo(noticia) }}</h3>
     <p class="resumo">{{ noticia.resumo }}</p>
@@ -99,11 +92,9 @@
     carregarNoticias()
   })
 
-  // Computed - Filtra apenas notícias
   const noticiasFiltradas = computed(() => {
     let resultado = [...noticias.value]
     
-    // Filtro de busca
     if (filtros.value.busca.trim()) {
       const termo = filtros.value.busca.toLowerCase()
       resultado = resultado.filter(n => {
@@ -116,7 +107,6 @@
     return resultado
   })
 
-  // Funções
   function getTitulo(noticia) {
     return noticia.nomeNoticia || noticia.titulo
   }
@@ -145,7 +135,6 @@
   }
 
   function aplicarFiltros() {
-    // Os filtros são aplicados automaticamente pelo computed
   }
   </script>
 

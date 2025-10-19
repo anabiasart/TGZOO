@@ -105,10 +105,6 @@ router.beforeEach((to, from, next) => {
   const token = localStorage.getItem('token');
   const userRole = localStorage.getItem('role');
 
-  console.log(`🔍 Token: ${token ? 'Presente' : 'Ausente'}`);
-  console.log(`🔍 Role do usuário: ${userRole}`);
-  console.log(`🔍 Role necessária: ${to.meta?.role}`);
-
   if (to.meta?.requiresAuth) {
     if (!token || !userRole) {
       console.log('❌ Sem autenticação, redirecionando para login');

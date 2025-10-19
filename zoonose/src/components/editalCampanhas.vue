@@ -1,6 +1,5 @@
 <template>
   <div class="campanhas-page">
-    <!-- Header -->
     <header class="page-header">
       <button class="btn-voltar" @click="$router.go(-1)">
         ← Voltar
@@ -11,7 +10,6 @@
       </div>
     </header>
 
-    <!-- Filtros -->
     <section class="filtros-section">
       <div class="filtros-container">
         <div class="search-box">
@@ -25,13 +23,11 @@
       </div>
     </section>
 
-    <!-- Loading -->
     <div v-if="carregando" class="loading-container">
       <div class="spinner"></div>
       <p>Carregando campanhas...</p>
     </div>
 
-    <!-- Lista de campanhas -->
     <main class="campanhas-container" v-else>
       <div v-if="campanhasFiltradas.length === 0" class="empty-state">
         <span class="empty-icon">📢</span>
@@ -46,21 +42,17 @@
           class="campanha-card"
           @click="verCampanha(campanha.id)"
         >
-          <!-- Badge -->
           <div class="card-badge">
             <span class="badge-campanha">📢 Campanha</span>
           </div>
 
-          <!-- Imagem -->
           <div class="card-image">
             <img :src="getImagem(campanha)" :alt="getTitulo(campanha)" />
           </div>
 
-          <!-- Conteúdo -->
           <div class="card-content">
             <h3>{{ getTitulo(campanha) }}</h3>
             
-            <!-- Info de Campanha -->
             <div class="campanha-info">
               <div class="info-item" v-if="campanha.dataInicioCampanha">
                 <span class="icon">📅</span>
@@ -107,7 +99,6 @@ import { useCampanhas } from '@/data/campanhasData.js'
 import vete from '@/assets/img/vete.jpg'
 
 const router = useRouter()
-// ✅ Correção: usar nomes mais claros para evitar confusão
 const { 
   campanhas, 
   carregando, 
@@ -122,11 +113,9 @@ onMounted(() => {
   carregarCampanhas()
 })
 
-// ✅ Usar 'campanhas' em vez de 'noticias'
 const campanhasFiltradas = computed(() => {
   let resultado = [...campanhas.value] 
   
-  // Filtro de busca
   if (filtros.value.busca.trim()) {
     const termo = filtros.value.busca.toLowerCase()
     resultado = resultado.filter(campanha => {
@@ -138,7 +127,6 @@ const campanhasFiltradas = computed(() => {
   return resultado
 })
   
-// Funções permanecem iguais
 function getTitulo(campanha) {
   return campanha.nomeCampanha || campanha.titulo
 }
@@ -156,7 +144,6 @@ function getResumo(campanha) {
     return cortarTexto(campanha.description, 120)
   }
   
-  // Fallback: criar um resumo básico
   let resumo = `Campanha ${campanha.nomeCampanha || 'sem nome'}`
   if (campanha.dataInicioCampanha) {
     resumo += ` agendada para ${campanha.dataInicioCampanha}`
@@ -175,7 +162,6 @@ function cortarTexto(texto, limite) {
   return cortado.slice(0, ultimoEspaco) + '…'
 }
 
-// Nova função para formatar período de forma mais limpa
 function formatarPeriodo(campanha) {
   if (!campanha.dataInicioCampanha) return ''
   

@@ -382,7 +382,6 @@
                 </div>
               </div>
 
-              <!-- Informações Adicionais -->
               <div class="form-section">
                 <h3>ℹ️ Informações Adicionais</h3>
                 
@@ -470,14 +469,11 @@
 <script setup>
 import { ref, computed, onMounted } from "vue"
 import { useEditais } from "@/data/editaisData.js"
-
-// Composables
 const { todosItens: noticias, carregando, erro, carregarTodos: carregarNoticias, adicionarItem: adicionarNoticia, editarItem: editarNoticiaData, removerItem: removerNoticiaPorId, alterarStatus: alterarStatusNoticia, limparErro 
 
 } = useEditais()
 
 
-// Estados do componente
 const modalAberto = ref(false)
 const modoEdicao = ref(false)
 const noticiaEditandoId = ref(null)
@@ -486,21 +482,18 @@ const excluindo = ref(false)
 const imagemComErro = ref(false)
 const menuAberto = ref(null)
 
-// Toast notification
 const toast = ref({
   mostrar: false,
   tipo: 'success',
   mensagem: ''
 })
 
-// Estados de filtro
 const filtros = ref({
   busca: '',
   tipo: '',
   status: ''
 })
 
-// Modal de exclusão
 const modalExclusao = ref({
   aberto: false,
   noticia: null
@@ -523,7 +516,6 @@ const noticiaForm = ref({
   dataPublicacao: new Date().toISOString().split('T')[0]
 })
 
-// Computed properties
 const campanhas = computed(() => 
   noticias.value.filter(n => n.tipo === 'campanha')
 )
@@ -558,8 +550,6 @@ const noticiasFiltradas = computed(() => {
 const temFiltrosAtivos = computed(() => 
   filtros.value.busca || filtros.value.tipo || filtros.value.status
 )
-
-// Métodos
 function mostrarToast(tipo, mensagem) {
   toast.value = { mostrar: true, tipo, mensagem }
   setTimeout(() => {
@@ -760,7 +750,6 @@ function formatarDataSimples(data) {
       return data
     }
     
-    // Tenta converter usando Date
     const date = new Date(data)
     if (!isNaN(date.getTime())) {
       return date.toLocaleDateString('pt-BR')
@@ -772,7 +761,6 @@ function formatarDataSimples(data) {
   }
 }
 
-// Lifecycle
 onMounted(() => {
   carregarNoticias()
   document.addEventListener('click', () => {

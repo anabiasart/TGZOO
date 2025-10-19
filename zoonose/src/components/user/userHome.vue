@@ -1,6 +1,5 @@
 <template>
   <div class="userHome">
-    <Header :usuario="nomeUsuario" />
 
     <div class="container">
       <!-- Atalhos Rápidos -->

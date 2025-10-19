@@ -10,7 +10,6 @@ const ano = new Date().getFullYear()
   <footer class="footer">
     <div class="footer-container">
 
-      <!-- Sobre -->
       <div class="footer-section">
 
         <h3 class="footer-title"> 
@@ -22,7 +21,6 @@ const ano = new Date().getFullYear()
         </p>
       </div>
 
-      <!-- Links úteis -->
       <div class="footer-section">
         <h4 class="footer-subtitle">Links úteis</h4>
         <ul class="footer-links">
@@ -35,14 +33,12 @@ const ano = new Date().getFullYear()
         </ul>
       </div>
 
-      <!-- Contato -->
       <div class="footer-section">
         <h4 class="footer-subtitle">Contato</h4>
         <p><Mail class="footer-icon" /> zoonosys@prefeitura.gov</p>
         <p><Phone class="footer-icon" /> (11) 99999-0000</p>
       </div>
 
-      <!-- Redes sociais -->
       <div class="footer-section">
         <h4 class="footer-subtitle">Siga-nos</h4>
         <div class="footer-socials">
@@ -52,7 +48,6 @@ const ano = new Date().getFullYear()
       </div>
     </div>
 
-    <!-- Copy -->
     <div class="footer-copy">
       <p>© {{ ano }} ZoonoSys - Todos os direitos reservados.</p>
     </div>

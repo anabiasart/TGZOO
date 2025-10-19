@@ -1,28 +1,5 @@
 <template>
-        <!-------------
-        <main>
-    <div class="detalhes-container">
-        <img id="fotoAnimal" alt="Foto do animal">
-        <h2 id="nomeAnimal"></h2>
-        <p><strong>Espécie:</strong> <span id="especieAnimal"></span></p>
-        <p><strong>Idade:</strong> <span id="idadeAnimal"></span></p>
-
-        <h3>Formulário de Adoção</h3>
-        <form id="formAdocao">
-            <label for="nome">Seu Nome:</label>
-            <input type="text" id="nome" required>
-
-            <label for="email">Seu Email:</label>
-            <input type="email" id="email" required>
-
-            <label for="mensagem">Por que deseja adotar?</label>
-            <textarea id="mensagem" rows="4" required></textarea>
-
-            <button type="submit">Enviar Solicitação</button>
-        </form>
-    </div>
-</main>
------>
+       
 <div class="adocao-page">
 
 
@@ -61,7 +38,6 @@
       <div v-if="filteredAnimals.length === 0" class="empty">Nenhum animal encontrado.</div>
     </main>
 
-    <!-- Modal simples -->
     <div v-if="selected" class="modal-overlay" @click.self="closeModal">
       <div class="modal">
         <button class="close" @click="closeModal">×</button>
@@ -94,7 +70,6 @@ const q = ref('')
 const filterType = ref('')
 const selected = ref(null)
 
-// Dados de exemplo — substitua pelos seus dados/API
 const animals = ref([
   {
     id: 1,

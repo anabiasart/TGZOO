@@ -1,4 +1,3 @@
-// zoonose/src/data/noticiasData.js
 import { ref } from 'vue'
 
 const noticias = ref([])
@@ -7,12 +6,10 @@ const erro = ref(null)
 
 const API_URL = 'http://localhost:8080/api/news'
 
-// Função para obter o token JWT
 const getAuthToken = () => {
   return localStorage.getItem('token')
 }
 
-// Função para configurar headers
 const getAuthHeaders = () => {
   const token = getAuthToken()
   console.log('🔑 Token encontrado:', token ? 'SIM ✅' : 'NÃO ❌')
@@ -24,7 +21,6 @@ const getAuthHeaders = () => {
   
   if (token) {
     headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`
-    console.log('📤 Authorization header:', headers['Authorization'].substring(0, 20) + '...')
   } else {
     console.warn('⚠️ Nenhum token encontrado! Você precisa fazer login primeiro.')
   }
@@ -32,7 +28,6 @@ const getAuthHeaders = () => {
   return headers
 }
 
-// Mapear backend -> frontend para NOTÍCIAS
 const mapBackendToFrontend = (backendNews) => {
   return {
     id: backendNews.id,
@@ -41,7 +36,7 @@ const mapBackendToFrontend = (backendNews) => {
     urlImagemNoticia: backendNews.imageUrl,
     resumo: backendNews.content,
     // Campos comuns
-    titulo: backendNews.title, // Mantém para compatibilidade
+    titulo: backendNews.title, 
     categoria: 'geral',
     status: 'ativo',
     autor: backendNews.user?.name || 'Sistema',
@@ -49,7 +44,6 @@ const mapBackendToFrontend = (backendNews) => {
   }
 }
 
-// Mapear frontend -> backend para NOTÍCIAS
 const mapFrontendToBackend = (frontendNews) => {
   return {
     title: frontendNews.nomeNoticia,
@@ -65,7 +59,6 @@ export function useNoticias() {
     erro.value = null
     
     try {
-      // GET /news é público, não precisa de token
       const response = await fetch(`${API_URL}?size=100&sort=createdAt,desc`, {
         method: 'GET',
         headers: {
@@ -93,7 +86,6 @@ export function useNoticias() {
     }
   }
 
-  // Adicionar nova notícia
   const adicionarNoticia = async (noticiaForm) => {
     carregando.value = true
     erro.value = null
@@ -140,7 +132,6 @@ export function useNoticias() {
     }
   }
 
-  // Editar notícia
   const editarNoticia = async (id, noticiaForm) => {
     carregando.value = true
     erro.value = null
@@ -179,7 +170,6 @@ export function useNoticias() {
       
       const noticiaAtualizada = await response.json()
       
-      // Atualizar na lista local
       const index = noticias.value.findIndex(n => n.id === id)
       if (index !== -1) {
         noticias.value[index] = mapBackendToFrontend(noticiaAtualizada)
@@ -230,7 +220,6 @@ export function useNoticias() {
         throw new Error(errorText || 'Erro ao excluir notícia')
       }
       
-      // Remover da lista local
       noticias.value = noticias.value.filter(n => n.id !== id)
       
       console.log('✅ Notícia removida com sucesso:', id)
@@ -247,7 +236,6 @@ export function useNoticias() {
   // Buscar notícia por ID
   const buscarNoticiaPorId = async (id) => {
     try {
-      // GET /news/{id} é público também, não precisa de token
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'GET',
         headers: {
@@ -271,7 +259,6 @@ export function useNoticias() {
     }
   }
 
-  // Alterar status (apenas localmente - backend não tem este campo)
   const alterarStatusNoticia = async (id, novoStatus) => {
     const index = noticias.value.findIndex(n => n.id === id)
     if (index !== -1) {
@@ -279,7 +266,6 @@ export function useNoticias() {
     }
   }
 
-  // Limpar erro
   const limparErro = () => {
     erro.value = null
   }

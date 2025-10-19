@@ -1,4 +1,3 @@
-// zoonose/src/data/campanhasData.js
 import { ref } from 'vue'
 
 const campanhas = ref([])
@@ -7,12 +6,10 @@ const erro = ref(null)
 
 const API_URL = 'http://localhost:8080/api/campaigns'
 
-// Função para obter o token JWT
 const getAuthToken = () => {
   return localStorage.getItem('token')
 }
 
-// Função para configurar headers
 const getAuthHeaders = () => {
   const token = getAuthToken()
   console.log('🔑 Token encontrado:', token ? 'SIM ✅' : 'NÃO ❌')
@@ -32,7 +29,6 @@ const getAuthHeaders = () => {
   return headers
 }
 
-// Função auxiliar para formatar data ISO para dd/mm/yyyy
 const formatarDataParaExibicao = (dataISO) => {
   if (!dataISO) return ''
   try {
@@ -44,7 +40,6 @@ const formatarDataParaExibicao = (dataISO) => {
   }
 }
 
-// Função auxiliar para extrair horário limpo
 const extractTimeFromDateTime = (startDateTime, endDateTime) => {
   if (!startDateTime) return ''
   
@@ -72,13 +67,11 @@ const extractTimeFromDateTime = (startDateTime, endDateTime) => {
   }
 }
 
-// Mapear backend -> frontend (VERSÃO CORRIGIDA)
 const mapBackendToFrontend = (backendCampaign) => {
   const dataInicio = formatarDataParaExibicao(backendCampaign.startDateTime)
   const dataFim = formatarDataParaExibicao(backendCampaign.endDateTime)
   const horario = extractTimeFromDateTime(backendCampaign.startDateTime, backendCampaign.endDateTime)
   
-  // Criar uma descrição resumida se não existir
   let descricaoResumo = backendCampaign.description || ''
   if (!descricaoResumo || descricaoResumo.length < 10) {
     descricaoResumo = `Campanha ${backendCampaign.name} agendada para ${dataInicio}`
@@ -99,10 +92,9 @@ const mapBackendToFrontend = (backendCampaign) => {
     horarioCampanha: horario,
     urlImagem: backendCampaign.imageUrl,
     description: backendCampaign.description,
-    resumo: descricaoResumo, // ✅ Adicionar resumo para exibição
-    localCampanha: backendCampaign.location || '', // ✅ Local se existir
+    resumo: descricaoResumo, 
+    localCampanha: backendCampaign.location || '', 
     
-    // Campos comuns para compatibilidade
     titulo: backendCampaign.name,
     categoria: 'campanha',
     status: 'ativo',
@@ -111,9 +103,7 @@ const mapBackendToFrontend = (backendCampaign) => {
   }
 }
 
-// Mapear frontend -> backend
 const mapFrontendToBackend = (frontendCampaign) => {
-  // Função para garantir formato de data correto
   const formatarData = (data) => {
     if (!data) return null
     
@@ -128,7 +118,6 @@ const mapFrontendToBackend = (frontendCampaign) => {
       return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
     }
     
-    // Se é um objeto Date, converte
     if (data instanceof Date) {
       return data.toISOString().split('T')[0]
     }
@@ -142,11 +131,7 @@ const mapFrontendToBackend = (frontendCampaign) => {
   const startDateTime = createDateTime(dataInicio, '08:00:00')
   const endDateTime = createDateTime(dataFim, '17:00:00')
   
-  console.log('🔍 Debug formatação:')
-  console.log('Data início original:', frontendCampaign.dataInicioCampanha)
-  console.log('Data início formatada:', dataInicio)
-  console.log('StartDateTime final:', startDateTime)
-  console.log('EndDateTime final:', endDateTime)
+  
   
   return {
     name: frontendCampaign.nomeCampanha,
@@ -160,7 +145,6 @@ const mapFrontendToBackend = (frontendCampaign) => {
 const createDateTime = (date, time) => {
   if (!date) return null
   
-  // Garantir que a data está no formato yyyy-mm-dd
   let formattedDate = date
   if (date.includes('/')) {
     const [dia, mes, ano] = date.split('/')
@@ -169,7 +153,6 @@ const createDateTime = (date, time) => {
   
   const timeToUse = time || '08:00:00'
   
-  // Formato ISO 8601 esperado pelo backend: "2025-01-20T08:00:00"
   return `${formattedDate}T${timeToUse}`
 }
 
@@ -196,20 +179,15 @@ export function useCampanhas() {
       
       const data = await response.json()
       campanhas.value = data.content.map(mapBackendToFrontend)
-      
-      console.log('✅ Campanhas carregadas:', campanhas.value.length)
-      console.log('📋 IDs das campanhas:', campanhas.value.map(c => c.id))
-      
+
     } catch (error) {
       erro.value = `Erro ao carregar campanhas: ${error.message}`
-      console.error('Erro ao carregar campanhas:', error)
       campanhas.value = []
     } finally {
       carregando.value = false
     }
   }
 
-  // Adicionar nova campanha
   const adicionarCampanha = async (campanhaForm) => {
     carregando.value = true
     erro.value = null
@@ -221,7 +199,6 @@ export function useCampanhas() {
       }
 
       const payload = mapFrontendToBackend(campanhaForm)
-      console.log('📤 Enviando payload de campanha:', payload)
       
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -256,7 +233,6 @@ export function useCampanhas() {
     }
   }
 
-  // Editar campanha
   const editarCampanha = async (id, campanhaForm) => {
     carregando.value = true
     erro.value = null
@@ -295,7 +271,6 @@ export function useCampanhas() {
       
       const campanhaAtualizada = await response.json()
       
-      // Atualizar na lista local
       const index = campanhas.value.findIndex(c => c.id === id)
       if (index !== -1) {
         campanhas.value[index] = mapBackendToFrontend(campanhaAtualizada)
@@ -312,7 +287,6 @@ export function useCampanhas() {
     }
   }
 
-  // Remover campanha
   const removerCampanha = async (id) => {
     carregando.value = true
     erro.value = null
@@ -395,7 +369,6 @@ export function useCampanhas() {
     }
   }
 
-  // Alterar status (apenas localmente - backend não tem este campo)
   const alterarStatusCampanha = async (id, novoStatus) => {
     const index = campanhas.value.findIndex(c => c.id === id)
     if (index !== -1) {
@@ -403,7 +376,6 @@ export function useCampanhas() {
     }
   }
 
-  // Limpar erro
   const limparErro = () => {
     erro.value = null
   }

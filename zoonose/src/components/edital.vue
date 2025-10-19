@@ -1,12 +1,10 @@
 <template>
   <div class="edital-page">
-    <!-- Loading State -->
     <div v-if="carregando" class="loading-container">
       <div class="spinner"></div>
       <p>Carregando...</p>
     </div>
 
-    <!-- Item Encontrado -->
     <template v-else-if="item">
       <header class="edital-header">
         <button class="btn-voltar" @click="$router.go(-1)">
@@ -37,14 +35,11 @@
           </div>
         </div>
       </header>
-
-      <!-- Imagem -->
       <div v-if="getImagem()" class="imagem-container">
         <img :src="getImagem()" :alt="getTitulo()" class="imagem-noticia" />
       </div>
 
       <main class="conteudo">
-        <!-- Conteúdo CAMPANHA -->
         <section v-if="item.tipo === 'campanha'" class="campanha-info">
           <h2>📢 Informações da Campanha</h2>
           <div class="grid-detalhes campanha-grid">
@@ -67,13 +62,11 @@
           </div>
         </section>
 
-        <!-- Conteúdo NOTÍCIA -->
         <section v-else class="resumo">
           <h2>📄 Conteúdo</h2>
           <div class="conteudo-texto" v-html="formatarConteudo(item.resumo)"></div>
         </section>
 
-        <!-- Ações -->
         <section class="acoes">
           <button class="btn-compartilhar" @click="compartilhar">
             📤 Compartilhar

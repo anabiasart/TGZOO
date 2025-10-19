@@ -29,7 +29,6 @@ function getTitulo(item) {
   return item.nomeNoticia || item.titulo
 }
 
-// Função para pegar a imagem correta
 function getImagem(item) {
   if (item.tipo === 'campanha') {
     return item.urlImagem || vete
@@ -37,7 +36,6 @@ function getImagem(item) {
   return item.urlImagemNoticia || item.imagem || vete
 }
 
-// Função para pegar o resumo correto
 function getResumo(item) {
   if (item.tipo === 'campanha') {
     let texto = `${item.dataInicioCampanha || ''} até ${item.dataFimCampanha || ''}`
@@ -92,7 +90,6 @@ function anterior() { indexAtual.value = (indexAtual.value - 1 + imagens.value.l
 onMounted(() => { intervalo = setInterval(proximo, 4000) })
 onUnmounted(() => clearInterval(intervalo))
 
-// Serviços
 const servicos = [
   { titulo: "Vacine o seu Pet", desc: "Garanta a saúde dos seus amigos peludos...", label: "CONSULTAR", icon: Syringe, acao: () => router.push('/edital') },
   { titulo: "Faça login", desc: "Receba dicas dos nossos veterinários...", label: "LOGIN", icon: User, acao: () => router.push('/login') },
