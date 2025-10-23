@@ -164,7 +164,7 @@ export function useCampanhas() {
     
     try {
       // GET /campaigns é público, não precisa de token
-      const response = await fetch(`${API_URL}?size=100&sort=createdAt,desc`, {
+      const response = await fetch(`${API_URL}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

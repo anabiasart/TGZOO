@@ -1,4 +1,3 @@
-// zoonose/src/data/editaisData.js
 import { ref, computed } from 'vue'
 import { useNoticias } from './noticiasData.js'
 import { useCampanhas } from './campanhasData.js'
@@ -68,44 +67,63 @@ export function useEditais() {
     }
   }
 
+  // 🔥 FUNÇÃO CORRIGIDA - SEM LOGS CONFUSOS
   const buscarItemPorId = async (id) => {
-  
-  
-  try {
-    const itemNaMemoria = todosItens.value.find(item => item.id == id)
-    if (itemNaMemoria) {
-      return itemNaMemoria
-    }
-    await carregarTodos()
-    const itemCarregado = todosItens.value.find(item => item.id == id)
-    if (itemCarregado) {
-      return itemCarregado
-    }
-    let item = await buscarNoticiaPorId(id)
-    if (item) {
-      return item
-    }
+    try {
+      console.log('🔍 Buscando item por ID:', id)
+      
+      // 1. Primeiro verifica se já está carregado na memória
+      const itemNaMemoria = todosItens.value.find(item => item.id == id)
+      if (itemNaMemoria) {
+        console.log('✅ Item encontrado na memória:', itemNaMemoria.tipo)
+        return itemNaMemoria
+      }
 
-    item = await buscarCampanhaPorId(id)
-    if (item) {
-      return item
-    }
+      // 2. Se não encontrou, carrega todos os dados
+      console.log('📡 Carregando todos os dados...')
+      await carregarTodos()
+      
+      // 3. Verifica novamente após carregar
+      const itemCarregado = todosItens.value.find(item => item.id == id)
+      if (itemCarregado) {
+        console.log('✅ Item encontrado após carregamento:', itemCarregado.tipo)
+        return itemCarregado
+      }
 
-    return null
-  } catch (error) {
-    return null
+      // 4. Se ainda não encontrou, tenta buscar individualmente
+      console.log('🔍 Tentando buscar como notícia...')
+      let item = await buscarNoticiaPorId(id)
+      if (item) {
+        console.log('✅ Encontrado como notícia')
+        return item
+      }
+
+      console.log('🔍 Tentando buscar como campanha...')
+      item = await buscarCampanhaPorId(id)
+      if (item) {
+        console.log('✅ Encontrado como campanha')
+        return item
+      }
+
+      console.log('❌ Item não encontrado')
+      return null
+      
+    } catch (error) {
+      console.error('❌ Erro ao buscar item:', error)
+      return null
+    }
   }
-}
-const alterarStatus = async (id, novoStatus, tipo) => {
-  if (tipo === 'campanha') {
-    return await alterarStatusCampanha(id, novoStatus)
-  } else {
-    return await alterarStatusNoticia(id, novoStatus)
-  }
-}
 
+  const alterarStatus = async (id, novoStatus, tipo) => {
+    if (tipo === 'campanha') {
+      return await alterarStatusCampanha(id, novoStatus)
+    } else {
+      return await alterarStatusNoticia(id, novoStatus)
+    }
+  }
 
   const limparErro = () => {
+    // Função vazia - pode implementar lógica se necessário
   }
 
   return {
