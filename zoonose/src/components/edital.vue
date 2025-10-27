@@ -44,30 +44,34 @@
       </div>
 
       <main class="conteudo">
-        <!-- Conteúdo CAMPANHA -->
+        <!-- CAMPANHA -->
         <section v-if="item.tipo === 'campanha'" class="campanha-info">
-          <h2>📢 Informações da Campanha</h2>
-          <div class="grid-detalhes campanha-grid">
-            <div v-if="item.nomeCampanha" class="detalhe-item destaque">
-              <strong>📋 Nome da Campanha</strong>
-              <span>{{ item.nomeCampanha }}</span>
-            </div>
-            <div v-if="item.dataInicioCampanha" class="detalhe-item">
-              <strong>📅 Data Início</strong>
-              <span>{{ item.dataInicioCampanha }}</span>
-            </div>
-            <div v-if="item.dataFimCampanha" class="detalhe-item">
-              <strong>📅 Data Fim</strong>
-              <span>{{ item.dataFimCampanha }}</span>
-            </div>
-            <div v-if="item.horarioCampanha" class="detalhe-item">
-              <strong>🕐 Horário</strong>
-              <span>{{ item.horarioCampanha }}</span>
-            </div>
-          </div>
-        </section>
+  <h2>📢 Informações da Campanha</h2>
 
-        <!-- Conteúdo NOTÍCIA -->
+  <div class="grid-detalhes campanha-grid">
+    <div v-if="item.nomeCampanha" class="detalhe-item destaque">
+      <strong>📋 Nome da Campanha</strong>
+      <span>{{ item.nomeCampanha }}</span>
+    </div>
+
+    <div v-if="dataInicio" class="detalhe-item">
+      <strong>📅 Data Início</strong>
+      <span>{{ dataInicio }} <span v-if="horarioInicio">às {{ horarioInicio }}</span></span>
+    </div>
+
+    <div v-if="dataFim" class="detalhe-item">
+      <strong>📅 Data Fim</strong>
+      <span>{{ dataFim }} <span v-if="horarioFim">às {{ horarioFim }}</span></span>
+    </div>
+
+    <div v-if="item.horarioCampanha" class="detalhe-item">
+      <strong>🕐 Horário Geral</strong>
+      <span>{{ item.horarioCampanha }}</span>
+    </div>
+  </div>
+</section>
+
+        <!-- NOTÍCIA -->
         <section v-else class="resumo">
           <h2>📄 Conteúdo</h2>
           <div class="conteudo-texto" v-html="formatarConteudo(item.resumo)"></div>
@@ -75,12 +79,8 @@
 
         <!-- Ações -->
         <section class="acoes">
-          <button class="btn-compartilhar" @click="compartilhar">
-            📤 Compartilhar
-          </button>
-          <button class="btn-imprimir" @click="imprimir">
-            🖨️ Imprimir
-          </button>
+          <button class="btn-compartilhar" @click="compartilhar">📤 Compartilhar</button>
+          <button class="btn-imprimir" @click="imprimir">🖨️ Imprimir</button>
         </section>
       </main>
     </template>
@@ -99,97 +99,99 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from "vue"
+import { ref, onMounted, computed } from "vue"
 import { useRoute } from "vue-router"
-import { useNoticias } from "@/data/noticiasData.js"
+import { useEditais } from "@/data/editaisData.js"
+import vete from "@/assets/img/vete.jpg"
+
+const route = useRoute()
+const { todosItens, carregarTodos } = useEditais()
 
 const item = ref(null)
 const carregando = ref(true)
-const route = useRoute()
-const { noticias: todasNoticias, carregarNoticias, buscarNoticiaPorId } = useNoticias()
 
 onMounted(async () => {
   try {
-    const id = parseInt(route.params.id, 10)
-    
-    if (isNaN(id)) {
-      carregando.value = false
-      return
+    const id = Number(route.params.id)
+    if (!id) return (carregando.value = false)
+
+    if (!todosItens.value.length) {
+      await carregarTodos()
     }
-    
-    if (todasNoticias.value.length === 0) {
-      await carregarNoticias()
-    }
-    
-    const resultado = await buscarNoticiaPorId(id)
-    
-    if (resultado) {
-      item.value = resultado
+
+    const encontrado = todosItens.value.find(i => i.id === id)
+    if (encontrado) {
+      item.value = encontrado
+      console.log("✅ Item encontrado:", encontrado)
     } else {
-      console.error('Notícia não encontrada')
+      console.warn("⚠️ Nenhum item encontrado com ID:", id)
     }
-    
-  } catch (error) {
-    console.error('Erro ao carregar:', error)
-    item.value = null
   } finally {
     carregando.value = false
   }
 })
 
-function getTitulo() {
-  if (!item.value) return ''
-  if (item.value.tipo === 'campanha') {
-    return item.value.nomeCampanha || item.value.titulo
-  }
-  return item.value.nomeNoticia || item.value.titulo
-}
-
-function getImagem() {
-  if (!item.value) return ''
-  if (item.value.tipo === 'campanha') {
-    return item.value.urlImagem || item.value.imagem
-  }
-  return item.value.urlImagemNoticia || item.value.imagem
-}
+const dataInicio = computed(() => formatarData(item.value?.startDateTime))
+const horarioInicio = computed(() => formatarHora(item.value?.startDateTime))
+const dataFim = computed(() => formatarData(item.value?.endDateTime))
+const horarioFim = computed(() => formatarHora(item.value?.endDateTime))
 
 function formatarData(data) {
-  if (!data) return 'Data não disponível'
-  return new Date(data).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'long',
-    year: 'numeric'
+  if (!data) return ""
+  const d = new Date(data)
+  return d.toLocaleDateString("pt-BR", {
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
   })
 }
 
-function formatarConteudo(texto) {
-  if (!texto) return ''
-  return texto
-    .split('\n\n')
-    .map(paragrafo => `<p>${paragrafo.replace(/\n/g, '<br>')}</p>`)
-    .join('')
+function formatarHora(data) {
+  if (!data) return ""
+  const d = new Date(data)
+  return d.toLocaleTimeString("pt-BR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  })
+}
+
+function getTitulo() {
+  if (!item.value) return ""
+  return item.value.nomeCampanha || item.value.titulo
+}
+
+function getImagem() {
+  if (!item.value) return vete
+  return item.value.urlImagem || vete
+}
+
+function formatarConteudo(text) {
+  if (!text) return ""
+  return text
+    .split("\n\n")
+    .map(p => `<p>${p.replace(/\n/g, "<br>")}</p>`)
+    .join("")
 }
 
 function compartilhar() {
-  if (navigator.share) {
-    navigator.share({
-      title: getTitulo(),
-      text: item.value.resumo?.substring(0, 200) || '',
-      url: window.location.href
-    }).catch(err => {
-      console.log('Erro ao compartilhar:', err)
-    })
-  } else {
+  if (!navigator.share) {
     navigator.clipboard.writeText(window.location.href)
-      .then(() => alert('Link copiado para a área de transferência!'))
-      .catch(err => console.error('Erro ao copiar:', err))
+    alert("Link copiado!")
+    return
   }
+
+  navigator.share({
+    title: getTitulo(),
+    url: window.location.href,
+  })
 }
 
 function imprimir() {
   window.print()
 }
 </script>
+
+
 
 <style scoped>
 .edital-page {

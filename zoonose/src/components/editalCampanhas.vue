@@ -99,62 +99,76 @@
     </main>
   </div>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useNoticias } from '@/data/noticiasData.js'
+import { useEditais } from '@/data/editaisData.js'
 import vete from '@/assets/img/vete.jpg'
 
 const router = useRouter()
-const { noticias, carregando, carregarNoticias } = useNoticias()
+const { todosItens, carregarTodos, carregando, erro } = useEditais()
 
-const filtros = ref({
-  busca: ''
+// 🔍 Filtros
+const filtros = ref({ busca: '' })
+
+// 🔹 Carrega campanhas ao montar
+onMounted(async () => {
+  try {
+    await carregarTodos()
+  } catch (e) {
+    console.error('❌ Erro ao carregar campanhas:', e)
+  }
 })
 
-onMounted(() => {
-  carregarNoticias()
-})
-
-// Computed - Filtra apenas campanhas
+// 🔹 Filtra apenas as campanhas
 const campanhasFiltradas = computed(() => {
-  let resultado = noticias.value.filter(n => n.tipo === 'campanha')
-  
-  // Filtro de busca
+  let lista = todosItens.value.filter(i => i.tipo === 'campanha')
+
   if (filtros.value.busca.trim()) {
     const termo = filtros.value.busca.toLowerCase()
-    resultado = resultado.filter(n => {
-      const titulo = getTitulo(n).toLowerCase()
-      return titulo.includes(termo)
-    })
+    lista = lista.filter(c =>
+      (c.nomeCampanha || c.titulo || '').toLowerCase().includes(termo)
+    )
   }
-  
-  return resultado
+
+  // ordena por data mais recente
+  return lista.sort((a, b) => new Date(b.dataPublicacao || b.createdAt) - new Date(a.dataPublicacao || a.createdAt))
 })
 
-// Funções
-function getTitulo(campanha) {
-  return campanha.nomeCampanha || campanha.titulo
+// 🔹 Helpers
+function getTitulo(c) {
+  return c.nomeCampanha || c.titulo || 'Campanha sem título'
 }
 
-function getImagem(campanha) {
-  return campanha.urlImagem || vete
+function getImagem(c) {
+  return c.urlImagem || c.imagem || vete
+}
+
+function getResumo(c) {
+  const inicio = c.dataInicioCampanha || c.startDateTime
+  const fim = c.dataFimCampanha || c.endDateTime
+  const horario = c.horarioCampanha
+  let texto = ''
+
+  if (inicio && fim) texto += `${formatarData(inicio)} até ${formatarData(fim)}`
+  if (horario) texto += ` • ${horario}`
+  return texto || 'Sem informações de data'
 }
 
 function formatarData(data) {
   if (!data) return ''
-  return new Date(data).toLocaleDateString('pt-BR')
+  try {
+    return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+  } catch {
+    return data
+  }
 }
 
 function verCampanha(id) {
   router.push(`/edital/${id}`)
 }
-
-function aplicarFiltros() {
-  // Os filtros são aplicados automaticamente pelo computed
-}
 </script>
+
 
 <style scoped>
 .campanhas-page {

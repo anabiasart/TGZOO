@@ -2,67 +2,79 @@
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Syringe, User, Calendar } from 'lucide-vue-next'
-import { useNoticias } from "@/data/noticiasData.js"
 import vete from "../assets/img/vete.jpg"
 import pata from "../assets/img/pata.jpg"
 import zoo from "../assets/img/zoo.png"
 
-const { noticias: todasNoticias, carregarNoticias } = useNoticias()
-const noticias = ref([])
+// 🔹 Importa o composable unificado
+import { useEditais } from "@/data/editaisData.js"
+
 const router = useRouter()
 const menuAberto = ref(false)
 
+// 🔹 Usa o composable para carregar notícias + campanhas
+const { todosItens: todosEditais, carregarTodos, carregando, erro } = useEditais()
+const noticias = ref([])
+
+// 🔹 Carrega ao montar
 onMounted(async () => {
   try {
-    await carregarNoticias()
-    console.log('Notícias carregadas:', todasNoticias.value)
+    await carregarTodos()
+    console.log('✅ Dados carregados:', todosEditais.value)
   } catch (erro) {
-    console.error('Erro ao carregar notícias:', erro)
+    console.error('❌ Erro ao carregar editais:', erro)
   }
 })
-// Função para pegar o título correto
+
+// 🔹 Helpers para exibir títulos e imagens corretamente
 function getTitulo(item) {
-  if (item.tipo === 'campanha') {
-    return item.nomeCampanha || item.titulo
-  }
-  return item.nomeNoticia || item.titulo
+  if (!item) return 'Sem título'
+  return item.tipo === 'campanha'
+    ? item.nomeCampanha || item.titulo
+    : item.nomeNoticia || item.titulo
 }
 
-// Função para pegar a imagem correta
 function getImagem(item) {
-  if (item.tipo === 'campanha') {
-    return item.urlImagem || vete
-  }
-  return item.urlImagemNoticia || item.imagem || vete
+  if (!item) return vete
+  return item.tipo === 'campanha'
+    ? item.urlImagem || item.imagem || vete
+    : item.urlImagemNoticia || item.imagem || vete
 }
 
-// Função para pegar o resumo correto
 function getResumo(item) {
+  if (!item) return ''
   if (item.tipo === 'campanha') {
-    let texto = `${item.dataInicioCampanha || ''} até ${item.dataFimCampanha || ''}`
-    if (item.horarioCampanha) {
-      texto += ` - ${item.horarioCampanha}`
-    }
-    return cortarTexto(texto, 80)
+    const inicio = item.dataInicioCampanha || item.startDateTime
+    const fim = item.dataFimCampanha || item.endDateTime
+    const horario = item.horarioCampanha
+    let texto = ''
+    if (inicio && fim) texto += `${formatarData(inicio)} até ${formatarData(fim)}`
+    if (horario) texto += ` • ${horario}`
+    return cortarTexto(texto, 90)
+  } else {
+    return cortarTexto(item.resumo || item.description || '', 100)
   }
-  return cortarTexto(item.resumo || '', 80)
 }
 
-// Função para cortar texto
 function cortarTexto(texto, limite) {
-  if (!texto) return '' 
+  if (!texto) return ''
   texto = texto.replace(/\s+/g, ' ').trim()
   if (texto.length <= limite) return texto
   const cortado = texto.slice(0, limite + 1)
   const ultimoEspaco = cortado.lastIndexOf(' ')
-  if (ultimoEspaco <= 0) return texto.slice(0, limite) + '…'
-  return cortado.slice(0, ultimoEspaco) + '…'
+  return (ultimoEspaco <= 0 ? texto.slice(0, limite) : cortado.slice(0, ultimoEspaco)) + '…'
 }
 
+function formatarData(data) {
+  if (!data) return ''
+  try {
+    return new Date(data).toLocaleDateString('pt-BR', { day: '2-digit', month: 'short', year: 'numeric' })
+  } catch { return data }
+}
 
-
-watch(todasNoticias, () => {
-  noticias.value = todasNoticias.value
+// 🔹 Atualiza lista quando o carregamento termina
+watch(todosEditais, () => {
+  noticias.value = todosEditais.value
     .slice(0, 4)
     .map(n => ({
       id: n.id,
@@ -74,12 +86,14 @@ watch(todasNoticias, () => {
     }))
 })
 
+// 🔹 Controle do menu responsivo
 function fecharMenu() {
   if (window.innerWidth > 768) menuAberto.value = false
 }
 onMounted(() => window.addEventListener('resize', fecharMenu))
 onUnmounted(() => window.removeEventListener('resize', fecharMenu))
 
+// 🔹 Carrossel
 const imagens = ref([
   { src: vete, texto: "Cuide do seu pet com amor e vacinas 💉🐶" },
   { src: pata, texto: "Adote um amigo e ganhe um companheiro fiel 🐾❤️" }
@@ -91,14 +105,14 @@ function anterior() { indexAtual.value = (indexAtual.value - 1 + imagens.value.l
 onMounted(() => { intervalo = setInterval(proximo, 4000) })
 onUnmounted(() => clearInterval(intervalo))
 
-// Serviços
+// 🔹 Serviços (iguais ao seu)
 const servicos = [
   { titulo: "Vacine o seu Pet", desc: "Garanta a saúde dos seus amigos peludos...", label: "CONSULTAR", icon: Syringe, acao: () => router.push('/edital') },
   { titulo: "Faça login", desc: "Receba dicas dos nossos veterinários...", label: "LOGIN", icon: User, acao: () => router.push('/login') },
   { titulo: "Agende uma Consulta", desc: "Receba atendimento especializado...", label: "AGENDAR", icon: Calendar, acao: () => router.push('/login') }
 ]
 
-// FAQ
+// 🔹 FAQ (mantido igual)
 const faq = ref([
   { pergunta: "Como faço para cadastrar meu pet?", resposta: "Basta acessar a área de login, criar sua conta e cadastrar os dados do seu pet.", aberto: false },
   { pergunta: "As vacinas são gratuitas?", resposta: "Sim, as campanhas de vacinação promovidas pela prefeitura são gratuitas.", aberto: false },
@@ -108,98 +122,104 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 </script>
 
 <template>
-<nav class="navbar">
-  <div class="navbar-logo" @click="router.push('/')">
-    <img :src="zoo" alt="ZoonoSys Logo" class="logo" />
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="navbar-logo" @click="router.push('/')">
+      <img :src="zoo" alt="ZoonoSys Logo" class="logo" />
+    </div>
+
+    <ul class="navbar-links">
+      <li @click="router.push('/')">Início</li>
+      <li @click="router.push('/edital/noticias')">Notícias</li> 
+      <li @click="router.push('/edital/campanhas')">Campanhas</li>
+      <li @click="router.push('/login')">Login</li>
+      <li @click="router.push('/adocao')">Adote um Amigo</li>
+    </ul>
+
+    <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>
+
+    <ul v-if="menuAberto" class="navbar-mobile">
+      <li @click="router.push('/')">Início</li>
+      <li @click="router.push('/edital/noticias')">Notícias</li> 
+      <li @click="router.push('/edital/campanhas')">Campanhas</li>
+      <li @click="router.push('/login')">Login</li>
+      <li @click="router.push('/contato')">Contato</li>
+    </ul>
+  </nav>
+
+  <!-- Carrossel -->
+  <div class="carrossel-container">
+    <img :src="imagens[indexAtual].src" alt="Carrossel" />
+    <transition name="fade" mode="out-in">
+      <div class="carrossel-texto" :key="indexAtual">
+        <h2>{{ imagens[indexAtual].texto }}</h2>
+      </div>
+    </transition>
+    <button class="btn-prev" @click="anterior">‹</button>
+    <button class="btn-next" @click="proximo">›</button>
   </div>
 
-  <ul class="navbar-links">
-    <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital/noticias')">Noticias</li> 
-    <li @click="router.push('/edital/campanhas')">Campanhas</li>
-    <li @click="router.push('/login')">Login</li>
-    <li @click="router.push('/adocao')">Adote um Amigo</li>
-  </ul>
-
-  <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>
-
-  <ul v-if="menuAberto" class="navbar-mobile">
-    <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital/noticias')">Notícias</li> 
-    <li @click="router.push('/edital/campanhas')">Campanhas</li>
-    <li @click="router.push('/login')">Login</li>
-    <li @click="router.push('/contato')">Contato</li>
-  </ul>
-</nav>
-
-<div class="carrossel-container">
-  <img :src="imagens[indexAtual].src" alt="Carrossel" />
-  <transition name="fade" mode="out-in">
-    <div class="carrossel-texto" :key="indexAtual">
-      <h2>{{ imagens[indexAtual].texto }}</h2>
-    </div>
-  </transition>
-  <button class="btn-prev" @click="anterior">‹</button>
-  <button class="btn-next" @click="proximo">›</button>
-</div>
-
-<div class="home-page">
-  <div class="content">
-    <div class="template2">
-      <main class="col-central">
-        <section class="noticias">
-          <h3 class="titulo">📰 Últimas Notícias & Campanhas</h3>
-          <div class="lista-noticias">
-            <div v-for="n in noticias" :key="n.id" class="card-noticia">
-              <div class="card-badge">
-                <span :class="n.tipo === 'campanha' ? 'badge-campanha' : 'badge-noticia'">
-                  {{ n.badge }}
-                </span>
-              </div>
-              <img :src="n.imagem" :alt="n.titulo" />
-              <div class="conteudo">
-                <h4>{{ n.titulo }}</h4>
-                <p>{{ n.resumo }}</p>
-                <button class="btn-leia" @click="router.push(`/edital/${n.id}`)">
-                  Leia mais ›
-                </button>
+  <!-- Conteúdo principal -->
+  <div class="home-page">
+    <div class="content">
+      <div class="template2">
+        <main class="col-central">
+          <section class="noticias">
+            <h3 class="titulo">📰 Últimas Notícias & Campanhas</h3>
+            <div class="lista-noticias">
+              <div v-for="n in noticias" :key="n.id" class="card-noticia">
+                <div class="card-badge">
+                  <span :class="n.tipo === 'campanha' ? 'badge-campanha' : 'badge-noticia'">
+                    {{ n.badge }}
+                  </span>
+                </div>
+                <img :src="n.imagem" :alt="n.titulo" />
+                <div class="conteudo">
+                  <h4>{{ n.titulo }}</h4>
+                  <p>{{ n.resumo }}</p>
+                  <button class="btn-leia" @click="router.push(`/edital/${n.id}`)">
+                    Leia mais ›
+                  </button>
+                </div>
               </div>
             </div>
+          </section>
+        </main>
+
+        <!-- Coluna lateral -->
+        <aside class="col-esquerda">
+          <section class="texto-zoonoses">
+            <h2>Sobre as Zoonoses</h2>
+            <p>
+              Zoonoses são doenças que podem ser transmitidas de animais para humanos.
+              É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
+            </p>
+          </section>
+
+          <div v-for="(s, i) in servicos" :key="i" class="service">
+            <component :is="s.icon" class="icon"/>
+            <h3>{{ s.titulo }}</h3>
+            <p>{{ s.desc }}</p>
+            <button class="btn-action" @click="s.acao">{{ s.label }}</button>
           </div>
-        </section>
-      </main>
 
-      <aside class="col-esquerda">
-        <section class="texto-zoonoses">
-          <h2>Sobre as Zoonoses</h2>
-          <p>
-            Zoonoses são doenças que podem ser transmitidas de animais para humanos.
-            É fundamental a vacinação e os cuidados veterinários para prevenir esses riscos.
-          </p>
-        </section>
-
-        <div v-for="(s, i) in servicos" :key="i" class="service">
-          <component :is="s.icon" class="icon"/>
-          <h3>{{ s.titulo }}</h3>
-          <p>{{ s.desc }}</p>
-          <button class="btn-action" @click="s.acao">{{ s.label }}</button>
-        </div>
-
-        <section class="faq">
-          <h3>❓ Dúvidas Frequentes</h3>
-          <div v-for="(item, i) in faq" :key="i" class="faq-item">
-            <button class="faq-question" @click="toggleFaq(i)">
-              {{ item.pergunta }}
-              <span>{{ item.aberto ? '−' : '+' }}</span>
-            </button>
-            <p v-if="item.aberto" class="faq-answer">{{ item.resposta }}</p>
-          </div>
-        </section>
-      </aside>
+          <section class="faq">
+            <h3>❓ Dúvidas Frequentes</h3>
+            <div v-for="(item, i) in faq" :key="i" class="faq-item">
+              <button class="faq-question" @click="toggleFaq(i)">
+                {{ item.pergunta }}
+                <span>{{ item.aberto ? '−' : '+' }}</span>
+              </button>
+              <p v-if="item.aberto" class="faq-answer">{{ item.resposta }}</p>
+            </div>
+          </section>
+        </aside>
+      </div>
     </div>
   </div>
-</div>
 </template>
+
+
 
 <style>
 .home-page {

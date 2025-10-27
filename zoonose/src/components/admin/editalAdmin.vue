@@ -1,1736 +1,368 @@
+<script setup>
+import { ref, onMounted, watch } from "vue"
+import { useEditais } from "@/data/editaisData.js"
+import vete from "@/assets/img/vete.jpg"
+
+const { todosItens, carregarTodos } = useEditais()
+
+const carregando = ref(true)
+const tipoSelecionado = ref("noticia")
+const editando = ref(false)
+
+const itemAtual = ref({
+  id: null,
+  tipo: "noticia",
+  titulo: "",
+  resumo: "",
+  autor: "",
+  dataInicioCampanha: "",
+  dataFimCampanha: "",
+  horarioCampanha: "",
+  urlImagem: "",
+})
+
+const imagemPreview = ref(vete)
+const toastMsg = ref("")
+const mostrarToast = ref(false)
+const toastTipo = ref("success")
+
+onMounted(async () => {
+  try {
+    await carregarTodos()
+  } catch (e) {
+    mostrarToastMsg("Erro ao carregar editais.", "error")
+  } finally {
+    carregando.value = false
+  }
+})
+
+watch(() => itemAtual.value.urlImagem, (nova) => {
+  imagemPreview.value = nova || vete
+})
+
+function getItensPorTipo(tipo) {
+  return todosItens.value.filter(i => i.tipo === tipo)
+}
+
+function mostrarToastMsg(msg, tipo = "success") {
+  toastMsg.value = msg
+  toastTipo.value = tipo
+  mostrarToast.value = true
+  setTimeout(() => (mostrarToast.value = false), 3000)
+}
+
+async function salvarItem() {
+  try {
+    const tipo = tipoSelecionado.value
+    const url = tipo === "campanha" ? "/campaigns" : "/news"
+
+    const metodo = editando.value ? "PUT" : "POST"
+    const corpo = { ...itemAtual.value, tipo }
+
+    if (tipo === "campanha") {
+      corpo.startDateTime = corpo.dataInicioCampanha
+      corpo.endDateTime = corpo.dataFimCampanha
+    }
+
+    const resp = await fetch(url, {
+      method: metodo,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(corpo)
+    })
+
+    if (!resp.ok) throw new Error(`Erro ao salvar: ${resp.status}`)
+
+    mostrarToastMsg(editando.value ? "✅ Atualizado com sucesso!" : "✅ Cadastrado com sucesso!")
+    await carregarTodos()
+    resetarFormulario()
+  } catch (e) {
+    console.error("Erro ao salvar item:", e)
+    mostrarToastMsg("❌ Erro ao salvar. Verifique os dados.", "error")
+  }
+}
+
+function editarItem(item) {
+  editando.value = true
+  itemAtual.value = { ...item }
+  imagemPreview.value = item.urlImagem || vete
+  tipoSelecionado.value = item.tipo
+}
+
+async function excluirItem(item) {
+  if (!confirm("Deseja realmente excluir este item?")) return
+  try {
+    const url = item.tipo === "campanha"
+      ? `/campaigns/${item.id}`
+      : `/news/${item.id}`
+
+    const resp = await fetch(url, { method: "DELETE" })
+    if (!resp.ok) throw new Error()
+    mostrarToastMsg("🗑️ Excluído com sucesso!")
+    await carregarTodos()
+  } catch {
+    mostrarToastMsg("Erro ao excluir item.", "error")
+  }
+}
+
+function resetarFormulario() {
+  itemAtual.value = {
+    id: null,
+    tipo: "noticia",
+    titulo: "",
+    resumo: "",
+    autor: "",
+    dataInicioCampanha: "",
+    dataFimCampanha: "",
+    horarioCampanha: "",
+    urlImagem: "",
+  }
+  imagemPreview.value = vete
+  editando.value = false
+}
+</script>
+
 <template>
-  <div class="admin-dashboard">
-    <!-- Header -->
-    <header class="dashboard-header">
-      <div class="header-content">
-        <h1>
-          <span class="icon">📰</span>
-          Gerenciar Editais
-        </h1>
-        <div class="header-stats">
-          <div class="stat-item">
-            <span class="stat-number">{{ noticias.length }}</span>
-            <span class="stat-label">Total</span>
-          </div>
-          <div class="stat-item success">
-            <span class="stat-number">{{ campanhas.length }}</span>
-            <span class="stat-label">Campanhas</span>
-          </div>
-          <div class="stat-item info">
-            <span class="stat-number">{{ noticiasGerais.length }}</span>
-            <span class="stat-label">Notícias</span>
-          </div>
-        </div>
-      </div>
-    </header>
+  <div class="admin-container">
+    <h1>⚙️ Painel de Gerenciamento de Editais</h1>
 
-    <!-- Toast Notification -->
-    <transition name="toast">
-      <div v-if="toast.mostrar" class="toast" :class="toast.tipo">
-        <span class="toast-icon">{{ toast.tipo === 'success' ? '✅' : '❌' }}</span>
-        <span class="toast-message">{{ toast.mensagem }}</span>
-      </div>
-    </transition>
-
-    <!-- Controles e Filtros -->
-    <section class="controls-section">
-      <div class="search-filters">
-        <div class="search-box">
-          <input 
-            v-model="filtros.busca" 
-            type="text"
-            placeholder="🔍 Buscar por título, autor..."
-            @input="aplicarFiltros"
-            class="search-input"
-          />
-        </div>
-        
-        <div class="filter-group">
-          <select 
-            v-model="filtros.tipo" 
-            @change="aplicarFiltros"
-            class="filter-select"
-          >
-            <option value="">Todos os tipos</option>
-            <option value="campanha">📢 Campanhas</option>
-            <option value="noticia">📝 Notícias</option>
-          </select>
-          
-          <select 
-            v-model="filtros.status" 
-            @change="aplicarFiltros"
-            class="filter-select"
-          >
-            <option value="">Todos os status</option>
-            <option value="ativo">✅ Ativo</option>
-            <option value="rascunho">📝 Rascunho</option>
-            <option value="arquivado">📦 Arquivado</option>
-          </select>
-        </div>
-
-        <button 
-          @click="abrirModalNoticia()" 
-          class="btn-primary btn-add"
-        >
-          <span>➕</span>
-          Novo Item
-        </button>
-      </div>
-    </section>
-
-    <!-- Loading State -->
-    <div v-if="carregando" class="loading-container">
-      <div class="spinner"></div>
-      <p>Carregando...</p>
-    </div>
-
-    <!-- Error State -->
-    <div v-if="erro" class="error-container">
-      <div class="error-content">
-        <span class="error-icon">⚠️</span>
-        <p>{{ erro }}</p>
-        <button @click="limparErro" class="btn-secondary">Fechar</button>
-      </div>
-    </div>
-
-    <!-- Lista de Itens -->
-    <section class="noticias-grid" v-if="!carregando">
-      <div 
-        v-for="noticia in noticiasFiltradas" 
-        :key="noticia.id"
-        class="noticia-card"
-        :class="{ 
-          'status-rascunho': noticia.status === 'rascunho',
-          'status-arquivado': noticia.status === 'arquivado'
-        }"
+    <div class="tipo-toggle">
+      <button
+        :class="{ ativo: tipoSelecionado === 'noticia' }"
+        @click="tipoSelecionado = 'noticia'"
       >
-        <!-- Card Header -->
-        <div class="card-header">
-          <div class="card-badges">
-            <span class="badge" :class="`badge-${noticia.tipo || 'noticia'}`">
-              {{ getTipoLabel(noticia.tipo) }}
-            </span>
-            </div>
-            <div class="card-badges-left">
-            <span class="badge" :class="`badge-status-${noticia.status || 'ativo'}`">
-              {{ getStatusLabel(noticia.status) }}
-            </span>
-          </div>
-          <div class="card-menu">
-            <div v-if="menuAberto === noticia.id" class="dropdown-menu">
-              <button @click="editarNoticia(noticia)">
-                <span class="menu-icon">✏️</span>
-                Editar
-              </button>
-              <button @click="duplicarNoticia(noticia)">
-                <span class="menu-icon">📋</span>
-                Duplicar
-              </button>
-              <button v-if="noticia.status === 'ativo'" @click="alterarStatus(noticia.id, 'arquivado')">
-                <span class="menu-icon">📦</span>
-                Arquivar
-              </button>
-              <button v-else @click="alterarStatus(noticia.id, 'ativo')">
-                <span class="menu-icon">✅</span>
-                Ativar
-              </button>
-              <hr>
-              <button @click="confirmarExclusao(noticia)" class="btn-danger">
-                <span class="menu-icon">🗑️</span>
-                Excluir
-              </button>
-            </div>
-          </div>
+        📰 Notícias
+      </button>
+      <button
+        :class="{ ativo: tipoSelecionado === 'campanha' }"
+        @click="tipoSelecionado = 'campanha'"
+      >
+        📢 Campanhas
+      </button>
+    </div>
+
+    <!-- Formulário -->
+    <div class="card-form">
+      <h2>{{ editando ? "✏️ Editar" : "➕ Nova" }} {{ tipoSelecionado }}</h2>
+      <form @submit.prevent="salvarItem">
+        <label>Título:</label>
+        <input v-model="itemAtual.titulo" required />
+
+        <div v-if="tipoSelecionado === 'noticia'">
+          <label>Resumo:</label>
+          <textarea v-model="itemAtual.resumo" rows="3" required></textarea>
+
+          <label>Autor:</label>
+          <input v-model="itemAtual.autor" placeholder="Sistema ou Nome" />
         </div>
 
-        <!-- Card Content -->
-        <div class="card-content">
-          <h3 class="card-title">{{ getTitulo(noticia) }}</h3>
-          
-          <!-- Conteúdo Campanha -->
-          <div v-if="noticia.tipo === 'campanha'" class="card-details campanha-details">
-            <div class="detail-row" v-if="noticia.dataInicioCampanha">
-              <span class="detail-icon">📅</span>
-              <span class="detail-text">{{ formatarDataSimples(noticia.dataInicioCampanha) }} até {{ formatarDataSimples(noticia.dataFimCampanha) }}</span>
-            </div>
-            <div class="detail-row" v-if="noticia.horarioCampanha">
-              <span class="detail-icon">🕐</span>
-              <span class="detail-text">{{ noticia.horarioCampanha }}</span>
-            </div>
-          </div>
+        <div v-else>
+          <label>Data Início:</label>
+          <input type="date" v-model="itemAtual.dataInicioCampanha" required />
 
-          <!-- Conteúdo Notícia -->
-          <p v-else class="card-description">{{ cortarTexto(noticia.resumo, 120) }}</p>
-          
-          <!-- Imagem Preview -->
-          <div v-if="getImagem(noticia)" class="card-image">
-            <img :src="getImagem(noticia)" :alt="getTitulo(noticia)" />
-          </div>
+          <label>Data Fim:</label>
+          <input type="date" v-model="itemAtual.dataFimCampanha" required />
+
+          <label>Horário:</label>
+          <input v-model="itemAtual.horarioCampanha" placeholder="Ex: 08:00 até 17:00" />
         </div>
 
-        <!-- Card Footer -->
-        <div class="card-footer">
-          <div class="card-meta">
-            <span class="meta-item">
-              <span class="meta-icon">👤</span>
-              {{ noticia.autor || 'Sistema' }}
-            </span>
-            <span class="meta-item">
-              <span class="meta-icon">📅</span>
-              {{ formatarData(noticia.dataPublicacao) }}
-            </span>
-          </div>
-          
-          <div class="card-actions">
-            <router-link 
-              :to="`/edital/${noticia.id}`" 
-              class="btn-secondary btn-sm"
-              target="_blank"
-            >
-              👁️ Ver
-            </router-link>
-            <button 
-              @click="editarNoticia(noticia)" 
-              class="btn-primary btn-sm"
-            >
-              ✏️ Editar
-            </button>
-          </div>
-        </div>
-      </div>
+        <label>URL da Imagem:</label>
+        <input v-model="itemAtual.urlImagem" placeholder="https://..." />
 
-      <!-- Empty State -->
-      <div v-if="noticiasFiltradas.length === 0" class="empty-state">
-        <div class="empty-content">
-          <span class="empty-icon">📰</span>
-          <h3>Nenhum item encontrado</h3>
-          <p v-if="temFiltrosAtivos">Tente ajustar os filtros ou criar um novo item.</p>
-          <p v-else>Comece criando seu primeiro item!</p>
-          <button @click="abrirModalNoticia()" class="btn-primary">
-            ➕ Criar Primeiro Item
+        <div class="preview">
+          <img :src="imagemPreview" alt="Prévia" />
+        </div>
+
+        <div class="acoes-form">
+          <button type="submit" class="btn-salvar">
+            {{ editando ? "Salvar Alterações" : "Cadastrar" }}
+          </button>
+          <button type="button" class="btn-resetar" @click="resetarFormulario">
+            Cancelar
           </button>
         </div>
+      </form>
+    </div>
+
+    <!-- Lista -->
+    <div v-if="!carregando" class="lista-itens">
+      <h2>📋 {{ tipoSelecionado === 'noticia' ? 'Notícias' : 'Campanhas' }} cadastradas</h2>
+
+      <div v-for="item in getItensPorTipo(tipoSelecionado)" :key="item.id" class="item-card">
+        <img :src="item.urlImagem || vete" alt="Capa" />
+        <div class="info">
+          <h3>{{ item.titulo }}</h3>
+          <p v-if="item.tipo === 'noticia'">{{ item.resumo }}</p>
+          <p v-else>
+            {{ item.dataInicioCampanha }} → {{ item.dataFimCampanha }}
+            <span v-if="item.horarioCampanha">• {{ item.horarioCampanha }}</span>
+          </p>
+        </div>
+        <div class="acoes">
+          <button @click="editarItem(item)" class="btn-editar">Editar</button>
+          <button @click="excluirItem(item)" class="btn-excluir">Excluir</button>
+        </div>
       </div>
-    </section>
+    </div>
 
-    <!-- Modal de Criação/Edição -->
-    <teleport to="body">
-      <transition name="modal">
-        <div v-if="modalAberto" class="modal-overlay" @click="fecharModal">
-          <div class="modal-content" @click.stop>
-            <div class="modal-header">
-              <h2>
-                {{ modoEdicao ? '✏️ Editar Item' : '➕ Novo Item' }}
-              </h2>
-              <button @click="fecharModal" class="btn-close">✕</button>
-            </div>
-
-            <div class="modal-body">
-              <!-- Seletor de Tipo -->
-              <div class="form-section">
-                <h3>📋 Tipo de Publicação</h3>
-                <div class="form-group">
-                  <div class="radio-group">
-                    <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'campanha' }">
-                      <input 
-                        type="radio" 
-                        v-model="noticiaForm.tipo" 
-                        value="campanha"
-                        class="radio-input"
-                      />
-                      <span class="radio-text">📢 Campanha</span>
-                    </label>
-                    <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'noticia' }">
-                      <input 
-                        type="radio" 
-                        v-model="noticiaForm.tipo" 
-                        value="noticia"
-                        class="radio-input"
-                      />
-                      <span class="radio-text">📝 Notícia</span>
-                    </label>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Formulário CAMPANHA -->
-              <div v-if="noticiaForm.tipo === 'campanha'" class="form-section">
-                <h3>📢 Dados da Campanha</h3>
-                
-                <div class="form-group">
-                  <label for="nomeCampanha">Nome da Campanha *</label>
-                  <input 
-                    id="nomeCampanha"
-                    v-model="noticiaForm.nomeCampanha" 
-                    type="text"
-                    placeholder="Ex: Vacinação Antirrábica 2025"
-                    required
-                    maxlength="100"
-                  />
-                  <small>{{ noticiaForm.nomeCampanha?.length || 0 }}/100 caracteres</small>
-                </div>
-
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="dataInicioCampanha">Data Início *</label>
-                    <input 
-                      id="dataInicioCampanha"
-                      v-model="noticiaForm.dataInicioCampanha" 
-                      type="date"
-                      required
-                    />
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="dataFimCampanha">Data Fim *</label>
-                    <input 
-                      id="dataFimCampanha"
-                      v-model="noticiaForm.dataFimCampanha" 
-                      type="date"
-                      required
-                    />
-                  </div>
-                </div>
-
-                <div class="form-group">
-                  <label for="horarioCampanha">Horário da Campanha *</label>
-                  <input 
-                    id="horarioCampanha"
-                    v-model="noticiaForm.horarioCampanha" 
-                    type="text"
-                    placeholder="Ex: 08:00 às 17:00"
-                    required
-                  />
-                </div>
-
-                <div class="form-group">
-                  <label for="urlImagem">URL da Imagem</label>
-                  <input 
-                    id="urlImagem"
-                    v-model="noticiaForm.urlImagem" 
-                    type="url"
-                    placeholder="https://exemplo.com/imagem.jpg"
-                  />
-                </div>
-
-                <!-- Preview da Imagem -->
-                <div v-if="noticiaForm.urlImagem" class="image-preview">
-                  <img :src="noticiaForm.urlImagem" alt="Preview" @error="imagemComErro = true" />
-                  <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
-                </div>
-              </div>
-
-              <!-- Formulário NOTÍCIA -->
-              <div v-else class="form-section">
-                <h3>📝 Dados da Notícia</h3>
-                
-                <div class="form-group">
-                  <label for="nomeNoticia">Nome da Notícia *</label>
-                  <input 
-                    id="nomeNoticia"
-                    v-model="noticiaForm.nomeNoticia" 
-                    type="text"
-                    placeholder="Ex: Novo Centro de Adoção Inaugurado"
-                    required
-                    maxlength="100"
-                  />
-                  <small>{{ noticiaForm.nomeNoticia?.length || 0 }}/100 caracteres</small>
-                </div>
-
-                <div class="form-group">
-                  <label for="resumo">Resumo *</label>
-                  <textarea 
-                    id="resumo"
-                    v-model="noticiaForm.resumo" 
-                    placeholder="Escreva um resumo da notícia"
-                    rows="4"
-                    maxlength="500"
-                    required
-                  ></textarea>
-                  <small>{{ noticiaForm.resumo?.length || 0 }}/500 caracteres</small>
-                </div>
-
-                <div class="form-group">
-                  <label for="urlImagemNoticia">URL da Imagem *</label>
-                  <input 
-                    id="urlImagemNoticia"
-                    v-model="noticiaForm.urlImagemNoticia" 
-                    type="url"
-                    placeholder="https://exemplo.com/imagem.jpg"
-                    required
-                  />
-                </div>
-
-                <!-- Preview da Imagem -->
-                <div v-if="noticiaForm.urlImagemNoticia" class="image-preview">
-                  <img :src="noticiaForm.urlImagemNoticia" alt="Preview" @error="imagemComErro = true" />
-                  <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
-                </div>
-              </div>
-
-              <!-- Informações Adicionais -->
-              <div class="form-section">
-                <h3>ℹ️ Informações Adicionais</h3>
-                
-                <div class="form-row">
-                  <div class="form-group">
-                    <label for="autor">Autor</label>
-                    <input 
-                      id="autor"
-                      v-model="noticiaForm.autor" 
-                      type="text"
-                      placeholder="Nome do autor"
-                    />
-                  </div>
-                  
-                  <div class="form-group">
-                    <label for="status">Status</label>
-                    <select id="status" v-model="noticiaForm.status">
-                      <option value="ativo">✅ Ativo</option>
-                      <option value="rascunho">📝 Rascunho</option>
-                      <option value="arquivado">📦 Arquivado</option>
-                    </select>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Actions -->
-              <div class="modal-actions">
-                <div class="modal-actions-left">
-                  <button 
-                    v-if="modoEdicao" 
-                    type="button" 
-                    @click="excluirDoModal" 
-                    class="btn-danger"
-                  >
-                    🗑️ Excluir
-                  </button>
-                </div>
-                <div class="modal-actions-right">
-                  <button type="button" @click="fecharModal" class="btn-secondary">
-                    Cancelar
-                  </button>
-                  <button @click="salvarNoticia" class="btn-primary" :disabled="salvando">
-                    <span v-if="salvando" class="spinner-small"></span>
-                    {{ salvando ? 'Salvando...' : (modoEdicao ? 'Salvar Alterações' : 'Criar Item') }}
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </teleport>
-
-    <!-- Modal de Confirmação de Exclusão -->
-    <teleport to="body">
-      <transition name="modal">
-        <div v-if="modalExclusao.aberto" class="modal-overlay" @click="cancelarExclusao">
-          <div class="modal-content modal-small" @click.stop>
-            <div class="modal-header">
-              <h2>🗑️ Confirmar Exclusão</h2>
-            </div>
-            
-            <div class="modal-body">
-              <p>Tem certeza que deseja excluir permanentemente:</p>
-              <strong class="item-destaque">"{{ getTitulo(modalExclusao.noticia) }}"</strong>
-              <p class="warning-text">⚠️ Esta ação não pode ser desfeita!</p>
-            </div>
-            
-            <div class="modal-actions">
-              <button @click="cancelarExclusao" class="btn-secondary">
-                Cancelar
-              </button>
-              <button @click="confirmarExclusaoFinal" class="btn-danger" :disabled="excluindo">
-                <span v-if="excluindo" class="spinner-small"></span>
-                {{ excluindo ? 'Excluindo...' : 'Sim, Excluir' }}
-              </button>
-            </div>
-          </div>
-        </div>
-      </transition>
-    </teleport>
+    <!-- Toast -->
+    <transition name="fade">
+      <div v-if="mostrarToast" :class="['toast', toastTipo]">{{ toastMsg }}</div>
+    </transition>
   </div>
 </template>
 
-<script setup>
-import { ref, computed, onMounted } from "vue"
-import { useNoticias } from "@/data/noticiasData.js"
-
-// Composables
-const { 
-  noticias, 
-  carregando, 
-  erro,
-  carregarNoticias,
-  adicionarNoticia,
-  editarNoticia: editarNoticiaData,
-  removerNoticiaPorId,
-  alterarStatusNoticia,
-  limparErro
-} = useNoticias()
-
-// Estados do componente
-const modalAberto = ref(false)
-const modoEdicao = ref(false)
-const noticiaEditandoId = ref(null)
-const salvando = ref(false)
-const excluindo = ref(false)
-const imagemComErro = ref(false)
-const menuAberto = ref(null)
-
-// Toast notification
-const toast = ref({
-  mostrar: false,
-  tipo: 'success',
-  mensagem: ''
-})
-
-// Estados de filtro
-const filtros = ref({
-  busca: '',
-  tipo: '',
-  status: ''
-})
-
-// Modal de exclusão
-const modalExclusao = ref({
-  aberto: false,
-  noticia: null
-})
-
-// Form da notícia
-const noticiaForm = ref({
-  tipo: 'campanha',
-  nomeCampanha: '',
-  dataInicioCampanha: '',
-  dataFimCampanha: '',
-  horarioCampanha: '',
-  urlImagem: '',
-  nomeNoticia: '',
-  urlImagemNoticia: '',
-  resumo: '',
-  autor: 'Administrador',
-  status: 'ativo',
-  dataPublicacao: new Date().toISOString().split('T')[0]
-})
-
-// Computed properties
-const campanhas = computed(() => 
-  noticias.value.filter(n => n.tipo === 'campanha')
-)
-
-const noticiasGerais = computed(() => 
-  noticias.value.filter(n => n.tipo === 'noticia' || !n.tipo)
-)
-
-const noticiasFiltradas = computed(() => {
-  let resultado = [...noticias.value]
-  
-  if (filtros.value.busca.trim()) {
-    const termo = filtros.value.busca.toLowerCase()
-    resultado = resultado.filter(n => {
-      const titulo = getTitulo(n).toLowerCase()
-      const resumo = (n.resumo || '').toLowerCase()
-      const autor = (n.autor || '').toLowerCase()
-      return titulo.includes(termo) || resumo.includes(termo) || autor.includes(termo)
-    })
-  }
-  
-  if (filtros.value.tipo) {
-    resultado = resultado.filter(n => (n.tipo || 'noticia') === filtros.value.tipo)
-  }
-  
-  if (filtros.value.status) {
-    resultado = resultado.filter(n => (n.status || 'ativo') === filtros.value.status)
-  }
-  
-  return resultado.sort((a, b) => new Date(b.dataPublicacao || 0) - new Date(a.dataPublicacao || 0))
-})
-
-const temFiltrosAtivos = computed(() => 
-  filtros.value.busca || filtros.value.tipo || filtros.value.status
-)
-
-// Métodos
-function mostrarToast(tipo, mensagem) {
-  toast.value = { mostrar: true, tipo, mensagem }
-  setTimeout(() => {
-    toast.value.mostrar = false
-  }, 3000)
-}
-
-function resetarForm() {
-  noticiaForm.value = {
-    tipo: 'campanha',
-    nomeCampanha: '',
-    dataInicioCampanha: '',
-    dataFimCampanha: '',
-    horarioCampanha: '',
-    urlImagem: '',
-    nomeNoticia: '',
-    urlImagemNoticia: '',
-    resumo: '',
-    autor: 'Administrador',
-    status: 'ativo',
-    dataPublicacao: new Date().toISOString().split('T')[0]
-  }
-  imagemComErro.value = false
-  modoEdicao.value = false
-  noticiaEditandoId.value = null
-}
-
-function abrirModalNoticia(noticia = null) {
-  if (noticia) {
-    noticiaForm.value = JSON.parse(JSON.stringify(noticia))
-    if (!noticiaForm.value.tipo) {
-      noticiaForm.value.tipo = 'noticia'
-    }
-    modoEdicao.value = true
-    noticiaEditandoId.value = noticia.id
-  } else {
-    resetarForm()
-  }
-  modalAberto.value = true
-}
-
-function fecharModal() {
-  modalAberto.value = false
-  setTimeout(resetarForm, 300)
-}
-
-async function salvarNoticia() {
-  try {
-    salvando.value = true
-    
-    const dadosParaSalvar = {
-      ...noticiaForm.value,
-      dataPublicacao: noticiaForm.value.dataPublicacao || new Date().toISOString().split('T')[0]
-    }
-    
-    if (modoEdicao.value) {
-      await editarNoticiaData(noticiaEditandoId.value, dadosParaSalvar)
-      mostrarToast('success', '✅ Item atualizado com sucesso!')
-    } else {
-      await adicionarNoticia(dadosParaSalvar)
-      mostrarToast('success', '✅ Item criado com sucesso!')
-    }
-    
-    fecharModal()
-    
-  } catch (error) {
-    console.error('Erro ao salvar:', error)
-    mostrarToast('error', '❌ ' + error.message)
-  } finally {
-    salvando.value = false
-  }
-}
-
-function editarNoticia(noticia) {
-  menuAberto.value = null
-  abrirModalNoticia(noticia)
-}
-
-function duplicarNoticia(noticia) {
-  menuAberto.value = null
-  const noticiaClone = { ...noticia }
-  
-  if (noticia.tipo === 'campanha') {
-    noticiaClone.nomeCampanha = `${noticia.nomeCampanha} (Cópia)`
-  } else {
-    noticiaClone.nomeNoticia = `${noticia.nomeNoticia || noticia.titulo} (Cópia)`
-  }
-  
-  delete noticiaClone.id
-  abrirModalNoticia(noticiaClone)
-}
-
-async function alterarStatus(id, novoStatus) {
-  try {
-    await alterarStatusNoticia(id, novoStatus)
-    menuAberto.value = null
-    mostrarToast('success', `✅ Status alterado para ${novoStatus}`)
-  } catch (error) {
-    console.error('Erro ao alterar status:', error)
-    mostrarToast('error', '❌ ' + error.message)
-  }
-}
-
-function confirmarExclusao(noticia) {
-  modalExclusao.value = { aberto: true, noticia }
-  menuAberto.value = null
-}
-
-function excluirDoModal() {
-  const noticiaAtual = {
-    id: noticiaEditandoId.value,
-    ...noticiaForm.value
-  }
-  fecharModal()
-  confirmarExclusao(noticiaAtual)
-}
-
-function cancelarExclusao() {
-  modalExclusao.value = { aberto: false, noticia: null }
-}
-
-async function confirmarExclusaoFinal() {
-  try {
-    excluindo.value = true
-    await removerNoticiaPorId(modalExclusao.value.noticia.id)
-    mostrarToast('success', '✅ Item excluído com sucesso!')
-    cancelarExclusao()
-  } catch (error) {
-    console.error('Erro ao excluir:', error)
-    mostrarToast('error', '❌ ' + error.message)
-  } finally {
-    excluindo.value = false
-  }
-}
-
-function toggleMenuCard(id) {
-  menuAberto.value = menuAberto.value === id ? null : id
-}
-
-function aplicarFiltros() {
-  menuAberto.value = null
-}
-
-function getTipoLabel(tipo) {
-  return tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia'
-}
-
-function getStatusLabel(status) {
-  const labels = {
-    ativo: '✅ Ativo',
-    rascunho: '📝 Rascunho',
-    arquivado: '📦 Arquivado'
-  }
-  return labels[status] || '✅ Ativo'
-}
-
-function getTitulo(noticia) {
-  if (!noticia) return ''
-  return noticia.tipo === 'campanha' 
-    ? (noticia.nomeCampanha || noticia.titulo || 'Sem título')
-    : (noticia.nomeNoticia || noticia.titulo || 'Sem título')
-}
-
-function getImagem(noticia) {
-  if (!noticia) return ''
-  return noticia.tipo === 'campanha'
-    ? (noticia.urlImagem || noticia.imagem)
-    : (noticia.urlImagemNoticia || noticia.imagem)
-}
-
-function cortarTexto(texto, limite) {
-  if (!texto) return ''
-  return texto.length <= limite ? texto : texto.slice(0, limite) + '...'
-}
-
-function formatarData(dataISO) {
-  if (!dataISO) return 'Data não definida'
-  try {
-    return new Date(dataISO).toLocaleDateString('pt-BR')
-  } catch {
-    return 'Data inválida'
-  }
-}
-
-function formatarDataSimples(data) {
-  if (!data) return ''
-  try {
-    const [ano, mes, dia] = data.split('-')
-    return `${dia}/${mes}/${ano}`
-  } catch {
-    return data
-  }
-}
-
-// Lifecycle
-onMounted(() => {
-  carregarNoticias()
-  document.addEventListener('click', () => {
-    menuAberto.value = null
-  })
-})
-</script>
-
 <style scoped>
-.admin-dashboard {
+.admin-container {
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
   min-height: 100vh;
-  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-}
-
-.dashboard-header {
-   background: linear-gradient(150deg, white, #a5f3fc); 
-  backdrop-filter: blur(100px);
   padding: 2rem;
-  border-radius: 0rem 10rem 0rem;
+  color: #333;
 }
-
-.header-content {
-  max-width: 1200px;
-  margin: 0 auto;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.dashboard-header h1 {
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: #1e293b;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  margin: 0;
-}
-
-.header-stats {
-  display: flex;
-  gap: 1rem;
-}
-
-.stat-item {
+h1 {
   text-align: center;
-  padding: 0.9rem 2.5rem;
+  color: #0ea5e9;
+  margin-bottom: 1.5rem;
+}
+.tipo-toggle {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 1.5rem;
+}
+.tipo-toggle button {
   background: #f1f5f9;
-  border-radius: 12px;
-  min-width: 80px;
-}
-
-.stat-item.success {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.stat-item.info {
-  background: #dbeafe;
-  color: #1e40af;
-}
-
-.stat-number {
-  display: block;
-  font-size: 2.5rem;
-  font-weight: 700;
-}
-
-.stat-label {
-  display: block;
-  font-size: 0.999rem;
-  opacity: 0.9;
-  text-transform: uppercase;
-  letter-spacing: 0px;
-}
-
-/* Toast Notifications */
-.toast {
-  position: fixed;
-  top: 2rem;
-  right: 2rem;
-  background: white;
-  padding: 1rem 1.5rem;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  display: flex;
-  align-items: center;
-  gap: 0.75rem;
-  z-index: 1000;
-  min-width: 300px;
-  border-left: 4px solid;
-}
-
-.toast.success {
-  border-left-color: #10b981;
-}
-
-.toast.error {
-  border-left-color: #ef4444;
-}
-
-.toast-icon {
-  font-size: 1.5rem;
-}
-
-.toast-message {
-  font-weight: 500;
-  color: #374151;
-}
-
-.toast-enter-active, .toast-leave-active {
-  transition: all 0.3s ease;
-}
-
-.toast-enter-from {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-.toast-leave-to {
-  transform: translateX(100%);
-  opacity: 0;
-}
-
-.controls-section {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.search-filters {
-  display: flex;
-  gap: 1rem;
-  align-items: center;
-  flex-wrap: wrap;
-}
-
-.search-box {
-  flex: 1;
-  min-width: 150px;
-  align-items: last baseline;
-
-}
-
-.search-input {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: 0px solid white;
-   background: linear-gradient(135deg, white, #bfdbfe7e);
-  border-radius: 12px;
-  font-size: 1.5rem;
-  transition: all 0.2s;
-}
-
-.search-input:focus {
-  outline: none;
-  border-color: #3b82f6;
-  background: white;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.filter-group {
-  display: flex;
-  gap: 1.75rem;
-}
-
-.filter-select {
-  padding: 0.9rem 1.5rem;
-  border: 0px solid #e2e8f0;
-  border-radius: 10px;
-  background: white;
-  font-size: 1.2rem;
-  min-width: 150px;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
-}
-
-.filter-select:hover {
-  border-color: #cbd5e1;
-}
-
-.filter-select:focus {
-  outline: none;
-  border-color: #bfdbfe;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.btn-add {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
   font-weight: 600;
 }
-
-.loading-container {
-  text-align: center;
-  padding: 4rem 2rem;
-  color: #64748b;
-}
-
-.spinner {
-  width: 40px;
-  height: 40px;
-  border: 3px solid #e2e8f0;
-  border-top: 3px solid #3b82f6;
-  border-radius: 50%;
-  animation: spin 1s linear infinite;
-  margin: 0 auto 1rem;
-}
-
-.spinner-small {
-  width: 16px;
-  height: 16px;
-  border: 2px solid rgba(255,255,255,0.3);
-  border-top: 2px solid white;
-  border-radius: 50%;
-  animation: spin 0.8s linear infinite;
-  display: inline-block;
-  margin-right: 0.5rem;
-}
-
-@keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
-}
-
-.error-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 2rem;
-}
-
-.error-content {
-  background: #fef2f2;
-  border: 1px solid #fecaca;
-  border-radius: 12px;
-  padding: 1rem;
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  color: #dc2626;
-}
-
-.error-icon {
-  font-size: 1.5rem;
-}
-
-.noticias-grid {
-  max-width: 1300px;
-  margin: 0 auto;
-  padding: 2rem 1rem;
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(450px, 2fr));
-  gap: 0.999rem;
-}
-
-.noticia-card {
-  background: white;
-  border-radius: 20px;
-  border: 2px solid transparent;
-  overflow: hidden;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  height: 100%;
-  transition: all 0.3s ease;
-   cursor: pointer;
-  position: relative;
-  justify-content: space-between;
-
-}
-
-.noticia-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 12px 30px rgba(0,0,0,0.12);
-}
-
-.noticia-card.status-rascunho {
-  border-left: 4px solid #f59e0b;
-}
-
-.noticia-card.status-arquivado {
-  opacity: 0.7;
-  border-left: 4px solid #6b7280;
-}
-
-.card-header {
-  padding: 1.2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  border-bottom: 3px solid #f1f5f9;
-}
-
-.card-badges {
-  display: inline-flex;
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 10;
-}
-
-
-.card-badges-left {
-  display: inline-flex;
-  position: absolute;
-  top: 12px;
-  left: 12px; 
-  z-index: 10;
-}
-
-.badge {
-  padding: 3px 14px;
-  border-radius: 20px;
-  font-size: 0.999rem;
-  font-weight: 400;
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
-}
-
-.badge-campanha { 
-  background: linear-gradient(135deg, #b0d5ff, #6488ff, #93c5fd); 
-  color: rgb(235, 235, 235);
-}
-
-.badge-noticia { 
-  background: #f1f5f9; 
-  color: #475569; 
-}
-
-.badge-status-ativo { 
-  background: #dcfce7; 
-  color: #166534; 
-}
-
-.badge-status-rascunho { 
-  background: #fef3c7; 
-  color: #92400e; 
-}
-
-.badge-status-arquivado { 
-  background: #f1f5f9; 
-  color: #6b7280; 
-}
-
-.btn-menu {
-  background: none;
-  border: none;
-  padding: 0.5rem;
-  border-radius: 8px;
-  cursor: pointer;
-  color: #64748b;
-  font-size: 1.25rem;
-  transition: all 0.2s;
-}
-
-.btn-menu:hover {
-  background: #f1f5f9;
-  color: #334155;
-}
-
-.card-menu {
-  position: relative;
-}
-
-.dropdown-menu {
-  position: absolute;
-  top: 100%;
-  right: 0;
-  background: white;
-  border: 1px solid #e2e8f0;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0,0,0,0.15);
-  min-width: 160px;
-  z-index: 10;
-  overflow: hidden;
-}
-
-.dropdown-menu button {
-  width: 100%;
-  padding: 0.75rem 1rem;
-  border: none;
-  background: none;
-  text-align: left;
-  cursor: pointer;
-  font-size: 0.875rem;
-  color: #374151;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  transition: background 0.2s;
-}
-
-.dropdown-menu button:hover {
-  background: #f9fafb;
-}
-
-.dropdown-menu button.btn-danger {
-  color: #dc2626;
-}
-
-.dropdown-menu button.btn-danger:hover {
-  background: #fef2f2;
-}
-
-.dropdown-menu hr {
-  margin: 0.25rem 0;
-  border: none;
-  border-top: 1px solid #e5e7eb;
-}
-
-.menu-icon {
-  width: 20px;
-  text-align: center;
-}
-
-.card-content {
-  padding:0.999rem;
-  overflow: hidden;
-  }
-
-.card-title {
-  font-size: 2rem;
-  font-weight: 200;
-  color: #1e293b;
-  margin: 0.5rem 1rem 1.2rem;
-  line-height: 1.2;
-}
-
-.card-description {
-  color: #64748b;
-  line-height: 1.2;
-  font-size: 1.5rem;
-  margin: 0 auto;
-  padding: 0rem 0rem 0rem;
-
-}
-
-.card-image {
-  margin: 1rem 0 0;
-  border-radius: 6px;
-  overflow: hidden;
-}
-
-.card-image img {
-  width: 100%;
-  object-fit: cover;
-  transition: transform 0.3s;
-   height: 250px;
-  overflow: hidden;
-}
-
-.noticia-card:hover .card-image img {
-  transform: scale(1.05);
-}
-
-.card-details {
-  background: #f8fafc;
-  padding: 0.999rem;
-  border-radius: 8px;
-  margin: 0.75rem 0;
-}
-
-.campanha-details {
-  background: #eff6ff;
-  border: 2px solid transparent;
-} 
-
-.detail-row {
-  display: flex;
-  align-items: normal;
- gap: 1rem;
-  font-size: 1.1rem;
-  font-weight: 350;
-   margin:0;
-  color: #475569;
-}
-
-.detail-row:last-child {
-  margin-bottom: 0;
-}
-
-.detail-icon {
-   width:25px;
-  text-align: flex;
-  flex-grow: 1;
-}
-
-.card-footer {
- padding: 1rem 2rem;
-  border-top: 1px solid #a5d2ff;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  background: #f8fafc;
-}
-
-.card-meta {
- display: flex;
-  gap: 1rem;
-  font-size: 0.813rem;
-  color: #94a3b8;
-}
-
-.meta-item {
-   display:flex;
-  align-items:normal;
-  gap: 1rem;
-  font-size: 1.1rem;
-  font-weight: 350;
-   margin:0;
-  
-}
-.meta-item .icon{
-  width:25px;
-  text-align: flex;
-  flex-grow: 1;
-}
-
-.card-actions {
-  display: flex;
-  gap: 1.5rem;
-  
-}
-
-.empty-state {
-  grid-column: 1 / -1;
-  text-align: center;
-  padding: 4rem 2rem;
-}
-
-.empty-content {
-  max-width: 400px;
-  margin: 0 auto;
-}
-
-.empty-icon {
-  font-size: 4rem;
-  display: block;
-  margin-bottom: 1rem;
-  opacity: 0.5;
-}
-
-.empty-content h3 {
-  font-size: 1.5rem;
-  color: #374151;
-  margin: 0 0 0.5rem 0;
-}
-
-.empty-content p {
-  color: #6b7280;
-  margin: 0 0 2rem 0;
-}
-
-.btn-primary, .btn-secondary, .btn-danger, .btn-close {
-  border: none;
-  border-radius: 5px;
-  padding: 0.5rem 2rem;
-  font-weight: 550;
-  cursor: pointer;
-  transition: all 0.2s;
-  display: inline-flex;
-  align-items: flex-end;
-  justify-content: flex-end;
-  gap: 0.5rem;
-  font-size: 1.2rem;
-}
-
-.btn-primary {
-  background: #3b82f6;
+.tipo-toggle .ativo {
+  background: #0ea5e9;
   color: white;
 }
-
-.btn-primary:hover:not(:disabled) {
-  background: #2563eb;
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+.card-form {
+  background: #fff;
+  padding: 1.5rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+  max-width: 700px;
+  margin: 0 auto 2rem;
 }
-
-.btn-primary:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-  transform: none;
+.card-form label {
+  display: block;
+  margin-top: 1rem;
+  font-weight: 600;
 }
-
-.btn-secondary {
-  background: #f1f5f9;
-  color: #475569;
-  border: 1px solid #e2e8f0;
-  text-decoration: none;
+.card-form input, textarea {
+  width: 100%;
+  padding: 0.6rem;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  margin-top: 0.3rem;
 }
-
-.btn-secondary:hover {
-  background: #e2e8f0;
-  border-color: #cbd5e1;
+.preview {
+  text-align: center;
+  margin-top: 1rem;
 }
-
-.btn-danger {
+.preview img {
+  width: 100%;
+  max-height: 180px;
+  object-fit: cover;
+  border-radius: 10px;
+}
+.acoes-form {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1.5rem;
+}
+.btn-salvar {
+  background: #059669;
+  color: white;
+  border: none;
+  padding: 0.7rem 1.4rem;
+  border-radius: 8px;
+  cursor: pointer;
+}
+.btn-resetar {
   background: #dc2626;
   color: white;
-}
-
-.btn-danger:hover:not(:disabled) {
-  background: #b91c1c;
-  box-shadow: 0 4px 12px rgba(220, 38, 38, 0.4);
-}
-
-.btn-danger:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-}
-
-.btn-sm {
-  padding: 0.5rem 1rem;
-  font-size: 0.813rem;
-  white-space: nowrap;
-}
-
-.btn-close {
-  background: none;
-  color: #6b7280;
-  padding: 0.5rem;
-  font-size: 1.5rem;
-  border-radius: 50%;
-  width: 2.5rem;
-  height: 2.5rem;
-}
-
-.btn-close:hover {
-  background: #f3f4f6;
-  color: #374151;
-}
-
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-  padding: 2rem;
-  backdrop-filter: blur(2px);
-}
-
-.modal-content {
-  background: white;
-  border-radius: 36px;
-  width: 100%;
-  max-width: 1000px;
-  max-height: 90vh;
-  overflow-y: auto;
-  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25);
-}
-
-.modal-small {
-  max-width: 450px;
-}
-
-.modal-header {
-  padding: 1.9rem 1.9rem;
-  border-bottom: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  position: sticky;
-  top: 0;
-  background: white;
-  z-index: 1;
-}
-
-.modal-header h2 {
-  margin: 0;
-  font-size: 2.5rem;
-  color: #1f2937;
-}
-
-.modal-body {
-  padding: 2rem 2rem;
-}
-
-.modal-actions {
-  padding: 1rem 1rem;
-  border-top: 1px solid #e5e7eb;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 0.5rem;
-  position: sticky;
-  bottom: 0;
-  background: white;
-}
-
-.modal-actions-left {
-  flex: 0;
-}
-
-.modal-actions-right {
-  display: flex;
-  gap: 1rem;
-  margin-left: auto;
-}
-
-.modal-enter-active, .modal-leave-active {
-  transition: all 0.3s ease;
-}
-
-.modal-enter-from, .modal-leave-to {
-  opacity: 0;
-}
-
-.modal-enter-from .modal-content,
-.modal-leave-to .modal-content {
-  transform: scale(0.9) translateY(20px);
-}
-
-.form-section {
-  margin-bottom: 2rem;
-}
-
-.form-section h3 {
-  margin: 0 0 1rem 0;
-  font-size: 1.9rem;
-  color: #374151;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e5e7eb;
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.form-row {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 1rem;
-  margin-bottom: 1rem;
-}
-
-.form-group {
-  display: flex;
-  flex-direction: column;
-  margin-bottom: 1rem;
-}
-
-.form-group label {
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 0.5rem;
-  font-size: 1.5rem;
-}
-
-.form-group input,
-.form-group textarea,
-.form-group select {
-  padding: 0.75rem;
-  border: 2px solid #e5e7eb;
-  border-radius: 8px;
-  font-size: 1.2rem;
-  transition: all 0.2s;
-  width: 100%;
-  box-sizing: border-box;
-  font-family: inherit;
-}
-
-.form-group input:focus,
-.form-group textarea:focus,
-.form-group select:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.form-group textarea {
-  resize: vertical;
-  min-height: 100px;
-}
-
-.form-group small {
-  margin-top: 0.25rem;
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.radio-group {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-
-.radio-label {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1.5rem;
-  border: 2px solid #e5e7eb;
+  border: none;
+  padding: 0.7rem 1.4rem;
   border-radius: 8px;
   cursor: pointer;
-  transition: all 0.2s;
-  flex: 1;
-  min-width: 150px;
 }
-
-.radio-label:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
+.lista-itens {
+  background: #fff;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+  max-width: 900px;
+  margin: 0 auto;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.1);
 }
-
-.radio-label.radio-active {
-  border-color: #3b82f6;
-  background: #eff6ff;
+.item-card {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid #eee;
+  padding: 0.8rem 0;
 }
-
-.radio-input {
-  cursor: pointer;
-}
-
-.radio-text {
-  font-weight: 500;
-}
-
-.image-preview {
-  margin: 1rem 0;
+.item-card img {
+  width: 90px;
+  height: 60px;
   border-radius: 8px;
-  overflow: hidden;
-  border: 2px solid #e5e7eb;
-}
-
-.image-preview img {
-  width: 100%;
-  height: 250px;
   object-fit: cover;
 }
-
-.error-text {
-  color: #dc2626;
-  font-size: 0.875rem;
-  margin: 0.5rem 0;
-  text-align: center;
-  padding: 0.5rem;
-  background: #fef2f2;
+.item-card .info {
+  flex: 1;
+}
+.item-card h3 {
+  color: #0ea5e9;
+  margin: 0;
+}
+.acoes {
+  display: flex;
+  gap: 0.5rem;
+}
+.btn-editar {
+  background: #2563eb;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border: none;
   border-radius: 6px;
+  cursor: pointer;
+}
+.btn-excluir {
+  background: #dc2626;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
 }
 
-.warning-text {
-  color: #d97706;
-  font-size: 0.938rem;
-  margin: 1rem 0;
-  padding: 0.75rem;
-  background: #fef3c7;
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #059669;
+  color: white;
+  padding: 12px 18px;
   border-radius: 8px;
-  text-align: center;
+  font-weight: 500;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  opacity: 0.95;
 }
-
-.item-destaque {
-  display: block;
-  color: #1f2937;
-  margin: 1rem 0;
-  padding: 0.75rem;
-  background: #f3f4f6;
-  border-radius: 8px;
-  font-size: 1.125rem;
+.toast.error {
+  background: #dc2626;
 }
-
-@media (max-width: 768px) {
-  .header-content {
-    flex-direction: column;
-    gap: 1rem;
-    text-align: center;
-  }
-
-  .header-stats {
-    justify-content: center;
-  }
-
-  .search-filters {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .filter-group {
-    flex-direction: column;
-  }
-
-  .noticias-grid {
-    grid-template-columns: 1fr;
-    padding: 0 1rem 2rem;
-  }
-
-  .form-row {
-    grid-template-columns: 1fr;
-  }
-
-  .modal-content {
-    margin: 1rem;
-    max-width: none;
-  }
-
-  .modal-header,
-  .modal-body,
-  .modal-actions {
-    padding: 1rem;
-  }
-
-  .modal-actions {
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .modal-actions-left,
-  .modal-actions-right {
-    width: 100%;
-  }
-
-  .modal-actions-right {
-    display: flex;
-    flex-direction: column;
-    gap: 0.75rem;
-  }
-
-  .modal-actions button {
-    width: 100%;
-  }
-
-  .card-footer {
-    flex-direction: column;
-    gap: 1rem;
-    align-items: stretch;
-  }
-
-  .card-meta {
-    justify-content: space-between;
-  }
-
-  .card-actions {
-    justify-content: center;
-  }
-
-  .radio-group {
-    flex-direction: column;
-  }
-
-  .radio-label {
-    min-width: auto;
-  }
-
-  .toast {
-    right: 1rem;
-    left: 1rem;
-    min-width: auto;
-  }
+.fade-enter-active, .fade-leave-active {
+  transition: opacity 0.4s ease;
 }
-
-@media (max-width: 480px) {
-  .dashboard-header {
-    padding: 1rem;
-  }
-
-  .controls-section {
-    padding: 1rem;
-  }
-
-  .btn-add span {
-    display: none;
-  }
-
-  .dashboard-header h1 {
-    font-size: 1.5rem;
-  }
-
-  .stat-item {
-    min-width: 70px;
-    padding: 0.5rem 0.75rem;
-  }
-
-  .stat-number {
-    font-size: 1.25rem;
-  }
-
-  .header-stats {
-    gap: 1rem;
-  }
+.fade-enter-from, .fade-leave-to {
+  opacity: 0;
 }
 </style>

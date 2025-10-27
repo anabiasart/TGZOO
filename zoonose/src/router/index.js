@@ -16,13 +16,13 @@ import EditalNoticias from '@/components/editalNoticias.vue'
 import EditalCampanhas from '../components/editalCampanhas.vue'
 
 const routes = [
-  // Rotas públicas
+  // 🔹 Rotas públicas
   { path: '/', component: Home },
   { path: '/login', component: Login },
   { path: '/adocao', component: Adocao },
   { path: '/footer', component: Footer },
-  
-  // Rotas de edital - Notícias e Campanhas
+
+  // 🔹 Editais públicos (Notícias e Campanhas)
   { 
     path: '/edital/noticias', 
     name: 'edital-noticias', 
@@ -33,54 +33,60 @@ const routes = [
     name: 'edital-campanhas', 
     component: EditalCampanhas  
   },
-  
-  // Rota para detalhes de uma notícia/campanha específica
   { 
     path: '/edital/:id', 
     name: 'edital-detalhes', 
-    component: Edital
+    component: Edital 
   },
-  
-  // Rotas de admin
+
+  // 🔹 Painel de Administração
   { 
     path: '/admin', 
+    name: 'admin-home',
     component: adminHome, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/agenda', 
+    name: 'admin-agenda',
     component: Agendar, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/animal', 
+    name: 'admin-animal',
     component: Animal, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/especie', 
+    name: 'admin-especie',
     component: Especie, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/protocolo', 
+    name: 'admin-protocolo',
     component: Protocolo, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/atendimento', 
+    name: 'admin-atendimento',
     component: Atendimento, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
   { 
     path: '/edital-admin', 
+    name: 'edital-admin',
     component: editalAdmin, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
-  
-  // Rotas de usuário
+
+  // 🔹 Usuário comum
   { 
     path: '/user', 
+    name: 'user-home',
     component: userHome, 
     meta: { requiresAuth: true, role: 'ROLE_CUSTOMER' } 
   },
@@ -91,48 +97,51 @@ const router = createRouter({
   routes,
 })
 
-// Guard de navegação
+// ===================================
+// 🔐 Guard de Navegação (Auth + Roles)
+// ===================================
 router.beforeEach((to, from, next) => {
-  // Rotas públicas
-  const publicPaths = ['/', '/login', '/adocao', '/footer'];
-  const isPublicEdital = to.path.startsWith('/edital') && !to.path.includes('admin');
-  
+  const publicPaths = ['/', '/login', '/adocao', '/footer']
+  const isPublicEdital = to.path.startsWith('/edital') && !to.path.includes('admin')
+
+  // 🔹 Rotas públicas e editais abertos
   if (publicPaths.includes(to.path) || isPublicEdital) {
-    return next();
+    return next()
   }
 
-  // Verificar autenticação para rotas protegidas
-  const token = localStorage.getItem('token');
-  const userRole = localStorage.getItem('role');
+  const token = localStorage.getItem('token')
+  const userRole = localStorage.getItem('role')
 
-  console.log(`🔍 Token: ${token ? 'Presente' : 'Ausente'}`);
-  console.log(`🔍 Role do usuário: ${userRole}`);
-  console.log(`🔍 Role necessária: ${to.meta?.role}`);
+  console.log(`🔍 Token: ${token ? 'Presente' : 'Ausente'}`)
+  console.log(`🔍 Role do usuário: ${userRole}`)
+  console.log(`🔍 Role necessária: ${to.meta?.role}`)
 
+  // 🔹 Se a rota exige autenticação
   if (to.meta?.requiresAuth) {
     if (!token || !userRole) {
-      console.log('❌ Sem autenticação, redirecionando para login');
-      return next('/login');
+      console.log('❌ Sem autenticação, redirecionando para login')
+      return next('/login')
     }
 
+    // 🔹 Se o usuário não tem o papel certo
     if (to.meta.role && userRole !== to.meta.role) {
-      console.log(`❌ Role inválida. Usuário: ${userRole}, Necessária: ${to.meta.role}`);
+      console.log(`❌ Role inválida. Usuário: ${userRole}, Necessária: ${to.meta.role}`)
       
       if (userRole === 'ROLE_ADMINISTRATOR') {
-        console.log('🔄 Redirecionando admin para /admin');
-        return next('/admin');
+        console.log('🔄 Redirecionando admin para /admin')
+        return next('/admin')
       } else if (userRole === 'ROLE_CUSTOMER') {
-        console.log('🔄 Redirecionando customer para /user');
-        return next('/user');
+        console.log('🔄 Redirecionando customer para /user')
+        return next('/user')
       } else {
-        console.log('🔄 Role desconhecida, redirecionando para login');
-        return next('/login');
+        console.log('🔄 Role desconhecida, redirecionando para login')
+        return next('/login')
       }
     }
   }
 
-  console.log('✅ Acesso permitido');
-  next();
-});
+  console.log('✅ Acesso permitido')
+  next()
+})
 
 export default router
