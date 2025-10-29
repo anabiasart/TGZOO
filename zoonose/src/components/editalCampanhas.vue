@@ -93,6 +93,8 @@
 </template>
 
 <script setup>
+import { formatDataBR, formatHoraBR } from '@/utils/datetime'
+
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCampanhas } from '@/data/campanhasData.js'

@@ -92,6 +92,8 @@
 </template>
 
 <script setup>
+import { formatDataBR, formatHoraBR } from '@/utils/datetime'
+
 import { ref, onMounted } from "vue"
 import { useRoute } from "vue-router"
 import { useEditais } from "@/data/editaisData.js"

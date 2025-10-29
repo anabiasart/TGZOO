@@ -1,4 +1,6 @@
 <script setup>
+import { formatDataBR, formatHoraBR } from '@/utils/datetime'
+
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Syringe, User, Calendar } from 'lucide-vue-next'

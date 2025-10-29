@@ -151,12 +151,13 @@
           <div v-if="noticia.tipo === 'campanha'" class="card-details campanha-details">
             <div class="detail-row" v-if="noticia.dataInicioCampanha">
               <span class="detail-icon">📅</span>
-              <span class="detail-text">{{ formatarDataSimples(noticia.dataInicioCampanha) }} até {{ formatarDataSimples(noticia.dataFimCampanha) }}</span>
+              <span class="detail-text">{{formatDataBR(noticia.dataInicioCampanha) }} até {{ formatDataBR(noticia.dataFimCampanha) }}</span>
             </div>
             <div class="detail-row" v-if="noticia.horarioCampanha">
               <span class="detail-icon">🕐</span>
-              <span class="detail-text">{{ noticia.horarioCampanha }}</span>
+              <span class="detail-text">{{formatHoraBR(noticia.horaInicioCampanha) }} às {{formatHoraBR(noticia.horaFimCampanha) }}</span>
             </div>
+            
           </div>
 
           <!-- Conteúdo Notícia -->
@@ -177,7 +178,7 @@
             </span>
             <span class="meta-item">
               <span class="meta-icon">📅</span>
-              {{ formatarData(noticia.dataPublicacao) }}
+              {{(noticia.dataPublicacao) }}
             </span>
           </div>
           
@@ -269,20 +270,9 @@
                   />
                   <small>{{ noticiaForm.nomeCampanha?.length || 0 }}/100 caracteres</small>
                 </div>
-                <div class="form-group">
-  <label for="descricaoCampanha">Descrição da Campanha *</label>
-  <textarea 
-    id="descricaoCampanha"
-    v-model="noticiaForm.description" 
-    placeholder="Descreva a campanha..."
-    rows="3"
-    maxlength="500"
-    required
-  ></textarea>
-  <small>{{ noticiaForm.description?.length || 0 }}/500 caracteres</small>
-</div>
 
-               <div class="form-row">
+                <!-- Campos de Data e Hora Início -->
+<div class="form-row">
   <div class="form-group">
     <label for="dataInicioCampanha">Data Início *</label>
     <input 
@@ -291,9 +281,21 @@
       type="date"
       required
     />
-    <small>Selecione a data de início da campanha</small>
   </div>
   
+  <div class="form-group">
+    <label for="horaInicioCampanha">Hora Início *</label>
+    <input 
+      id="horaInicioCampanha"
+      v-model="noticiaForm.horaInicioCampanha" 
+      type="time"
+      required
+    />
+  </div>
+</div>
+
+<!-- Campos de Data e Hora Fim -->
+<div class="form-row">
   <div class="form-group">
     <label for="dataFimCampanha">Data Fim *</label>
     <input 
@@ -302,20 +304,18 @@
       type="date"
       required
     />
-    <small>Selecione a data de término da campanha</small>
+  </div>
+  
+  <div class="form-group">
+    <label for="horaFimCampanha">Hora Fim *</label>
+    <input 
+      id="horaFimCampanha"
+      v-model="noticiaForm.horaFimCampanha" 
+      type="time"
+      required
+    />
   </div>
 </div>
-
-                <div class="form-group">
-                  <label for="horarioCampanha">Horário da Campanha *</label>
-                  <input 
-                    id="horarioCampanha"
-                    v-model="noticiaForm.horarioCampanha" 
-                    type="text"
-                    placeholder="Ex: 08:00 às 17:00"
-                    required
-                  />
-                </div>
 
                 <div class="form-group">
                   <label for="urlImagem">URL da Imagem</label>
@@ -382,6 +382,7 @@
                 </div>
               </div>
 
+              <!-- Informações Adicionais -->
               <div class="form-section">
                 <h3>ℹ️ Informações Adicionais</h3>
                 
@@ -469,10 +470,19 @@
 <script setup>
 import { ref, computed, onMounted } from "vue"
 import { useEditais } from "@/data/editaisData.js"
-const { todosItens: noticias, carregando, erro, carregarTodos: carregarNoticias, adicionarItem: adicionarNoticia, editarItem: editarNoticiaData, removerItem: removerNoticiaPorId, alterarStatus: alterarStatusNoticia, limparErro 
+import { formatDataBR, formatHoraBR, parseBackendTs, toBackendTimestamp } from '@/utils/datetime'
 
+const {
+  todosItens: noticias,
+  carregando,
+  erro,
+  carregarTodos: carregarNoticias,
+  adicionarItem: adicionarNoticia,
+  editarItem: editarNoticiaData,
+  removerItem: removerNoticiaPorId,
+  alterarStatus: alterarStatusNoticia,
+  limparErro
 } = useEditais()
-
 
 const modalAberto = ref(false)
 const modoEdicao = ref(false)
@@ -499,14 +509,13 @@ const modalExclusao = ref({
   noticia: null
 })
 
-// Form da notícia
 const noticiaForm = ref({
   tipo: 'campanha',
   nomeCampanha: '',
-  description: '', 
   dataInicioCampanha: '',
+  horaInicioCampanha: '',
   dataFimCampanha: '',
-  horarioCampanha: '',
+  horaFimCampanha: '',
   urlImagem: '',
   nomeNoticia: '',
   urlImagemNoticia: '',
@@ -516,55 +525,15 @@ const noticiaForm = ref({
   dataPublicacao: new Date().toISOString().split('T')[0]
 })
 
-const campanhas = computed(() => 
-  noticias.value.filter(n => n.tipo === 'campanha')
-)
-
-const noticiasGerais = computed(() => 
-  noticias.value.filter(n => n.tipo === 'noticia')
-)
-const noticiasFiltradas = computed(() => {
-  let resultado = [...noticias.value]
-  
-  if (filtros.value.busca.trim()) {
-    const termo = filtros.value.busca.toLowerCase()
-    resultado = resultado.filter(n => {
-      const titulo = getTitulo(n).toLowerCase()
-      const resumo = (n.resumo || '').toLowerCase()
-      const autor = (n.autor || '').toLowerCase()
-      return titulo.includes(termo) || resumo.includes(termo) || autor.includes(termo)
-    })
-  }
-  
-  if (filtros.value.tipo) {
-    resultado = resultado.filter(n => (n.tipo || 'noticia') === filtros.value.tipo)
-  }
-  
-  if (filtros.value.status) {
-    resultado = resultado.filter(n => (n.status || 'ativo') === filtros.value.status)
-  }
-  
-  return resultado.sort((a, b) => new Date(b.dataPublicacao || 0) - new Date(a.dataPublicacao || 0))
-})
-
-const temFiltrosAtivos = computed(() => 
-  filtros.value.busca || filtros.value.tipo || filtros.value.status
-)
-function mostrarToast(tipo, mensagem) {
-  toast.value = { mostrar: true, tipo, mensagem }
-  setTimeout(() => {
-    toast.value.mostrar = false
-  }, 3000)
-}
 
 function resetarForm() {
   noticiaForm.value = {
     tipo: 'campanha',
     nomeCampanha: '',
-    description: '', 
     dataInicioCampanha: '',
+    horaInicioCampanha: '',
     dataFimCampanha: '',
-    horarioCampanha: '',
+    horaFimCampanha: '',
     urlImagem: '',
     nomeNoticia: '',
     urlImagemNoticia: '',
@@ -578,17 +547,85 @@ function resetarForm() {
   noticiaEditandoId.value = null
 }
 
+const campanhas = computed(() =>
+  noticias.value.filter(n => n.tipo === 'campanha')
+)
+
+const noticiasGerais = computed(() =>
+  noticias.value.filter(n => n.tipo === 'noticia')
+)
+
+const noticiasFiltradas = computed(() => {
+  let resultado = [...noticias.value]
+
+  if (filtros.value.busca.trim()) {
+    const termo = filtros.value.busca.toLowerCase()
+    resultado = resultado.filter(n => {
+      const titulo = getTitulo(n).toLowerCase()
+      const resumo = (n.resumo || '').toLowerCase()
+      const autor = (n.autor || '').toLowerCase()
+      return titulo.includes(termo) || resumo.includes(termo) || autor.includes(termo)
+    })
+  }
+
+  if (filtros.value.tipo) {
+    resultado = resultado.filter(n => (n.tipo || 'noticia') === filtros.value.tipo)
+  }
+
+  if (filtros.value.status) {
+    resultado = resultado.filter(n => (n.status || 'ativo') === filtros.value.status)
+  }
+
+  return resultado.sort((a, b) =>
+    new Date(b.dataPublicacao || 0) - new Date(a.dataPublicacao || 0)
+  )
+})
+
+const temFiltrosAtivos = computed(() =>
+  filtros.value.busca || filtros.value.tipo || filtros.value.status
+)
+
+function mostrarToast(tipo, mensagem) {
+  toast.value = { mostrar: true, tipo, mensagem }
+  setTimeout(() => {
+    toast.value.mostrar = false
+  }, 3000)
+}
+
+function ajustarDataParaInput(ts) {
+  const d = parseBackendTs(ts);
+  return d ? d.toISOString().split('T')[0] : '';
+}
+
+
+function prepararDatasParaSalvar() {
+  if (noticiaForm.value.tipo !== 'campanha') return
+
+  noticiaForm.value.dataInicioCampanha =
+    toBackendTimestamp(noticiaForm.value.dataInicioCampanha)
+
+  noticiaForm.value.dataFimCampanha =
+    toBackendTimestamp(noticiaForm.value.dataFimCampanha)
+}
+
+
+
 function abrirModalNoticia(noticia = null) {
   if (noticia) {
     noticiaForm.value = JSON.parse(JSON.stringify(noticia))
-    if (!noticiaForm.value.tipo) {
-      noticiaForm.value.tipo = 'noticia'
-    }
     modoEdicao.value = true
     noticiaEditandoId.value = noticia.id
+
+    if (!noticiaForm.value.tipo) noticiaForm.value.tipo = 'noticia'
+
+    if (noticiaForm.value.tipo === 'campanha') {
+      noticiaForm.value.dataInicioCampanha = ajustarDataParaInput(noticia.dataInicioCampanha)
+      noticiaForm.value.dataFimCampanha = ajustarDataParaInput(noticia.dataFimCampanha)
+    }
   } else {
     resetarForm()
   }
+
   modalAberto.value = true
 }
 
@@ -604,6 +641,19 @@ async function salvarNoticia() {
     const dadosParaSalvar = {
       ...noticiaForm.value,
       dataPublicacao: noticiaForm.value.dataPublicacao || new Date().toISOString().split('T')[0]
+    }
+    
+    if (noticiaForm.value.tipo === 'campanha') {
+      dadosParaSalvar.startDateTime = `${noticiaForm.value.dataInicioCampanha} ${noticiaForm.value.horaInicioCampanha}:00`
+      
+      if (noticiaForm.value.dataFimCampanha && noticiaForm.value.horaFimCampanha) {
+        dadosParaSalvar.endDateTime = `${noticiaForm.value.dataFimCampanha} ${noticiaForm.value.horaFimCampanha}:00`
+      }
+      
+      delete dadosParaSalvar.dataInicioCampanha
+      delete dadosParaSalvar.horaInicioCampanha
+      delete dadosParaSalvar.dataFimCampanha
+      delete dadosParaSalvar.horaFimCampanha
     }
     
     if (modoEdicao.value) {
@@ -623,7 +673,6 @@ async function salvarNoticia() {
     salvando.value = false
   }
 }
-
 function editarNoticia(noticia) {
   menuAberto.value = null
   abrirModalNoticia(noticia)
@@ -631,59 +680,52 @@ function editarNoticia(noticia) {
 
 function duplicarNoticia(noticia) {
   menuAberto.value = null
-  const noticiaClone = { ...noticia }
-  
-  if (noticia.tipo === 'campanha') {
-    noticiaClone.nomeCampanha = `${noticia.nomeCampanha} (Cópia)`
-  } else {
-    noticiaClone.nomeNoticia = `${noticia.nomeNoticia || noticia.titulo} (Cópia)`
+
+  const clone = {
+    ...noticia,
+    nomeCampanha: noticia.nomeCampanha ? `${noticia.nomeCampanha} (Cópia)` : '',
+    nomeNoticia: noticia.nomeNoticia ? `${noticia.nomeNoticia} (Cópia)` : '',
   }
-  
-  delete noticiaClone.id
-  abrirModalNoticia(noticiaClone)
+
+  delete clone.id
+  abrirModalNoticia(clone)
 }
 
 async function alterarStatus(id, novoStatus) {
   try {
     const item = noticias.value.find(n => n.id === id)
-    const tipo = item ? item.tipo : 'noticia'
-    
-    await alterarStatusNoticia(id, novoStatus, tipo) 
+    await alterarStatusNoticia(id, novoStatus, item?.tipo || 'noticia')
+    mostrarToast('success', `Status: ${novoStatus}`)
     menuAberto.value = null
-    mostrarToast('success', `✅ Status alterado para ${novoStatus}`)
-  } catch (error) {
-    console.error('Erro ao alterar status:', error)
-    mostrarToast('error', '❌ ' + error.message)
+  } catch (err) {
+    mostrarToast('error', '❌ Falha ao mudar status')
   }
 }
+
+// ✅ Exclusão
 function confirmarExclusao(noticia) {
   modalExclusao.value = { aberto: true, noticia }
-  menuAberto.value = null
 }
 
 function excluirDoModal() {
-  const noticiaAtual = {
-    id: noticiaEditandoId.value,
-    ...noticiaForm.value
-  }
+  confirmarExclusao({ id: noticiaEditandoId.value })
   fecharModal()
-  confirmarExclusao(noticiaAtual)
 }
 
 function cancelarExclusao() {
-  modalExclusao.value = { aberto: false, noticia: null }
+  modalExclusao.value.aberto = false
+  modalExclusao.value.noticia = null
 }
 
 async function confirmarExclusaoFinal() {
   try {
     excluindo.value = true
     await removerNoticiaPorId(modalExclusao.value.noticia.id)
-    mostrarToast('success', '✅ Item excluído com sucesso!')
-    cancelarExclusao()
-  } catch (error) {
-    console.error('Erro ao excluir:', error)
-    mostrarToast('error', '❌ ' + error.message)
+    mostrarToast('success', '🗑️ Deletado!')
+  } catch {
+    mostrarToast('error', '❌ Falha ao excluir!')
   } finally {
+    cancelarExclusao()
     excluindo.value = false
   }
 }
@@ -701,73 +743,34 @@ function getTipoLabel(tipo) {
 }
 
 function getStatusLabel(status) {
-  const labels = {
+  const map = {
     ativo: '✅ Ativo',
     rascunho: '📝 Rascunho',
     arquivado: '📦 Arquivado'
   }
-  return labels[status] || '✅ Ativo'
+  return map[status] || map.ativo
 }
 
 function getTitulo(noticia) {
-  if (!noticia) return ''
-  return noticia.tipo === 'campanha' 
-    ? (noticia.nomeCampanha || noticia.titulo || 'Sem título')
-    : (noticia.nomeNoticia || noticia.titulo || 'Sem título')
+  return noticia.tipo === 'campanha'
+    ? noticia.nomeCampanha || 'Sem título'
+    : noticia.nomeNoticia || 'Sem título'
 }
 
 function getImagem(noticia) {
-  if (!noticia) return ''
-  return noticia.tipo === 'campanha'
-    ? (noticia.urlImagem || noticia.imagem)
-    : (noticia.urlImagemNoticia || noticia.imagem)
+  return noticia.urlImagemNoticia || noticia.urlImagem || null
 }
 
-function cortarTexto(texto, limite) {
-  if (!texto) return ''
-  return texto.length <= limite ? texto : texto.slice(0, limite) + '...'
-}
-
-function formatarData(dataISO) {
-  if (!dataISO) return 'Data não definida'
-  try {
-    return new Date(dataISO).toLocaleDateString('pt-BR')
-  } catch {
-    return 'Data inválida'
-  }
-}
-
-function formatarDataSimples(data) {
-  if (!data) return ''
-  try {
-    if (data.includes('-') && data.length >= 10) {
-      const [ano, mes, dia] = data.split('-')
-      return `${dia.padStart(2, '0')}/${mes.padStart(2, '0')}/${ano}`
-    }
-    
-    
-    if (data.includes('/')) {
-      return data
-    }
-    
-    const date = new Date(data)
-    if (!isNaN(date.getTime())) {
-      return date.toLocaleDateString('pt-BR')
-    }
-    
-    return data
-  } catch {
-    return data
-  }
+function cortarTexto(txt, limit) {
+  return txt && txt.length > limit ? txt.slice(0, limit) + '...' : txt
 }
 
 onMounted(() => {
   carregarNoticias()
-  document.addEventListener('click', () => {
-    menuAberto.value = null
-  })
+  document.addEventListener('click', () => (menuAberto.value = null))
 })
 </script>
+
 
 <style scoped>
 .admin-dashboard {

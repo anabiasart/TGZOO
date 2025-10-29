@@ -1,3 +1,4 @@
+import { toBackendTimestamp } from '@/utils/datetime'
 import { ref } from 'vue'
 
 const campanhas = ref([])
@@ -99,7 +100,7 @@ const mapBackendToFrontend = (backendCampaign) => {
     categoria: 'campanha',
     status: 'ativo',
     autor: backendCampaign.user?.name || 'Sistema',
-    dataPublicacao: backendCampaign.createdAt || new Date().toISOString()
+    dataPublicacao: backendCampaign.createdAt || new Date().toBackendTimestamp(new Date())
   }
 }
 
@@ -107,19 +108,17 @@ const mapFrontendToBackend = (frontendCampaign) => {
   const formatarData = (data) => {
     if (!data) return null
     
-    // Se já está no formato yyyy-mm-dd, mantém
     if (data.match(/^\d{4}-\d{2}-\d{2}$/)) {
       return data
     }
     
-    // Se está no formato dd/mm/yyyy, converte
     if (data.includes('/')) {
       const [dia, mes, ano] = data.split('/')
       return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
     }
     
     if (data instanceof Date) {
-      return data.toISOString().split('T')[0]
+      return data.toBackendTimestamp(new Date()).split('T')[0]
     }
     
     return data
@@ -128,8 +127,8 @@ const mapFrontendToBackend = (frontendCampaign) => {
   const dataInicio = formatarData(frontendCampaign.dataInicioCampanha)
   const dataFim = formatarData(frontendCampaign.dataFimCampanha)
   
-  const startDateTime = createDateTime(dataInicio, '08:00:00')
-  const endDateTime = createDateTime(dataFim, '17:00:00')
+  const startDateTime = createDateTime(dataInicio, '')
+  const endDateTime = createDateTime(dataFim, '')
   
   
   
@@ -151,7 +150,7 @@ const createDateTime = (date, time) => {
     formattedDate = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
   }
   
-  const timeToUse = time || '08:00:00'
+  const timeToUse = time || '00:00:00'
   
   return `${formattedDate}T${timeToUse}`
 }
@@ -163,8 +162,7 @@ export function useCampanhas() {
     erro.value = null
     
     try {
-      // GET /campaigns é público, não precisa de token
-      const response = await fetch(`${API_URL}`, {
+      const response = await fetch(`${API_URL}?size=100&sort=createdAt,desc`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

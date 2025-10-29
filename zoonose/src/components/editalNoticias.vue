@@ -75,7 +75,7 @@
     </div>
   </template>
 
-  <script setup>
+<script setup>
   import { ref, computed, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { useNoticias } from '@/data/noticiasData.js'

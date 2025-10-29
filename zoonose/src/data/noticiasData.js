@@ -59,7 +59,7 @@ export function useNoticias() {
     erro.value = null
     
     try {
-      const response = await fetch(`${API_URL}`, {
+      const response = await fetch(`${API_URL}?size=100&sort=createdAt,desc`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -70,7 +70,6 @@ export function useNoticias() {
       
       if (!response.ok) {
         throw new Error(`Erro HTTP: ${response.status}`)
-        return
       }
       
       const data = await response.json()
