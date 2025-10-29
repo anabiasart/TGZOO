@@ -101,45 +101,88 @@
 </template>
 
 <script setup>
+import { formatDataBR, formatHoraBR } from '@/utils/datetime'
+
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { useNoticias } from '@/data/noticiasData.js'
+import { useCampanhas } from '@/data/campanhasData.js'
 import vete from '@/assets/img/vete.jpg'
 
 const router = useRouter()
-const { noticias, carregando, carregarNoticias } = useNoticias()
+const { 
+  campanhas, 
+  carregando, 
+  carregarCampanhas 
+} = useCampanhas()
 
 const filtros = ref({
   busca: ''
 })
 
 onMounted(() => {
-  carregarNoticias()
+  carregarCampanhas()
 })
 
-// Computed - Filtra apenas campanhas
 const campanhasFiltradas = computed(() => {
-  let resultado = noticias.value.filter(n => n.tipo === 'campanha')
+  let resultado = [...campanhas.value] 
   
-  // Filtro de busca
   if (filtros.value.busca.trim()) {
     const termo = filtros.value.busca.toLowerCase()
-    resultado = resultado.filter(n => {
-      const titulo = getTitulo(n).toLowerCase()
+    resultado = resultado.filter(campanha => {
+      const titulo = getTitulo(campanha).toLowerCase()
       return titulo.includes(termo)
     })
   }
   
   return resultado
 })
-
-// Funções
+  
 function getTitulo(campanha) {
   return campanha.nomeCampanha || campanha.titulo
 }
 
 function getImagem(campanha) {
   return campanha.urlImagem || vete
+}
+
+function getResumo(campanha) {
+  if (campanha.resumo) {
+    return cortarTexto(campanha.resumo, 120)
+  }
+  
+  if (campanha.description) {
+    return cortarTexto(campanha.description, 120)
+  }
+  
+  let resumo = `Campanha ${campanha.nomeCampanha || 'sem nome'}`
+  if (campanha.dataInicioCampanha) {
+    resumo += ` agendada para ${campanha.dataInicioCampanha}`
+  }
+  return resumo
+}
+
+// Função para cortar texto
+function cortarTexto(texto, limite) {
+  if (!texto) return '' 
+  texto = texto.replace(/\s+/g, ' ').trim()
+  if (texto.length <= limite) return texto
+  const cortado = texto.slice(0, limite + 1)
+  const ultimoEspaco = cortado.lastIndexOf(' ')
+  if (ultimoEspaco <= 0) return texto.slice(0, limite) + '…'
+  return cortado.slice(0, ultimoEspaco) + '…'
+}
+
+function formatarPeriodo(campanha) {
+  if (!campanha.dataInicioCampanha) return ''
+  
+  const inicio = campanha.dataInicioCampanha
+  const fim = campanha.dataFimCampanha
+  
+  if (!fim || fim === inicio) {
+    return inicio
+  }
+  
+  return `${inicio} até ${fim}`
 }
 
 function formatarData(data) {
@@ -151,8 +194,9 @@ function verCampanha(id) {
   router.push(`/edital/${id}`)
 }
 
+
+
 function aplicarFiltros() {
-  // Os filtros são aplicados automaticamente pelo computed
 }
 </script>
 

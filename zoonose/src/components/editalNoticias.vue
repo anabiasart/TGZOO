@@ -82,7 +82,7 @@
     </div>
   </template>
 
-  <script setup>
+<script setup>
   import { ref, computed, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
   import { useNoticias } from '@/data/noticiasData.js'
@@ -99,11 +99,9 @@
     carregarNoticias()
   })
 
-  // Computed - Filtra apenas notícias
   const noticiasFiltradas = computed(() => {
-    let resultado = noticias.value.filter(n => (n.tipo || 'noticia') === 'noticia')
+    let resultado = [...noticias.value]
     
-    // Filtro de busca
     if (filtros.value.busca.trim()) {
       const termo = filtros.value.busca.toLowerCase()
       resultado = resultado.filter(n => {
@@ -116,7 +114,6 @@
     return resultado
   })
 
-  // Funções
   function getTitulo(noticia) {
     return noticia.nomeNoticia || noticia.titulo
   }
@@ -145,7 +142,6 @@
   }
 
   function aplicarFiltros() {
-    // Os filtros são aplicados automaticamente pelo computed
   }
   </script>
 

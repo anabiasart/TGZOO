@@ -11,12 +11,21 @@ export function toBackendTimestamp(dateLike) {
   return `${Y}-${M}-${D} ${h}:${m}:${s}` }
 
 export function parseBackendTs(ts) {
-  if (!ts) return null
-  const norm = ts.replace('T', ' ')
-  const [date, time = '00:00:00'] = norm.split(' ')
-  const [Y, M, D] = date.split('-').map(Number)
-  const [h, m, s = 0] = time.split(':').map(Number)
-  return new Date(Y, (M || 1) - 1, D || 1, h || 0, m || 0, s || 0)
+  if (!ts) return null;
+
+  try {
+    const d = new Date(ts);
+
+    if (isNaN(d.getTime())) {
+      console.warn("parseBackendTs: valor inválido recebido:", ts);
+      return null;
+    }
+
+    return d;
+  } catch (e) {
+    console.warn("parseBackendTs erro:", ts, e);
+    return null;
+  }
 }
 
 export function formatDataBR(ts) {

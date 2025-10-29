@@ -99,14 +99,16 @@
 </template>
 
 <script setup>
+import { formatDataBR, formatHoraBR } from '@/utils/datetime'
+
 import { ref, onMounted } from "vue"
 import { useRoute } from "vue-router"
-import { useNoticias } from "@/data/noticiasData.js"
+import { useEditais } from "@/data/editaisData.js"
 
 const item = ref(null)
 const carregando = ref(true)
 const route = useRoute()
-const { noticias: todasNoticias, carregarNoticias, buscarNoticiaPorId } = useNoticias()
+const { todosItens: todasNoticias, carregarTodos: carregarNoticias, buscarItemPorId: buscarNoticiaPorId } = useEditais()
 
 onMounted(async () => {
   try {
