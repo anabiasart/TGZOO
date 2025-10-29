@@ -7,17 +7,14 @@
       <section class="atalhos-rapidos">
         <h2>Atalhos Rápidos</h2>
         <div class="cards-grid">
-          <div class="card" @click="router.push('/usuarios')">
-            <h3>Usuários</h3>
-            <p>Gerencie cadastros e permissões</p>
-          </div>
-          <div class="card" @click="router.push('/atendimentos')">
-            <h3>Atendimentos</h3>
-            <p>Veja solicitações e histórico</p>
-          </div>
-          <div class="card" @click="router.push('/configuracoes')">
-            <h3>Configurações</h3>
-            <p>Ajuste preferências do sistema</p>
+          <div
+            v-for="atalho in atalhos"
+            :key="atalho.titulo"
+            class="card"
+            @click="router.push(atalho.destino)"
+          >
+            <h3>{{ atalho.titulo }}</h3>
+            <p>{{ atalho.descricao }}</p>
           </div>
         </div>
       </section>
@@ -130,13 +127,31 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '@/components/header.vue'
 import { useUsuarios } from '@/data/usuariosData.js'
 
 const router = useRouter()
 const nomeUsuario = ref('Admin')
+
+const atalhos = [
+  {
+    titulo: 'Usuários',
+    descricao: 'Gerencie cadastros e permissões',
+    destino: { name: 'admin-home' }
+  },
+  {
+    titulo: 'Atendimentos',
+    descricao: 'Veja solicitações e histórico',
+    destino: { name: 'admin-atendimento' }
+  },
+  {
+    titulo: 'Agenda',
+    descricao: 'Organize eventos e compromissos',
+    destino: { name: 'admin-agenda' }
+  }
+]
 
 // Usar composable de usuários
 const { 

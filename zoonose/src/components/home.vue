@@ -107,7 +107,7 @@ onUnmounted(() => clearInterval(intervalo))
 
 // 🔹 Serviços (iguais ao seu)
 const servicos = [
-  { titulo: "Vacine o seu Pet", desc: "Garanta a saúde dos seus amigos peludos...", label: "CONSULTAR", icon: Syringe, acao: () => router.push('/edital') },
+  { titulo: "Vacine o seu Pet", desc: "Garanta a saúde dos seus amigos peludos...", label: "CONSULTAR", icon: Syringe, acao: () => router.push('/edital/noticias') },
   { titulo: "Faça login", desc: "Receba dicas dos nossos veterinários...", label: "LOGIN", icon: User, acao: () => router.push('/login') },
   { titulo: "Agende uma Consulta", desc: "Receba atendimento especializado...", label: "AGENDAR", icon: Calendar, acao: () => router.push('/login') }
 ]
@@ -143,7 +143,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
       <li @click="router.push('/edital/noticias')">Notícias</li> 
       <li @click="router.push('/edital/campanhas')">Campanhas</li>
       <li @click="router.push('/login')">Login</li>
-      <li @click="router.push('/contato')">Contato</li>
+      <li @click="router.push('/adocao')">Adote um Amigo</li>
     </ul>
   </nav>
 

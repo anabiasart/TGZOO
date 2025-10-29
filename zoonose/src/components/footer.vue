@@ -27,11 +27,10 @@ const ano = new Date().getFullYear()
         <h4 class="footer-subtitle">Links úteis</h4>
         <ul class="footer-links">
           <li @click="$router.push('/')">Início</li>
-          <li @click="$router.push('/edital')">Editais</li>
+          <li @click="$router.push('/edital/noticias')">Notícias</li>
+          <li @click="$router.push('/edital/campanhas')">Campanhas</li>
           <li @click="$router.push('/login')">Login</li>
-          <li @click="$router.push('/contato')">Contato</li>
-          <li @click="$router.push('public/user/detalhes.html')">Adote um Amigo</li>
-          <li @click="$router.push('/faq')">FAQ</li>
+          <li @click="$router.push('/adocao')">Adote um Amigo</li>
         </ul>
       </div>
 

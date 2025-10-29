@@ -9,7 +9,7 @@
     <!-- Logo + Navegação -->
     <div class="navbar">
       <div class="logo">
-        <h1><a href="/home">ZoonoSys</a></h1>
+        <h1><router-link to="/">ZoonoSys</router-link></h1>
         <p>Vigilância, Prevenção e Controle de Zoonoses</p>
       </div>
 
