@@ -1,107 +1,226 @@
 <template>
-  <div class="adocao-admin">
-    <header class="admin-header">
-      <h2>Gerenciar Adoções 🐾</h2>
-      <button class="btn" @click="abrirModal()">+ Novo Animal</button>
+  <div class="admin-dashboard">
+    <!-- Cabeçalho -->
+    <header class="dashboard-header">
+      <div class="header-content">
+        <h1>
+          <span class="icon">🐾</span>
+          Gerenciar Adoções
+        </h1>
+        <div class="header-stats">
+          <div class="stat-item">
+            <span class="stat-number">{{ animais.length }}</span>
+            <span class="stat-label">Total</span>
+          </div>
+          <div class="stat-item success">
+            <span class="stat-number">{{ totalCachorros }}</span>
+            <span class="stat-label">Cachorros</span>
+          </div>
+          <div class="stat-item info">
+            <span class="stat-number">{{ totalGatos }}</span>
+            <span class="stat-label">Gatos</span>
+          </div>
+        </div>
+      </div>
     </header>
 
-    <main v-if="!carregando">
-      <div v-if="animais.length" class="lista-animais">
-        <article v-for="a in animais" :key="a.id" class="animal-card">
-          <img :src="a.imageUrl || placeholder" alt="foto animal" />
-          <div class="info">
-            <h3>{{ a.name }}</h3>
-            <p>{{ a.description || 'Sem descrição.' }}</p>
-            <small>{{ a.species }} • {{ a.size }} • {{ a.gender }}</small>
-            <div class="acoes">
-              <button class="btn edit" @click="editarAnimal(a)">✏️ Editar</button>
-              <button class="btn del" @click="removerAnimal(a.id)">🗑️ Excluir</button>
-            </div>
-          </div>
-        </article>
+    <!-- Barra de busca -->
+    <section class="controls-section">
+      <div class="search-filters">
+        <input
+          v-model="filtro"
+          type="text"
+          placeholder="🔍 Buscar por nome, espécie..."
+          class="search-input"
+        />
+        <button @click="abrirModal()" class="btn-primary btn-sm">
+          ➕ Novo Animal
+        </button>
       </div>
-      <div v-else class="vazio">Nenhum animal cadastrado.</div>
-    </main>
+    </section>
+
+    <!-- Loading -->
+    <div v-if="carregando" class="loading-container">
+      <div class="spinner"></div>
+      <p>Carregando...</p>
+    </div>
+
+    <!-- Lista -->
+    <section v-if="!carregando" class="noticias-grid">
+      <div
+        v-for="a in animaisFiltrados"
+        :key="a.id"
+        class="noticia-card"
+      >
+        <div class="card-header">
+          <span class="badge" :class="a.species === 'CANINE' ? 'badge-cachorro' : 'badge-gato'">
+            {{ traduzirEspecie(a.species) }}
+          </span>
+          <span class="badge-status">{{ traduzirGenero(a.gender) }}</span>
+        </div>
+
+        <div class="card-content">
+          <div class="card-image">
+            <img :src="a.imageUrl || placeholder" alt="foto animal" />
+          </div>
+          <h3 class="card-title">{{ a.name }}</h3>
+          <p class="card-description">{{ truncarTexto(a.description, 120) }}</p>
+        </div>
+
+        <div class="card-footer">
+          <div class="card-meta">
+            <span>🐕 Porte: {{ traduzirPorte(a.size) }}</span>
+            <span>💉 {{ a.isVaccinated ? 'Vacinado' : 'Não vacinado' }}</span>
+          </div>
+
+          <div class="card-actions">
+            <button class="btn-secondary btn-sm" @click="editarAnimal(a)">✏️ Editar</button>
+            <button class="btn-danger btn-sm" @click="removerAnimal(a.id)">🗑️ Excluir</button>
+          </div>
+        </div>
+      </div>
+
+      <div v-if="animaisFiltrados.length === 0" class="empty-state">
+        <div class="empty-content">
+          <span class="empty-icon">🐾</span>
+          <h3>Nenhum animal encontrado</h3>
+          <button @click="abrirModal()" class="btn-primary">➕ Cadastrar Novo</button>
+        </div>
+      </div>
+    </section>
 
     <!-- Modal -->
-    <div v-if="mostrarModal" class="modal-overlay" @click.self="fecharModal">
-      <div class="modal">
-        <h3>{{ editando ? 'Editar Animal' : 'Novo Animal' }}</h3>
+    <teleport to="body">
+      <transition name="modal">
+        <div v-if="mostrarModal" class="modal-overlay" @click.self="fecharModal">
+          <div class="modal-content" @click.stop>
+            <div class="modal-header">
+              <h2>{{ editando ? '✏️ Editar Animal' : '➕ Novo Animal' }}</h2>
+              <button @click="fecharModal" class="btn-close">✕</button>
+            </div>
 
-        <form @submit.prevent="salvarAnimal">
-          <label>Nome:
-            <input v-model="form.name" required />
-          </label>
+            <div class="modal-body">
+              <form class="form-animal" @submit.prevent="salvarAnimal">
+                <div class="form-group">
+                  <label>Nome do Animal <span>*</span></label>
+                  <input v-model="form.name" required placeholder="Ex: Luna, Thor, Mel..." />
+                </div>
 
-          <label>Espécie:
-            <select v-model="form.species" required>
-              <option value="">Selecione</option>
-              <option value="CANINE">Cachorro</option>
-              <option value="FELINE">Gato</option>
-            </select>
-          </label>
+                <div class="form-row">
+                  <div class="form-group">
+                    <label>Espécie <span>*</span></label>
+                    <select v-model="form.species" required>
+                      <option value="">Selecione</option>
+                      <option value="CANINE">🐶 Cachorro</option>
+                      <option value="FELINE">🐱 Gato</option>
+                    </select>
+                  </div>
 
-          <label>Porte:
-            <select v-model="form.size" required>
-              <option value="">Selecione</option>
-              <option value="SMALL">Pequeno</option>
-              <option value="MEDIUM">Médio</option>
-              <option value="LARGE">Grande</option>
-            </select>
-          </label>
+                  <div class="form-group">
+                    <label>Porte <span>*</span></label>
+                    <select v-model="form.size" required>
+                      <option value="">Selecione</option>
+                      <option value="SMALL">Pequeno</option>
+                      <option value="MEDIUM">Médio</option>
+                      <option value="LARGE">Grande</option>
+                    </select>
+                  </div>
+                </div>
 
-          <label>Gênero:
-            <select v-model="form.gender" required>
-              <option value="">Selecione</option>
-              <option value="MALE">Macho</option>
-              <option value="FEMALE">Fêmea</option>
-            </select>
-          </label>
+                <div class="form-row">
+  <div class="form-group">
+    <label>Gênero <span>*</span></label>
+    <select v-model="form.gender" required>
+      <option value="">Selecione</option>
+      <option value="MALE">Macho</option>
+      <option value="FEMALE">Fêmea</option>
+    </select>
+  </div>
 
-          <label>Raça:
-            <input v-model="form.breed" placeholder="Ex: SRD" required />
-          </label>
+  <div class="form-group">
+    <label>Raça</label>
+    <select v-model="form.breed">
+      <option value="">Selecione</option>
+      <option value="SRD">SRD / Sem Raça Definida</option>
+      <optgroup label="Cães">
+        <option value="Labrador">Labrador</option>
+        <option value="Poodle">Poodle</option>
+        <option value="Bulldog">Bulldog</option>
+        <option value="Shih Tzu">Shih Tzu</option>
+        <option value="Golden Retriever">Golden Retriever</option>
+        <option value="Pastor Alemão">Pastor Alemão</option>
+        <option value="Pinscher">Pinscher</option>
+        <option value="Beagle">Beagle</option>
+        <option value="Husky Siberiano">Husky Siberiano</option>
+      </optgroup>
+      <optgroup label="Gatos">
+        <option value="Persa">Persa</option>
+        <option value="Siamês">Siamês</option>
+        <option value="Angorá">Angorá</option>
+        <option value="Maine Coon">Maine Coon</option>
+        <option value="Sphynx">Sphynx</option>
+        <option value="Bengal">Bengal</option>
+        <option value="British Shorthair">British Shorthair</option>
+      </optgroup>
+    </select>
+  </div>
+</div>
 
-          <label>Descrição:
-            <textarea v-model="form.description"></textarea>
-          </label>
+                <div class="form-group">
+                  <label>Descrição</label>
+                  <textarea
+                    v-model="form.description"
+                    rows="3"
+                    placeholder="Ex: Brincalhona, dócil e se dá bem com outros animais."
+                  ></textarea>
+                </div>
 
-          <label>Imagem:
-            <input v-model="form.imageUrl" placeholder="URL da imagem" />
-          </label>
+                <div class="form-group">
+                  <label>Imagem (URL)</label>
+                  <input
+                    v-model="form.imageUrl"
+                    placeholder="Cole aqui o link da imagem do animal..."
+                  />
+                  <div v-if="form.imageUrl" class="image-preview">
+                    <img :src="form.imageUrl" alt="Preview" />
+                  </div>
+                </div>
 
-          <label>
-            Vacinado:
-            <input type="checkbox" v-model="form.isVaccinated" />
-          </label>
+                <div class="checkbox-group">
+                  <label>
+                    <input type="checkbox" v-model="form.isVaccinated" />
+                    💉 Vacinado
+                  </label>
+                  <label>
+                    <input type="checkbox" v-model="form.isNeutered" />
+                    ✂️ Castrado
+                  </label>
+                </div>
 
-          <label>
-            Castrado:
-            <input type="checkbox" v-model="form.isNeutered" />
-          </label>
-
-          <div class="acoes-modal">
-            <button type="submit" class="btn salvar">
-              {{ editando ? 'Salvar' : 'Cadastrar' }}
-            </button>
-            <button type="button" class="btn cancelar" @click="fecharModal">
-              Cancelar
-            </button>
+                <div class="modal-actions">
+                  <button type="button" class="btn-secondary" @click="fecharModal">Cancelar</button>
+                  <button type="submit" class="btn-primary">
+                    {{ editando ? 'Salvar Alterações' : 'Cadastrar' }}
+                  </button>
+                </div>
+              </form>
+            </div>
           </div>
-        </form>
-      </div>
-    </div>
+        </div>
+      </transition>
+    </teleport>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 
 const carregando = ref(true)
+const animais = ref([])
+const filtro = ref('')
 const mostrarModal = ref(false)
 const editando = ref(false)
 const placeholder = '/src/assets/img/vete.jpg'
-const animais = ref([])
 
 const form = ref({
   id: null,
@@ -116,18 +235,34 @@ const form = ref({
   isNeutered: false,
 })
 
-// canal de atualização
-const canal = new BroadcastChannel('atualizacao_animais')
+function traduzirEspecie(v) {
+  return v === 'CANINE' ? 'Cachorro' : v === 'FELINE' ? 'Gato' : 'Outro'
+}
+function traduzirPorte(v) {
+  return v === 'SMALL' ? 'Pequeno' : v === 'MEDIUM' ? 'Médio' : 'Grande'
+}
+function traduzirGenero(v) {
+  return v === 'MALE' ? 'Macho' : 'Fêmea'
+}
+function truncarTexto(txt, n) {
+  return txt && txt.length > n ? txt.slice(0, n) + '...' : txt
+}
+
+const totalCachorros = computed(() => animais.value.filter(a => a.species === 'CANINE').length)
+const totalGatos = computed(() => animais.value.filter(a => a.species === 'FELINE').length)
+
+const animaisFiltrados = computed(() => {
+  const termo = filtro.value.toLowerCase()
+  return animais.value.filter(a =>
+    !termo ||
+    [a.name, a.species, a.description, a.breed].join(' ').toLowerCase().includes(termo)
+  )
+})
 
 function getHeaders() {
   const token = localStorage.getItem('token')
-  const headers = {
-    'Content-Type': 'application/json',
-    'Accept': 'application/json',
-  }
-  if (token) {
-    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`
-  }
+  const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' }
+  if (token) headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`
   return headers
 }
 
@@ -140,7 +275,6 @@ async function carregarAnimais() {
     animais.value = data.content || data
   } catch (err) {
     console.error('Erro ao carregar animais:', err)
-    alert('Erro ao carregar animais.')
   } finally {
     carregando.value = false
   }
@@ -162,10 +296,14 @@ async function salvarAnimal() {
   try {
     const method = editando.value ? 'PUT' : 'POST'
     const url = editando.value ? `/api/animals/${form.value.id}` : '/api/animals/register'
-    const res = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(form.value) })
+    const res = await fetch(url, {
+      method,
+      headers: getHeaders(),
+      body: JSON.stringify(form.value),
+    })
+
     if (!res.ok) throw new Error(`Erro HTTP ${res.status}`)
     await carregarAnimais()
-    canal.postMessage('atualizar_lista_publica') // avisa o público
     fecharModal()
   } catch (err) {
     console.error('Erro ao salvar animal:', err)
@@ -178,106 +316,379 @@ async function removerAnimal(id) {
   try {
     const res = await fetch(`/api/animals/${id}`, { method: 'DELETE', headers: getHeaders() })
     if (!res.ok) throw new Error(`Erro HTTP ${res.status}`)
-    await carregarAnimais()
-    canal.postMessage('atualizar_lista_publica') // avisa o público
+    animais.value = animais.value.filter(a => a.id !== id)
   } catch (err) {
     console.error('Erro ao excluir animal:', err)
     alert('Erro ao excluir animal.')
   }
 }
 
+function editarAnimal(a) {
+  abrirModal(a)
+}
+
 onMounted(carregarAnimais)
 </script>
 
-
-
-
 <style scoped>
-.adocao-admin {
-  padding: 20px;
-  background: linear-gradient(135deg, #f8fcff, #e6f7ff);
+/* Mantém o visual geral e o novo modal refinado */
+.admin-dashboard {
   min-height: 100vh;
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+  font-family: 'Inter', sans-serif;
 }
-.admin-header {
+
+/* Header */
+.dashboard-header {
+  background: linear-gradient(135deg, white, #a5f3fc);
+  padding: 2rem;
+  border-radius: 0 10rem 0 0;
+}
+.header-content {
+  max-width: 1200px;
+  margin: auto;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
 }
-.lista-animais {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-  gap: 16px;
+.dashboard-header h1 {
+  font-size: 2.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #1e293b;
 }
-.animal-card {
-  background: white;
+.header-stats {
+  display: flex;
+  gap: 1rem;
+}
+.stat-item {
+  text-align: center;
+  background: #f1f5f9;
+  border-radius: 12px;
+  padding: 1rem 1.5rem;
+}
+.stat-item.success {
+  background: #dcfce7;
+  color: #166534;
+}
+.stat-item.info {
+  background: #dbeafe;
+  color: #1e40af;
+}
+.stat-number {
+  font-size: 2rem;
+  font-weight: 700;
+}
+
+/* Search bar */
+.controls-section {
+  max-width: 1200px;
+  margin: auto;
+  padding: 1.5rem;
+}
+.search-filters {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.search-input {
+  flex: 1;
+  padding: 0.9rem 1.2rem;
+  border: 1px solid #cbd5e1;
   border-radius: 10px;
+  font-size: 1rem;
+}
+
+/* GRID */
+.noticias-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem;
+  padding: 2rem;
+  max-width: 1200px;
+  margin: auto;
+}
+
+/* CARD */
+.noticia-card {
+  background: #ffffff;
+  border-radius: 20px;
   overflow: hidden;
-  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
   display: flex;
   flex-direction: column;
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  position: relative;
 }
-.animal-card img {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
+.noticia-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
 }
-.animal-card .info {
-  padding: 10px;
-  font-size: 14px;
-}
-.acoes {
+
+/* TAGS */
+.card-header {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  right: 10px;
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
+  justify-content: space-between;
+  z-index: 2;
 }
-.btn {
-  padding: 6px 10px;
-  border-radius: 6px;
+.badge {
+  font-weight: 600;
+  padding: 0.4rem 0.8rem;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  color: #fff;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.badge-cachorro {
+  background: linear-gradient(135deg, #16a34a, #4ade80);
+}
+.badge-gato {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+}
+.badge-status {
+  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+}
+
+/* IMAGEM */
+.card-image {
+  width: 100%;
+  height: 230px;
+  position: relative;
+}
+.card-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-bottom: 3px solid #e2e8f0;
+  transition: transform 0.4s ease;
+}
+.card-image img:hover {
+  transform: scale(1.07);
+}
+
+/* CONTEÚDO */
+.card-content {
+  padding: 1rem 1.5rem 0.5rem;
+  text-align: center;
+  flex-grow: 1;
+}
+.card-title {
+  font-size: 1.3rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin-bottom: 0.4rem;
+}
+.card-description {
+  color: #475569;
+  font-size: 0.95rem;
+  line-height: 1.4;
+  margin-bottom: 0.5rem;
+}
+
+/* RODAPÉ */
+.card-footer {
+  padding: 1rem 1.5rem;
+  border-top: 1px solid #e5e7eb;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+  background: #f9fafb;
+}
+.card-meta {
+  display: flex;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  font-size: 0.9rem;
+  color: #64748b;
+}
+.card-meta span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* BOTÕES */
+.card-actions {
+  display: flex;
+  justify-content: center;
+  gap: 0.8rem;
+}
+.btn-sm {
+  font-size: 0.9rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
+  transition: all 0.2s;
+  font-weight: 500;
 }
-.btn.edit { background: #3b82f6; color: white; }
-.btn.del { background: #ef4444; color: white; }
-.btn:hover { opacity: 0.9; }
+.btn-secondary {
+  background: linear-gradient(135deg, #3b82f6, #60a5fa);
+  color: white;
+}
+.btn-secondary:hover {
+  background: #2563eb;
+}
+.btn-danger {
+  background: linear-gradient(135deg, #ef4444, #f87171);
+  color: white;
+}
+.btn-danger:hover {
+  background: #dc2626;
+}
+
+
+/* Modal refinado */
 .modal-overlay {
   position: fixed;
   inset: 0;
-  background: rgba(0,0,0,0.45);
+  background: rgba(0, 0, 0, 0.45);
   display: flex;
   align-items: center;
   justify-content: center;
+  z-index: 100;
 }
-.modal {
+
+.modal-content {
   background: white;
-  border-radius: 10px;
-  padding: 20px;
-  width: 400px;
+  border-radius: 20px;
+  width: 500px;
   max-height: 90vh;
   overflow-y: auto;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+  animation: fadeIn 0.3s ease;
 }
-.modal form {
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.modal-header h2 {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: #1e293b;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.btn-close {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #64748b;
+  cursor: pointer;
+  transition: 0.2s;
+}
+.btn-close:hover {
+  color: #ef4444;
+}
+
+.modal-body {
+  padding: 1.5rem;
+}
+
+.form-animal {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 1rem;
 }
-.modal input, .modal select, .modal textarea {
+
+.form-group label {
+  display: block;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 0.4rem;
+}
+
+.form-group label span {
+  color: #ef4444;
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
   width: 100%;
-  padding: 6px;
-  border-radius: 6px;
-  border: 1px solid #ccc;
+  padding: 0.7rem 1rem;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  font-size: 1rem;
+  background: #f9fafb;
+  transition: 0.2s;
 }
-.acoes-modal {
+
+.form-group input:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  background: #fff;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.image-preview {
+  margin-top: 0.6rem;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.image-preview img {
+  width: 100%;
+  height: 180px;
+  object-fit: cover;
+  border-radius: 8px;
+}
+
+.checkbox-group {
+  display: flex;
+  justify-content: space-around;
+  padding-top: 0.5rem;
+  border-top: 1px solid #e2e8f0;
+  margin-top: 0.8rem;
+}
+
+.checkbox-group label {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: #374151;
+  font-weight: 500;
+}
+
+.modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 8px;
-  margin-top: 10px;
+  gap: 1rem;
+  margin-top: 1.5rem;
+  padding-top: 1rem;
+  border-top: 1px solid #e5e7eb;
 }
-.btn.salvar { background: #10b981; color: white; }
-.btn.cancelar { background: #6b7280; color: white; }
-.vazio {
-  text-align: center;
-  color: #666;
-  margin-top: 40px;
+
+/* Animação */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>
