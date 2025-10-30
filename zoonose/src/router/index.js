@@ -20,81 +20,78 @@ const routes = [
   // Rotas públicas
   { path: '/', component: Home },
   { path: '/login', component: Login },
-  
-{ 
-  path: '/adocao', 
-  name: 'Adocao', 
-  component: Adocao  
-},
+  { path: '/adocao', name: 'Adocao', component: Adocao },
+  { path: '/footer', component: Footer },
 
-{ path: '/footer', component: Footer },
-  
-  // Rotas de edital - Notícias e Campanhas
-  { 
-    path: '/edital/noticias', 
-    name: 'edital-noticias', 
-    component: EditalNoticias  
+  // Rotas de edital (ordem importa!)
+  {
+    path: '/edital/noticias',
+    name: 'edital-noticias',
+    component: EditalNoticias
   },
-  { 
-    path: '/edital/campanhas', 
-    name: 'edital-campanhas', 
-    component: EditalCampanhas  
+  {
+    path: '/edital/campanhas',
+    name: 'edital-campanhas',
+    component: EditalCampanhas
   },
-  
-  // Rota para detalhes de uma notícia/campanha específica
-  { 
-    path: '/edital/:id', 
-    name: 'edital-detalhes', 
+  {
+    path: '/edital/adocao',
+    name: 'edital-adocao-publica',
+    component: Adocao // 👈 agora esta rota existe e vem ANTES do coringa
+  },
+  {
+    path: '/edital/:id',
+    name: 'edital-detalhes',
     component: Edital
   },
-  
+
   // Rotas de admin
-  { 
-    path: '/admin', 
-    component: adminHome, 
-    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
+  {
+    path: '/admin',
+    component: adminHome,
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' }
   },
-  { 
-    path: '/agenda', 
-    component: Agendar, 
-    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
+  {
+    path: '/agenda',
+    component: Agendar,
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' }
   },
-  { 
-    path: '/animal', 
-    component: Animal, 
-    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
+  {
+    path: '/animal',
+    component: Animal,
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' }
   },
-  { 
-    path: '/especie', 
-    component: Especie, 
-    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
+  {
+    path: '/especie',
+    component: Especie,
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' }
   },
-  { 
-    path: '/protocolo', 
-    component: Protocolo, 
-    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
+  {
+    path: '/protocolo',
+    component: Protocolo,
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' }
   },
-  { 
-    path: '/atendimento', 
-    component: Atendimento, 
-    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
+  {
+    path: '/atendimento',
+    component: Atendimento,
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' }
   },
-  { 
-    path: '/edital-admin', 
-    component: editalAdmin, 
-    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
+  {
+    path: '/edital-admin',
+    component: editalAdmin,
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' }
   },
-{ 
-  path: '/edital-adocao', 
-  component: adocaoAdmin, 
-  meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
-},
+  {
+    path: '/edital-adocao',
+    component: adocaoAdmin,
+    meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' }
+  },
 
   // Rotas de usuário
-  { 
-    path: '/user', 
-    component: userHome, 
-    meta: { requiresAuth: true, role: 'ROLE_CUSTOMER' } 
+  {
+    path: '/user',
+    component: userHome,
+    meta: { requiresAuth: true, role: 'ROLE_CUSTOMER' }
   },
 ]
 
@@ -105,42 +102,32 @@ const router = createRouter({
 
 // Guard de navegação
 router.beforeEach((to, from, next) => {
-  // Rotas públicas
-  const publicPaths = ['/', '/login', '/adocao', '/footer'];
-  const isPublicEdital = to.path.startsWith('/edital') && !to.path.includes('admin');
-  
+  const publicPaths = ['/', '/login', '/adocao', '/footer', '/edital/adocao']
+  const isPublicEdital = to.path.startsWith('/edital') && !to.path.includes('admin')
+
   if (publicPaths.includes(to.path) || isPublicEdital) {
-    return next();
+    return next()
   }
 
-  // Verificar autenticação para rotas protegidas
-  const token = localStorage.getItem('token');
-  const userRole = localStorage.getItem('role');
+  const token = localStorage.getItem('token')
+  const userRole = localStorage.getItem('role')
 
   if (to.meta?.requiresAuth) {
     if (!token || !userRole) {
-      console.log('❌ Sem autenticação, redirecionando para login');
-      return next('/login');
+      console.log('❌ Sem autenticação, redirecionando para login')
+      return next('/login')
     }
 
     if (to.meta.role && userRole !== to.meta.role) {
-      console.log(`❌ Role inválida. Usuário: ${userRole}, Necessária: ${to.meta.role}`);
-      
-      if (userRole === 'ROLE_ADMINISTRATOR') {
-        console.log('🔄 Redirecionando admin para /admin');
-        return next('/admin');
-      } else if (userRole === 'ROLE_CUSTOMER') {
-        console.log('🔄 Redirecionando customer para /user');
-        return next('/user');
-      } else {
-        console.log('🔄 Role desconhecida, redirecionando para login');
-        return next('/login');
-      }
+      console.log(`❌ Role inválida. Usuário: ${userRole}, Necessária: ${to.meta.role}`)
+
+      if (userRole === 'ROLE_ADMINISTRATOR') return next('/admin')
+      if (userRole === 'ROLE_CUSTOMER') return next('/user')
+      return next('/login')
     }
   }
 
-  console.log('✅ Acesso permitido');
-  next();
-});
+  next()
+})
 
 export default router

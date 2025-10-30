@@ -12,7 +12,7 @@
           <div class="info">
             <h3>{{ a.name }}</h3>
             <p>{{ a.description || 'Sem descrição.' }}</p>
-            <small>{{ traduz(a.species) }} • {{ traduz(a.size) }} • {{ traduz(a.gender) }}</small>
+            <small>{{ a.species }} • {{ a.size }} • {{ a.gender }}</small>
             <div class="acoes">
               <button class="btn edit" @click="editarAnimal(a)">✏️ Editar</button>
               <button class="btn del" @click="removerAnimal(a.id)">🗑️ Excluir</button>
@@ -58,12 +58,12 @@
             </select>
           </label>
 
-          <label>Descrição:
-            <textarea v-model="form.description"></textarea>
+          <label>Raça:
+            <input v-model="form.breed" placeholder="Ex: SRD" required />
           </label>
 
-          <label>Raça:
-            <input v-model="form.breed" placeholder="SRD, Labrador..." />
+          <label>Descrição:
+            <textarea v-model="form.description"></textarea>
           </label>
 
           <label>Imagem:
@@ -71,16 +71,22 @@
           </label>
 
           <label>
-            <input type="checkbox" v-model="form.isVaccinated" /> Vacinado
+            Vacinado:
+            <input type="checkbox" v-model="form.isVaccinated" />
           </label>
 
           <label>
-            <input type="checkbox" v-model="form.isNeutered" /> Castrado
+            Castrado:
+            <input type="checkbox" v-model="form.isNeutered" />
           </label>
 
           <div class="acoes-modal">
-            <button type="submit" class="btn salvar">{{ editando ? 'Salvar' : 'Cadastrar' }}</button>
-            <button type="button" class="btn cancelar" @click="fecharModal">Cancelar</button>
+            <button type="submit" class="btn salvar">
+              {{ editando ? 'Salvar' : 'Cadastrar' }}
+            </button>
+            <button type="button" class="btn cancelar" @click="fecharModal">
+              Cancelar
+            </button>
           </div>
         </form>
       </div>
@@ -91,16 +97,16 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 
-const carregando = ref(false)
-const animais = ref([])
-const placeholder = '/src/assets/img/vete.jpg'
+const carregando = ref(true)
 const mostrarModal = ref(false)
 const editando = ref(false)
+const placeholder = '/src/assets/img/vete.jpg'
+const animais = ref([])
 
 const form = ref({
   id: null,
   name: '',
-  breed: 'SRD',
+  breed: '',
   species: '',
   size: '',
   gender: '',
@@ -110,43 +116,47 @@ const form = ref({
   isNeutered: false,
 })
 
-const getHeaders = () => {
+// canal de atualização
+const canal = new BroadcastChannel('atualizacao_animais')
+
+function getHeaders() {
   const token = localStorage.getItem('token')
-  const headers = { 'Content-Type': 'application/json', 'Accept': 'application/json' }
-  if (token) headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`
+  const headers = {
+    'Content-Type': 'application/json',
+    'Accept': 'application/json',
+  }
+  if (token) {
+    headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`
+  }
   return headers
 }
 
-const traduz = (valor) => ({
-  CANINE: 'Cachorro',
-  FELINE: 'Gato',
-  SMALL: 'Pequeno',
-  MEDIUM: 'Médio',
-  LARGE: 'Grande',
-  MALE: 'Macho',
-  FEMALE: 'Fêmea'
-}[valor] || valor)
-
 async function carregarAnimais() {
-  carregando.value = true
   try {
-    const res = await fetch('/api/animals?size=100&sort=createdAt,desc', { headers: getHeaders() })
+    carregando.value = true
+    const res = await fetch('/api/animals', { headers: getHeaders() })
     if (!res.ok) throw new Error(`Erro HTTP ${res.status}`)
     const data = await res.json()
     animais.value = data.content || data
-  } catch (e) {
-    alert('Erro ao carregar animais: ' + e.message)
+  } catch (err) {
+    console.error('Erro ao carregar animais:', err)
+    alert('Erro ao carregar animais.')
   } finally {
     carregando.value = false
   }
 }
 
-function abrirModal(a = null) {
-  form.value = a ? { ...a } : { ...form.value, id: null, name: '', breed: 'SRD' }
-  editando.value = !!a
+function abrirModal(animal = null) {
+  form.value = animal
+    ? { ...animal }
+    : { id: null, name: '', breed: '', species: '', size: '', gender: '', description: '', imageUrl: '', isVaccinated: false, isNeutered: false }
+  editando.value = !!animal
   mostrarModal.value = true
 }
-const fecharModal = () => (mostrarModal.value = false)
+
+function fecharModal() {
+  mostrarModal.value = false
+}
 
 async function salvarAnimal() {
   try {
@@ -155,27 +165,32 @@ async function salvarAnimal() {
     const res = await fetch(url, { method, headers: getHeaders(), body: JSON.stringify(form.value) })
     if (!res.ok) throw new Error(`Erro HTTP ${res.status}`)
     await carregarAnimais()
+    canal.postMessage('atualizar_lista_publica') // avisa o público
     fecharModal()
-  } catch (e) {
-    alert('Erro ao salvar: ' + e.message)
+  } catch (err) {
+    console.error('Erro ao salvar animal:', err)
+    alert('Erro ao salvar animal.')
   }
 }
 
 async function removerAnimal(id) {
-  if (!confirm('Excluir este animal?')) return
+  if (!confirm('Tem certeza que deseja excluir este animal?')) return
   try {
     const res = await fetch(`/api/animals/${id}`, { method: 'DELETE', headers: getHeaders() })
     if (!res.ok) throw new Error(`Erro HTTP ${res.status}`)
-    animais.value = animais.value.filter(a => a.id !== id)
-  } catch (e) {
-    alert('Erro ao excluir: ' + e.message)
+    await carregarAnimais()
+    canal.postMessage('atualizar_lista_publica') // avisa o público
+  } catch (err) {
+    console.error('Erro ao excluir animal:', err)
+    alert('Erro ao excluir animal.')
   }
 }
 
-const editarAnimal = (a) => abrirModal(a)
-
 onMounted(carregarAnimais)
 </script>
+
+
+
 
 <style scoped>
 .adocao-admin {
