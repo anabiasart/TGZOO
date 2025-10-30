@@ -14,6 +14,8 @@
         <ul>
           <li><a href="/">Página Inicial</a></li>
       <li><router-link to="/edital-admin">Postagens</router-link></li>
+      <li><router-link to="/edital-adocao">Adocao</router-link></li>
+
 
           <li>
             <button class="btn-mais-opcoes" @click="toggleOpcoesExtras">

@@ -1,140 +1,61 @@
 <template>
-       
-<div class="adocao-page">
-
-
-  <section class="adoption-list">
-    <header class="controls">
+  <section class="adocao-publica">
+    <header>
       <h2>Animais disponíveis para adoção</h2>
-      <div class="search-area">
-        <input v-model="q" placeholder="Buscar por nome,tipo..." />
-        <select v-model="filterType">
-          <option value="">Todos</option>
-          <option value="Cachorro">Cachorro</option>
-          <option value="Gato">Gato</option>
-          <option value="Outros">Outros</option>
-        </select>
-      </div>
     </header>
 
-    <main class="grid">
-      <article v-for="animal in filteredAnimals" :key="animal.id" class="card">
-        <div class="thumb" @click="openModal(animal)">
-          <img :src="animal.photo" :alt="`Foto de ${animal.name}`" />   
-        </div>
+    <div v-if="carregando" class="status">Carregando...</div>
 
+    <div v-else-if="erro" class="erro">{{ erro }}</div>
+
+    <div v-else class="grid">
+      <article v-for="animal in animais" :key="animal.id" class="card">
+        <img :src="animal.imageUrl || placeholder" alt="Foto do animal" />
         <div class="info">
-          <h3>{{ animal.name }} <span class="badge">{{ animal.type }}</span></h3>
-          <p class="meta">{{ animal.age }} • {{ animal.size }} </p>
-          <p class="desc">{{ truncate(animal.description, 100) }}</p>
-
-          <div class="actions">
-            <button class="btn primary" @click="openModal(animal)">Ver detalhes</button>
-            <button class="btn" @click="requestAdoption(animal)">Quero adotar ❤️</button>
-          </div>
+          <h3>{{ animal.name }}</h3>
+          <p>{{ animal.description || 'Sem descrição.' }}</p>
+          <small>{{ traduz(animal.species) }} • {{ traduz(animal.size) }} • {{ traduz(animal.gender) }}</small>
         </div>
       </article>
-
-      <div v-if="filteredAnimals.length === 0" class="empty">Nenhum animal encontrado.</div>
-    </main>
-
-    <div v-if="selected" class="modal-overlay" @click.self="closeModal">
-      <div class="modal">
-        <button class="close" @click="closeModal">×</button>
-        <div class="modal-body">
-          <img :src="selected.photo" :alt="selected.name" />
-          <div class="detail">
-            <h3>{{ selected.name }} <small>({{ selected.type }})</small></h3>
-            <p class="meta">{{ selected.age }} • {{ selected.size }}</p>
-            <p class="desc">{{ selected.description }}</p>
-
-          
-
-            <div class="modal-actions">
-              <button class="btn primary" @click="confirmAdoption(selected)">Enviar pedido de adoção</button>
-              <button class="btn" @click="closeModal">Fechar</button>
-            </div>
-          </div>
-        </div>
-      </div>
     </div>
-
   </section>
-  </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, onMounted } from 'vue'
 
-const q = ref('')
-const filterType = ref('')
-const selected = ref(null)
+const animais = ref([])
+const carregando = ref(true)
+const erro = ref(null)
+const placeholder = '/src/assets/img/vete.jpg'
 
-const animals = ref([
-  {
-    id: 1,
-    name: 'Luna',
-    type: 'Gato',
-    age: '2 anos',
-    size: 'Pequeno',
-    city: 'São Paulo',
-    state: 'SP',
-    description: 'Gata carinhosa, vacinada e castrada. Muito brincalhona e sociável com outros gatos.',
-    photo: 'https://placekitten.com/400/300',
-    contact: { phone: '(11) 99999-0001', email: 'adocao@example.com' },
-  },
-  {
-    id: 2,
-    name: 'Thor',
-    type: 'Cachorro',
-    age: '3 anos',
-    size: 'Médio',
-    description: 'Cachorro protetor, ótimo para família. Já vacinado e vermifugado.',
-    photo: 'https://placedog.net/500/300?id=1',
-    contact: { phone: '(19) 98888-1111', email: 'thor.adocao@example.com' },
-  },
-  {
-    id: 3,
-    name: 'Mimi',
-    type: 'Cachorro',
-    age: '6 meses',
-    size: 'Pequeno',
-    description: 'Filhote alegre, adora crianças e aprende rápido. Ideal para quem quer um companheiro ativo.',
-    photo: 'https://placedog.net/500/300?id=2',
-    contact: { phone: '(13) 97777-2222', email: 'mimi@example.com' },
-  },
-])
-
-const filteredAnimals = computed(() => {
-  const term = q.value.trim().toLowerCase()
-  return animals.value.filter(a => {
-    const matchesQuery =
-      !term || [a.name, a.city, a.state, a.type, a.description].join(' ').toLowerCase().includes(term)
-    const matchesType = !filterType.value || a.type === filterType.value
-    return matchesQuery && matchesType
-  })
-})
-
-function truncate(text, n) {
-  if (!text) return ''
-  return text.length > n ? text.slice(0, n) + '...' : text
+async function carregarAnimais() {
+  try {
+    const res = await fetch('/api/animals/adocao', { headers: { Accept: 'application/json' } })
+    if (!res.ok) throw new Error(`Erro HTTP ${res.status}`)
+    const data = await res.json()
+    animais.value = data.content || data
+  } catch (e) {
+    erro.value = 'Falha ao carregar animais: ' + e.message
+  } finally {
+    carregando.value = false
+  }
 }
 
-function openModal(animal) {
-  selected.value = animal
-}
-function closeModal() {
-  selected.value = null
+function traduz(valor) {
+  const map = {
+    CANINE: 'Cachorro',
+    FELINE: 'Gato',
+    SMALL: 'Pequeno',
+    MEDIUM: 'Médio',
+    LARGE: 'Grande',
+    MALE: 'Macho',
+    FEMALE: 'Fêmea'
+  }
+  return map[valor] || valor
 }
 
-function requestAdoption(animal) {
-  selected.value = animal
-}
-
-function confirmAdoption(animal) {
-  alert(`Pedido de adoção enviado para ${animal.name}!\nContato: ${animal.contact.phone}`)
-  closeModal()
-}
+onMounted(carregarAnimais)
 </script>
 
 <style scoped>

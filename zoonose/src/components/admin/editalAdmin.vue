@@ -644,17 +644,31 @@ async function salvarNoticia() {
     }
     
     if (noticiaForm.value.tipo === 'campanha') {
-      dadosParaSalvar.startDateTime = `${noticiaForm.value.dataInicioCampanha} ${noticiaForm.value.horaInicioCampanha}:00`
-      
-      if (noticiaForm.value.dataFimCampanha && noticiaForm.value.horaFimCampanha) {
-        dadosParaSalvar.endDateTime = `${noticiaForm.value.dataFimCampanha} ${noticiaForm.value.horaFimCampanha}:00`
+      // ✅ VALIDAÇÃO ADICIONADA
+      if (!noticiaForm.value.dataInicioCampanha || !noticiaForm.value.horaInicioCampanha) {
+        throw new Error('Data e hora de início são obrigatórias para campanhas')
       }
       
+      // ✅ Formatação segura do startDateTime
+      dadosParaSalvar.startDateTime = `${noticiaForm.value.dataInicioCampanha} ${noticiaForm.value.horaInicioCampanha}:00`
+      
+      // ✅ Validação e formatação do endDateTime (opcional)
+      if (noticiaForm.value.dataFimCampanha && noticiaForm.value.horaFimCampanha) {
+        dadosParaSalvar.endDateTime = `${noticiaForm.value.dataFimCampanha} ${noticiaForm.value.horaFimCampanha}:00`
+      } else {
+        // Se não tiver data/hora fim completas, remove do payload
+        dadosParaSalvar.endDateTime = null
+      }
+      
+      // Remove campos temporários do formulário
       delete dadosParaSalvar.dataInicioCampanha
       delete dadosParaSalvar.horaInicioCampanha
       delete dadosParaSalvar.dataFimCampanha
       delete dadosParaSalvar.horaFimCampanha
     }
+    
+    // 🐛 DEBUG: Log do payload antes de enviar
+    console.log('📤 Payload que será enviado:', JSON.stringify(dadosParaSalvar, null, 2))
     
     if (modoEdicao.value) {
       await editarNoticiaData(noticiaEditandoId.value, dadosParaSalvar)
@@ -667,7 +681,7 @@ async function salvarNoticia() {
     fecharModal()
     
   } catch (error) {
-    console.error('Erro ao salvar:', error)
+    console.error('❌ Erro ao salvar:', error)
     mostrarToast('error', '❌ ' + error.message)
   } finally {
     salvando.value = false

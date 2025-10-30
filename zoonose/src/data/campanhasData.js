@@ -107,53 +107,48 @@ const mapBackendToFrontend = (backendCampaign) => {
 const mapFrontendToBackend = (frontendCampaign) => {
   const formatarData = (data) => {
     if (!data) return null
-    
-    if (data.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      return data
-    }
-    
+    if (data.match(/^\d{4}-\d{2}-\d{2}$/)) return data
     if (data.includes('/')) {
       const [dia, mes, ano] = data.split('/')
       return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
     }
-    
-    if (data instanceof Date) {
-      return data.toBackendTimestamp(new Date()).split('T')[0]
-    }
-    
     return data
   }
 
   const dataInicio = formatarData(frontendCampaign.dataInicioCampanha)
   const dataFim = formatarData(frontendCampaign.dataFimCampanha)
-  
-  const startDateTime = createDateTime(dataInicio, '')
-  const endDateTime = createDateTime(dataFim, '')
-  
-  
-  
+
+  // 🔒 Garante sempre um timestamp completo no formato ISO
+  const startDateTime = createDateTime(dataInicio, frontendCampaign.horaInicioCampanha || '00:00')
+  const endDateTime = dataFim ? createDateTime(dataFim, frontendCampaign.horaFimCampanha || '00:00') : null
+
+  console.log('🕒 Enviando startDateTime:', startDateTime)
+  console.log('🕒 Enviando endDateTime:', endDateTime)
+
   return {
     name: frontendCampaign.nomeCampanha,
     description: frontendCampaign.description || `Campanha: ${frontendCampaign.nomeCampanha}`,
-    startDateTime: startDateTime,
-    endDateTime: endDateTime,
-    imageUrl: frontendCampaign.urlImagem || undefined
+    startDateTime,
+    endDateTime,
+    imageUrl: frontendCampaign.urlImagem || undefined,
+    animalId: frontendCampaign.animalId || null // pronto pra integração futura
   }
 }
 
+// 🧠 Função reforçada pra gerar timestamps válidos
 const createDateTime = (date, time) => {
   if (!date) return null
-  
-  let formattedDate = date
+
+  // Converte formato BR (dd/MM/yyyy → yyyy-MM-dd)
   if (date.includes('/')) {
     const [dia, mes, ano] = date.split('/')
-    formattedDate = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
+    date = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
   }
-  
-  const timeToUse = time || '00:00:00'
-  
-  return `${formattedDate}T${timeToUse}`
+
+  const [hora, minuto] = (time || '00:00').split(':')
+  return `${date}T${hora.padStart(2, '0')}:${minuto.padStart(2, '0')}:00`
 }
+
 
 export function useCampanhas() {
 

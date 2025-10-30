@@ -10,6 +10,7 @@ import Protocolo from '../components/admin/Protocolo.vue'
 import Atendimento from '../components/admin/Atendimento.vue'
 import Footer from '../components/footer.vue'
 import Adocao from '../components/adocao.vue'
+import adocaoAdmin from '../components/admin/adocaoAdmin.vue'
 import editalAdmin from '../components/admin/editalAdmin.vue'
 import Edital from '@/components/edital.vue'
 import EditalNoticias from '@/components/editalNoticias.vue'
@@ -19,8 +20,14 @@ const routes = [
   // Rotas públicas
   { path: '/', component: Home },
   { path: '/login', component: Login },
-  { path: '/adocao', component: Adocao },
-  { path: '/footer', component: Footer },
+  
+{ 
+  path: '/adocao', 
+  name: 'Adocao', 
+  component: Adocao  
+},
+
+{ path: '/footer', component: Footer },
   
   // Rotas de edital - Notícias e Campanhas
   { 
@@ -77,7 +84,12 @@ const routes = [
     component: editalAdmin, 
     meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
   },
-  
+{ 
+  path: '/edital-adocao', 
+  component: adocaoAdmin, 
+  meta: { requiresAuth: true, role: 'ROLE_ADMINISTRATOR' } 
+},
+
   // Rotas de usuário
   { 
     path: '/user', 
