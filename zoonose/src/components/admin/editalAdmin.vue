@@ -649,17 +649,13 @@ async function salvarNoticia() {
         throw new Error('Data e hora de início são obrigatórias para campanhas')
       }
       
-      // ✅ Formatação segura do startDateTime
-      dadosParaSalvar.startDateTime = `${noticiaForm.value.dataInicioCampanha} ${noticiaForm.value.horaInicioCampanha}:00`
-      
-      // ✅ Validação e formatação do endDateTime (opcional)
-      if (noticiaForm.value.dataFimCampanha && noticiaForm.value.horaFimCampanha) {
-        dadosParaSalvar.endDateTime = `${noticiaForm.value.dataFimCampanha} ${noticiaForm.value.horaFimCampanha}:00`
-      } else {
-        // Se não tiver data/hora fim completas, remove do payload
-        dadosParaSalvar.endDateTime = null
-      }
-      
+      dadosParaSalvar.startDateTime = `${noticiaForm.value.dataInicioCampanha}T${noticiaForm.value.horaInicioCampanha}:00`
+
+if (noticiaForm.value.dataFimCampanha && noticiaForm.value.horaFimCampanha) {
+  dadosParaSalvar.endDateTime = `${noticiaForm.value.dataFimCampanha}T${noticiaForm.value.horaFimCampanha}:00`
+} else {
+  dadosParaSalvar.endDateTime = null
+}
       // Remove campos temporários do formulário
       delete dadosParaSalvar.dataInicioCampanha
       delete dadosParaSalvar.horaInicioCampanha
