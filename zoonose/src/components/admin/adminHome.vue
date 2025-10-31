@@ -3,7 +3,6 @@
     <Header :usuario="nomeUsuario" />
 
     <div class="container">
-      <!-- Atalhos Rápidos -->
       <section class="atalhos-rapidos">
         <h2>Atalhos Rápidos</h2>
         <div class="cards-grid">
@@ -22,7 +21,6 @@
         </div>
       </section>
 
-      <!-- Resumo -->
       <section class="resumo">
         <h2>Resumo</h2>
         <div class="cards-grid">
@@ -44,13 +42,11 @@
         </div>
       </section>
 
-      <!-- Loading State -->
       <div v-if="carregando" class="loading-section">
         <div class="spinner"></div>
         <p>Carregando usuários...</p>
       </div>
 
-      <!-- Error State -->
       <div v-if="erro" class="error-section">
         <div class="error-content">
           <span class="error-icon">⚠️</span>
@@ -138,7 +134,6 @@ import { useUsuarios } from '@/data/usuariosData.js'
 const router = useRouter()
 const nomeUsuario = ref('Admin')
 
-// Usar composable de usuários
 const { 
   usuarios, 
   carregando, 
@@ -147,7 +142,6 @@ const {
   limparErro
 } = useUsuarios()
 
-// Computed properties
 const administradores = computed(() => 
   usuarios.value.filter(u => u.isAdmin)
 )
@@ -156,7 +150,6 @@ const usuariosComuns = computed(() =>
   usuarios.value.filter(u => !u.isAdmin)
 )
 
-// Métodos auxiliares
 function getIniciais(nome) {
   if (!nome) return '?'
   const partes = nome.trim().split(' ')
@@ -169,10 +162,8 @@ function getIniciais(nome) {
 function formatarTelefone(telefone) {
   if (!telefone || telefone === 'Não informado') return telefone
   
-  // Remove tudo que não é número
   const numeros = telefone.replace(/\D/g, '')
   
-  // Formata baseado no tamanho
   if (numeros.length === 11) {
     return `(${numeros.slice(0, 2)}) ${numeros.slice(2, 7)}-${numeros.slice(7)}`
   }
@@ -183,7 +174,6 @@ function formatarTelefone(telefone) {
   return telefone
 }
 
-// Lifecycle
 onMounted(async () => {
   console.log('🚀 AdminHome montado')
   await carregarUsuarios()
@@ -213,7 +203,6 @@ h2 {
   font-weight: 600;
 }
 
-/* Atalhos Rápidos */
 .atalhos-rapidos .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -245,7 +234,6 @@ h2 {
   font-size: 0.95rem;
 }
 
-/* Resumo */
 .resumo .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
@@ -277,7 +265,6 @@ h2 {
   font-weight: bold;
 }
 
-/* Loading e Error */
 .loading-section, .error-section {
   text-align: center;
   padding: 2rem;
@@ -329,7 +316,6 @@ h2 {
   background: #e2e8f0;
 }
 
-/* Lista de Usuários */
 .lista-usuarios {
   margin-top: 3rem;
 }
@@ -470,7 +456,6 @@ h2 {
   font-style: italic;
 }
 
-/* Scrollbar personalizada */
 .usuarios-lista::-webkit-scrollbar {
   width: 8px;
 }
@@ -489,7 +474,6 @@ h2 {
   background: #94a3b8;
 }
 
-/* Responsivo */
 @media (max-width: 1024px) {
   .usuarios-container {
     grid-template-columns: 1fr;

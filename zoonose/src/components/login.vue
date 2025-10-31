@@ -19,7 +19,6 @@
         </h2>
 
         <form @submit.prevent="handleSubmit">
-          <!-- LOGIN -->
           <template v-if="!modoCadastro">
             <input
               type="email"
@@ -37,7 +36,6 @@
             />
           </template>
 
-          <!-- CADASTRO -->
           <template v-else>
             <input
               type="email"
@@ -85,7 +83,6 @@
               <option value="F">Feminino</option>
               <option value="O">Outro</option>
             </select>
-            <!-----Se esta no modo cadastro - true-->
             <select v-model="form.role" class="input-field" required>
               <option value="">Selecione o tipo de conta</option>
               <option value="ROLE_CUSTOMER">Usuário Comum</option>
@@ -93,7 +90,6 @@
             </select>
           </template>
 
-<!-------Valores salvos serão "ROLE_CUSTOMER" ou "ROLE_ADMINISTRATOR-->
           <button type="submit" class="btn btn-primary mb-2">
             {{ modoCadastro ? "Registrar" : "Entrar" }}
           </button>
@@ -105,7 +101,6 @@
             {{ modoCadastro ? "Faça login" : "Cadastre-se" }}
           </span>
         </p>
-<!--altera o modo-->
         <div v-if="mensagem" :class="['mensagem', 'mt-3', tipoMensagem]">
           {{ mensagem }}
         </div>
@@ -125,19 +120,14 @@ const API_BASE_URL = "http://localhost:8080/api";
 const router = useRouter();
 
 const redirecionarUsuario = (role) => {
-  console.log("🎯 Redirecionando usuário com role:", role);
   
-  // Usar as rotas definidas no router diretamente
   if (role === 'ROLE_ADMINISTRATOR' || role.includes('ADMIN')) {
-    console.log("👑 Admin detectado - indo para /admin");
     router.push('/admin');
   } else {
-    console.log("👤 Customer detectado - indo para /user"); 
     router.push('/user');
   }
 };
 
-// Estado
 const form = reactive({
   email: "",
   password: "",
@@ -154,7 +144,6 @@ const modoCadastro = ref(false);
 const loading = ref(false);
 const tipoMensagem = ref("");
 
-// Métodos
 const mostrarMensagem = (texto, tipo = "error") => {
   mensagem.value = texto;
   tipoMensagem.value = tipo;
@@ -164,7 +153,6 @@ const mostrarMensagem = (texto, tipo = "error") => {
   }
 };
 
-// Formatar CPF
 const formatCPF = (e) => {
   let value = e.target.value.replace(/\D/g, '');
   if (value.length <= 11) {
@@ -174,7 +162,6 @@ const formatCPF = (e) => {
   }
   form.cpf = value;
 };
-// Formatar Telefone
 const formatPhone = (e) => {
   let value = e.target.value.replace(/\D/g, '');
   if (value.length <= 11) {
@@ -194,7 +181,6 @@ const alternarModo = () => {
 
 
 
-//alterna entre login e cadast
 const handleSubmit = () => {
   modoCadastro.value ? cadastrar() : login();
 };
@@ -210,31 +196,22 @@ const login = async () => {
       password: form.password,
     });
     
-    console.log("🔍 DEBUG - Resposta completa do login:");
-    console.log("Headers:", response.headers);
-    console.log("Data:", response.data);
-    
-    // Obter token
     let token = response.headers["authorization"] || 
                 response.data.token ||
                 response.data.accessToken;
 
     if (!token) throw new Error("Token não recebido");
     
-    // Garantir formato Bearer
     if (!token.startsWith('Bearer ')) {
       token = `Bearer ${token}`;
     }
     
-    console.log("🔑 Token processado:", token);
 
     localStorage.setItem("token", token);
-    console.log("✅ Token salvo:", localStorage.getItem("token"));
     
     let role = "ROLE_CUSTOMER"; 
     
     try {
-      console.log("🔍 Testando se é administrador...");
       
       const testResponse = await fetch(`${API_BASE_URL}/users/test/administrator`, {
         method: 'GET',
@@ -246,15 +223,11 @@ const login = async () => {
       
       if (testResponse.ok) {
         role = "ROLE_ADMINISTRATOR";
-        console.log("✅ Usuário é administrador");
       } else {
-        console.log("ℹ️ Usuário é customer (status:", testResponse.status, ")");
       }
     } catch (error) {
-      console.log("ℹ️ Usuário é customer (erro esperado)");
     }
     
-    // ETAPA 3: SALVAR ROLE E USER DATA
     localStorage.setItem("role", role);
     
     const userData = {
@@ -263,12 +236,8 @@ const login = async () => {
     };
     localStorage.setItem("user", JSON.stringify(userData));
     
-    console.log("✅ Dados finais salvos:");
-    console.log("Token:", localStorage.getItem("token"));
-    console.log("Role:", localStorage.getItem("role"));
-    console.log("User:", localStorage.getItem("user"));
+  
     
-    // ETAPA 4: VERIFICAÇÃO FINAL ANTES DO REDIRECIONAMENTO
     const finalToken = localStorage.getItem("token");
     const finalRole = localStorage.getItem("role");
     
@@ -278,17 +247,13 @@ const login = async () => {
     
     mostrarMensagem("Login realizado com sucesso!", "success");
     
-    // ETAPA 5: REDIRECIONAMENTO BASEADO NA ROLE
     if (role === "ROLE_ADMINISTRATOR") {
-      console.log("🚀 Redirecionando admin para /admin");
       router.push('/admin');
     } else {
-      console.log("🚀 Redirecionando customer para /user");
       router.push('/user');
     }
     
   } catch (error) {
-    console.error("Erro no login:", error);
     
     if (error.response?.status === 401) {
       mostrarMensagem("E-mail ou senha inválidos");
@@ -308,22 +273,19 @@ const cadastrar = async () => {
 
   
   try {
-    // Validar campos
     if (!form.email || !form.password || !form.role || !form.name || !form.cpf || !form.phone) {
       mostrarMensagem("Preencha todos os campos obrigatórios");
       loading.value = false;
       return;
     }
 
-     // Validar CPF (11 dígitos) - LIMPAR formatação
-    const cpfLimpo = form.cpf.replace(/\D/g, ''); // Remove tudo que não é número
+    const cpfLimpo = form.cpf.replace(/\D/g, ''); 
     if (cpfLimpo.length !== 11) {
       mostrarMensagem("CPF deve ter 11 dígitos");
       loading.value = false;
       return;
     }
 
-        // Validar telefone (10 ou 11 dígitos)
     const telLimpo = form.phone.replace(/\D/g, '');
     if (telLimpo.length < 10 || telLimpo.length > 11) {
       mostrarMensagem("Telefone inválido");
@@ -338,8 +300,8 @@ const cadastrar = async () => {
       password: form.password,
       role: roleEscolhido,
       name: form.name,
-      cpf: cpfLimpo,        // Apenas números
-      phone: telLimpo, // Apenas números
+      cpf: cpfLimpo,       
+      phone: telLimpo, 
       sexo: form.sexo || undefined, //opcional
       //campos opcionais
       secundaryPhone: undefined,
@@ -348,14 +310,9 @@ const cadastrar = async () => {
     
     };
 
-   
-
-
-    
         await authAPI.register(dadosCadastro);
 
     mostrarMensagem("Conta criada com sucesso! Fazendo login...", "success");
-    // Auto-login após cadastro bem-sucedido
     setTimeout(async () => {
       try {
         const response = await authAPI.login({
@@ -363,7 +320,6 @@ const cadastrar = async () => {
           password: form.password,
         });
 
-        // Salvar token
     const token = response.data.token;
         localStorage.setItem("token", token);
         localStorage.setItem("role", roleEscolhido);
@@ -378,10 +334,8 @@ const cadastrar = async () => {
            redirecionarUsuario(roleEscolhido);
 
       } catch (loginError) {
-        console.error("Erro no auto-login:", loginError);
         mostrarMensagem("Cadastro realizado! Faça login para continuar.", "success");
         
-        // Alternar para modo login
         setTimeout(() => {
           modoCadastro.value = false;
           const emailSalvo = form.email;
@@ -392,15 +346,12 @@ const cadastrar = async () => {
     }, 1500);
     
   } catch (error) {
-    console.error("❌ Erro completo no cadastro:", error);
-    console.error("Response:", error.response);
+  
     
     if (error.code === 'ERR_NETWORK' || error.message === 'Network Error') {
       mostrarMensagem("Erro de conexão. Verifique se o servidor está rodando na porta 8080.");
     } else if (error.response?.status === 500) {
-      // Erro 500 - problema no servidor
       const errorData = error.response.data;
-      console.error("Erro 500 detalhes:", errorData);
       
       if (errorData?.message) {
         mostrarMensagem(`Erro no servidor: ${errorData.message}`);
@@ -518,7 +469,6 @@ const cadastrar = async () => {
   text-decoration: underline;
 }
 
-/* Utility classes */
 .text-3xl { font-size: 1.875rem; }
 .text-xl { font-size: 1.25rem; }
 .text-sm { font-size: 0.875rem; }

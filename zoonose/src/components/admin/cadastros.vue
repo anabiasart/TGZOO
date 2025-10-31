@@ -2,7 +2,6 @@
   <div class="container">
     <h1>Gerenciamento de Usuários</h1>
 
-    <!-- Formulário de Cadastro/Edição -->
     <form @submit.prevent="salvarUsuario">
       <input v-model="form.nome" placeholder="Nome" required />
       <input v-model="form.email" placeholder="Email" required />
@@ -18,7 +17,6 @@
 
     <hr />
 
-    <!-- Listagem -->
     <table border="1" cellpadding="8">
       <thead>
         <tr>
@@ -60,13 +58,11 @@ const form = ref({
 
 const API_URL = "http://localhost:3000/usuarios" // ajuste para sua API
 
-// Carregar usuários
 async function carregarUsuarios() {
   const res = await axios.get(API_URL)
   usuarios.value = res.data
 }
 
-// Salvar ou atualizar
 async function salvarUsuario() {
   if (editando.value) {
     await axios.put(`${API_URL}/${form.value.id}`, form.value)
@@ -77,19 +73,16 @@ async function salvarUsuario() {
   cancelarEdicao()
 }
 
-// Editar
 function editarUsuario(u) {
   form.value = { ...u }
   editando.value = true
 }
 
-// Cancelar edição
 function cancelarEdicao() {
   form.value = { id: null, nome: "", email: "", tipo: "usuario" }
   editando.value = false
 }
 
-// Excluir
 async function excluirUsuario(id) {
   if (confirm("Tem certeza que deseja excluir este usuário?")) {
     await axios.delete(`${API_URL}/${id}`)

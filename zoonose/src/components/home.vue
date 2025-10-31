@@ -82,8 +82,8 @@ onMounted(() => window.addEventListener('resize', fecharMenu))
 onUnmounted(() => window.removeEventListener('resize', fecharMenu))
 
 const imagens = ref([
-  { src: vete, texto: "Cuide do seu pet com amor e vacinas 💉🐶" },
-  { src: pata, texto: "Adote um amigo e ganhe um companheiro fiel 🐾❤️" }
+  { src: vete, texto: "Cuide do seu pet com amor e vacinas." },
+  { src: pata, texto: "Adote um amigo e ganhe um companheiro fiel." }
 ])
 const indexAtual = ref(0)
 let intervalo
@@ -118,7 +118,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <li @click="router.push('/edital/noticias')">Noticias</li> 
     <li @click="router.push('/edital/campanhas')">Campanhas</li>
     <li @click="router.push('/login')">Login</li>
-    <li @click="router.push('/adocao')">Adote um Amigo</li>
+    <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
   </ul>
 
   <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>
@@ -148,7 +148,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <div class="template2">
       <main class="col-central">
         <section class="noticias">
-          <h3 class="titulo">📰 Últimas Notícias & Campanhas</h3>
+          <h3 class="titulo"> > Últimas Notícias & Campanhas</h3>
           <div class="lista-noticias">
             <div v-for="n in noticias" :key="n.id" class="card-noticia">
               <div class="card-badge">
@@ -186,7 +186,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
         </div>
 
         <section class="faq">
-          <h3>❓ Dúvidas Frequentes</h3>
+          <h3>> Dúvidas Frequentes</h3>
           <div v-for="(item, i) in faq" :key="i" class="faq-item">
             <button class="faq-question" @click="toggleFaq(i)">
               {{ item.pergunta }}

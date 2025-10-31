@@ -1,6 +1,5 @@
 <template>
   <div class="campanhas-page">
-    <!-- Header -->
     <header class="page-header">
       <button class="btn-voltar" @click="$router.go(-1)">
         ← Voltar
@@ -11,7 +10,6 @@
       </div>
     </header>
 
-    <!-- Filtros -->
     <section class="filtros-section">
       <div class="filtros-container">
         <div class="search-box">
@@ -25,13 +23,11 @@
       </div>
     </section>
 
-    <!-- Loading -->
     <div v-if="carregando" class="loading-container">
       <div class="spinner"></div>
       <p>Carregando campanhas...</p>
     </div>
 
-    <!-- Lista de campanhas -->
     <main class="campanhas-container" v-else>
       <div v-if="campanhasFiltradas.length === 0" class="empty-state">
         <span class="empty-icon">📢</span>
@@ -46,21 +42,17 @@
           class="campanha-card"
           @click="verCampanha(campanha.id)"
         >
-          <!-- Badge -->
           <div class="card-badge">
             <span class="badge-campanha">📢 Campanha</span>
           </div>
 
-          <!-- Imagem -->
           <div class="card-image">
             <img :src="getImagem(campanha)" :alt="getTitulo(campanha)" />
           </div>
 
-          <!-- Conteúdo -->
           <div class="card-content">
             <h3>{{ getTitulo(campanha) }}</h3>
             
-            <!-- Info de Campanha -->
             <div class="campanha-info">
               <div class="info-item" v-if="campanha.dataInicioCampanha">
                 <span class="icon">📅</span>

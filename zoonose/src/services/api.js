@@ -12,7 +12,6 @@ const api = axios.create({
   withCredentials: true 
 });
 
-// Interceptor de Request
 api.interceptors.request.use(
   (config) => {
     const token = localStorage.getItem("token");
@@ -23,7 +22,6 @@ api.interceptors.request.use(
         : `Bearer ${token}`;
     }
     
-    console.log(`📤 ${config.method?.toUpperCase()} ${config.baseURL}${config.url}`);
     return config;
   },
   (error) => {
@@ -129,10 +127,9 @@ export const authAPI = {
   },
 };
 
-// ← NOVO: API para gerenciar usuários
 export const userAPI = {
   getAllUsers: async () => {
-    return await api.get('/users'); // ← http://localhost:8080/users
+    return await api.get('/users'); 
   },
 
   getUserById: async (id) => {

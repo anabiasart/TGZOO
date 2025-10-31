@@ -10,13 +10,25 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
-  server: {
-    proxy: {
-  '/users': {
-    target: 'http://localhost:8080',
-    changeOrigin: true,
-    secure: false,
+ server: {
+  proxy: {
+    '/api': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      secure: false,
+    },
+    '/users': {
+      target: 'http://localhost:8080',
+      changeOrigin: true,
+      secure: false,
+    },
+    '/animals': {
+      target: 'http://localhost:8080/api',
+      changeOrigin: true,
+      secure: false,
+      rewrite: path => path.replace(/^\/animals/, '/animals')
+    },
   },
 },
-  },
+
 })
