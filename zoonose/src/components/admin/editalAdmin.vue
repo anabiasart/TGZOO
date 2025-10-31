@@ -633,39 +633,33 @@ function fecharModal() {
   modalAberto.value = false
   setTimeout(resetarForm, 300)
 }
-
 async function salvarNoticia() {
   try {
     salvando.value = true
-    
+
     const dadosParaSalvar = {
       ...noticiaForm.value,
       dataPublicacao: noticiaForm.value.dataPublicacao || new Date().toISOString().split('T')[0]
     }
-    
-    if (noticiaForm.value.tipo === 'campanha') {
-      // ✅ VALIDAÇÃO ADICIONADA
-      if (!noticiaForm.value.dataInicioCampanha || !noticiaForm.value.horaInicioCampanha) {
-        throw new Error('Data e hora de início são obrigatórias para campanhas')
-      }
-      
-      dadosParaSalvar.startDateTime = `${noticiaForm.value.dataInicioCampanha}T${noticiaForm.value.horaInicioCampanha}:00`
 
-if (noticiaForm.value.dataFimCampanha && noticiaForm.value.horaFimCampanha) {
-  dadosParaSalvar.endDateTime = `${noticiaForm.value.dataFimCampanha}T${noticiaForm.value.horaFimCampanha}:00`
-} else {
-  dadosParaSalvar.endDateTime = null
-}
-      // Remove campos temporários do formulário
-      delete dadosParaSalvar.dataInicioCampanha
-      delete dadosParaSalvar.horaInicioCampanha
-      delete dadosParaSalvar.dataFimCampanha
-      delete dadosParaSalvar.horaFimCampanha
+    if (noticiaForm.value.tipo === 'campanha') {
+      if (!noticiaForm.value.nomeCampanha) {
+        throw new Error('O nome da campanha é obrigatório')
+      }
+
+      if (!noticiaForm.value.dataInicioCampanha || !noticiaForm.value.horaInicioCampanha) {
+        throw new Error('Data e hora de início são obrigatórias')
+      }
+
+      dadosParaSalvar.tipo = 'campanha'
+      dadosParaSalvar.resumo = noticiaForm.value.resumo || 'Sem descrição'
+      dadosParaSalvar.urlImagem = noticiaForm.value.urlImagem || ''
+      dadosParaSalvar.status = noticiaForm.value.status || 'ativo'
+      dadosParaSalvar.autor = noticiaForm.value.autor || 'Administrador'
     }
-    
-    // 🐛 DEBUG: Log do payload antes de enviar
-    console.log('📤 Payload que será enviado:', JSON.stringify(dadosParaSalvar, null, 2))
-    
+
+    console.log('📤 Enviando dados:', JSON.stringify(dadosParaSalvar, null, 2))
+
     if (modoEdicao.value) {
       await editarNoticiaData(noticiaEditandoId.value, dadosParaSalvar)
       mostrarToast('success', '✅ Item atualizado com sucesso!')
@@ -673,9 +667,8 @@ if (noticiaForm.value.dataFimCampanha && noticiaForm.value.horaFimCampanha) {
       await adicionarNoticia(dadosParaSalvar)
       mostrarToast('success', '✅ Item criado com sucesso!')
     }
-    
+
     fecharModal()
-    
   } catch (error) {
     console.error('❌ Erro ao salvar:', error)
     mostrarToast('error', '❌ ' + error.message)
@@ -683,6 +676,8 @@ if (noticiaForm.value.dataFimCampanha && noticiaForm.value.horaFimCampanha) {
     salvando.value = false
   }
 }
+
+
 function editarNoticia(noticia) {
   menuAberto.value = null
   abrirModalNoticia(noticia)
