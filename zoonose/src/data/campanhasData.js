@@ -107,53 +107,58 @@ const mapBackendToFrontend = (backendCampaign) => {
 const mapFrontendToBackend = (frontendCampaign) => {
   const formatarData = (data) => {
     if (!data) return null
-    
-    if (data.match(/^\d{4}-\d{2}-\d{2}$/)) {
-      return data
-    }
-    
+    if (data.match(/^\d{4}-\d{2}-\d{2}$/)) return data
     if (data.includes('/')) {
       const [dia, mes, ano] = data.split('/')
       return `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
     }
-    
-    if (data instanceof Date) {
-      return data.toBackendTimestamp(new Date()).split('T')[0]
-    }
-    
+    if (data instanceof Date) return data.toISOString().split('T')[0]
     return data
   }
 
-  const dataInicio = formatarData(frontendCampaign.dataInicioCampanha)
-  const dataFim = formatarData(frontendCampaign.dataFimCampanha)
-  
-  const startDateTime = createDateTime(dataInicio, '')
-  const endDateTime = createDateTime(dataFim, '')
-  
-  
-  
+  // 🔍 Pega tanto do campo separado quanto do formato ISO (caso venha assim)
+  let dataInicio = frontendCampaign.dataInicioCampanha
+  let horaInicio = frontendCampaign.horaInicioCampanha
+  let dataFim = frontendCampaign.dataFimCampanha
+  let horaFim = frontendCampaign.horaFimCampanha
+
+  // Caso venha direto do backend (ISO 8601)
+  if (frontendCampaign.startDateTime && !dataInicio) {
+    const [d, t] = frontendCampaign.startDateTime.split('T')
+    dataInicio = d
+    horaInicio = t?.slice(0, 5) || '00:00'
+  }
+  if (frontendCampaign.endDateTime && !dataFim) {
+    const [d, t] = frontendCampaign.endDateTime.split('T')
+    dataFim = d
+    horaFim = t?.slice(0, 5) || '00:00'
+  }
+
+  // 🧠 Corrige o bug do “T” duplicado e espaço extra
+  const normalizarDateTime = (data, hora) => {
+    if (!data) return null
+    const baseData = formatarData(data.trim())
+    const baseHora = (hora || '00:00').trim()
+    // evita caso já venha no formato ISO completo
+    if (baseData.includes('T')) return baseData
+    return `${baseData}T${baseHora}:00`
+  }
+
+  const startDateTime = normalizarDateTime(dataInicio, horaInicio)
+  const endDateTime = normalizarDateTime(dataFim, horaFim)
+
+  console.log('🧩 mapFrontendToBackend corrigido:', { startDateTime, endDateTime })
+
   return {
     name: frontendCampaign.nomeCampanha,
     description: frontendCampaign.description || `Campanha: ${frontendCampaign.nomeCampanha}`,
-    startDateTime: startDateTime,
-    endDateTime: endDateTime,
-    imageUrl: frontendCampaign.urlImagem || undefined
+    startDateTime,
+    endDateTime,
+    imageUrl: frontendCampaign.urlImagem || undefined,
+    location: frontendCampaign.localCampanha || ''
   }
 }
 
-const createDateTime = (date, time) => {
-  if (!date) return null
-  
-  let formattedDate = date
-  if (date.includes('/')) {
-    const [dia, mes, ano] = date.split('/')
-    formattedDate = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
-  }
-  
-  const timeToUse = time || '00:00:00'
-  
-  return `${formattedDate}T${timeToUse}`
-}
 
 export function useCampanhas() {
 
