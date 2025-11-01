@@ -43,24 +43,27 @@ const formatarDataParaExibicao = (dataISO) => {
 
 const extractTimeFromDateTime = (startDateTime, endDateTime) => {
   if (!startDateTime) return ''
-  
+
   try {
     const startDate = new Date(startDateTime)
     const endDate = endDateTime ? new Date(endDateTime) : null
-    
-    const startTime = startDate.toLocaleTimeString('pt-BR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+
+    // ❗ Usa UTC para não aplicar deslocamento local automático
+    const startTime = startDate.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC'
     })
-    
+
     if (endDate) {
-      const endTime = endDate.toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      const endTime = endDate.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC'
       })
       return `${startTime} às ${endTime}`
     }
-    
+
     return `A partir das ${startTime}`
   } catch (error) {
     console.error('Erro ao extrair horário:', error)
