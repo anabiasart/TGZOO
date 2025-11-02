@@ -43,24 +43,27 @@ const formatarDataParaExibicao = (dataISO) => {
 
 const extractTimeFromDateTime = (startDateTime, endDateTime) => {
   if (!startDateTime) return ''
-  
+
   try {
     const startDate = new Date(startDateTime)
     const endDate = endDateTime ? new Date(endDateTime) : null
-    
-    const startTime = startDate.toLocaleTimeString('pt-BR', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+
+    // ❗ Usa UTC para não aplicar deslocamento local automático
+    const startTime = startDate.toLocaleTimeString('pt-BR', {
+      hour: '2-digit',
+      minute: '2-digit',
+      timeZone: 'UTC'
     })
-    
+
     if (endDate) {
-      const endTime = endDate.toLocaleTimeString('pt-BR', { 
-        hour: '2-digit', 
-        minute: '2-digit' 
+      const endTime = endDate.toLocaleTimeString('pt-BR', {
+        hour: '2-digit',
+        minute: '2-digit',
+        timeZone: 'UTC'
       })
       return `${startTime} às ${endTime}`
     }
-    
+
     return `A partir das ${startTime}`
   } catch (error) {
     console.error('Erro ao extrair horário:', error)
@@ -135,7 +138,6 @@ const mapFrontendToBackend = (frontendCampaign) => {
   }
 }
 
-// 🧠 Função reforçada pra gerar timestamps válidos
 const createDateTime = (date, time) => {
   if (!date) return null
 
@@ -146,7 +148,13 @@ const createDateTime = (date, time) => {
   }
 
   const [hora, minuto] = (time || '00:00').split(':')
-  return `${date}T${hora.padStart(2, '0')}:${minuto.padStart(2, '0')}:00`
+  
+  // Cria a data em horário local e corrige para UTC (para evitar shift no backend)
+  const localDate = new Date(`${date}T${hora.padStart(2, '0')}:${minuto.padStart(2, '0')}:00`)
+  const offset = localDate.getTimezoneOffset() * 60000 // diferença do fuso em ms
+  const adjusted = new Date(localDate.getTime() - offset)
+  
+  return adjusted.toISOString().slice(0, 19) // corta o 'Z' no final
 }
 
 
