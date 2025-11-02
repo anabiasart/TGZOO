@@ -1,5 +1,3 @@
-import { toBackendTimestamp } from '@/utils/datetime'
-// zoonose/src/data/editaisData.js
 import { ref, computed } from 'vue'
 import { useNoticias } from './noticiasData.js'
 import { useCampanhas } from './campanhasData.js'
@@ -29,7 +27,6 @@ export function useEditais() {
     buscarCampanhaPorId
   } = useCampanhas()
 
-  // Estados unificados
   const carregando = computed(() => carregandoNoticias.value || carregandoCampanhas.value)
   const erro = computed(() => erroNoticias.value || erroCampanhas.value)
 
@@ -43,70 +40,90 @@ export function useEditais() {
       carregarNoticias(),
       carregarCampanhas()
     ])
+
+    noticias.value = noticias.value.map(n => ({ ...n, tipo: 'noticia' }))
+    campanhas.value = campanhas.value.map(c => ({ ...c, tipo: 'campanha' }))
   }
 
   const adicionarItem = async (itemForm) => {
     if (itemForm.tipo === 'campanha') {
-      return await adicionarCampanha(itemForm)
+      const nova = await adicionarCampanha(itemForm)
+      console.log('🟢 Nova campanha adicionada:', nova)
+      return nova
     } else {
-      return await adicionarNoticia(itemForm)
+      const nova = await adicionarNoticia(itemForm)
+      console.log('🟢 Nova notícia adicionada:', nova)
+      return nova
     }
   }
 
   const editarItem = async (id, itemForm) => {
     if (itemForm.tipo === 'campanha') {
+      console.log('✏️ Editando campanha ID:', id)
       return await editarCampanha(id, itemForm)
     } else {
+      console.log('✏️ Editando notícia ID:', id)
       return await editarNoticia(id, itemForm)
     }
   }
 
   const removerItem = async (id, tipo) => {
-    if (tipo === 'campanha') {
-      return await removerCampanha(id)
-    } else {
-      return await removerNoticiaPorId(id)
+    try {
+      const item = todosItens.value.find(i => i.id === id)
+      const tipoDefinido = tipo || item?.tipo
+
+      if (!tipoDefinido) {
+        console.warn(`⚠️ Tipo não informado nem encontrado para ID ${id}. Tentando excluir como notícia por padrão.`)
+        return await removerNoticiaPorId(id)
+      }
+
+      if (tipoDefinido === 'campanha') {
+        console.log(`🗑️ Excluindo CAMPANHA ID: ${id}`)
+        return await removerCampanha(id)
+      } else {
+        console.log(`🗑️ Excluindo NOTÍCIA ID: ${id}`)
+        return await removerNoticiaPorId(id)
+      }
+    } catch (error) {
+      console.error(`❌ Erro ao remover ${tipo || 'item'}:`, error)
+      throw error
     }
   }
 
   const buscarItemPorId = async (id) => {
-  
-  
-  try {
-    const itemNaMemoria = todosItens.value.find(item => item.id == id)
-    if (itemNaMemoria) {
-      return itemNaMemoria
-    }
-    await carregarTodos()
-    const itemCarregado = todosItens.value.find(item => item.id == id)
-    if (itemCarregado) {
-      return itemCarregado
-    }
-    let item = await buscarNoticiaPorId(id)
-    if (item) {
-      return item
-    }
+    try {
+      console.log('🔍 Buscando item unificado ID:', id)
 
-    item = await buscarCampanhaPorId(id)
-    if (item) {
-      return item
-    }
+      const itemNaMemoria = todosItens.value.find(item => item.id == id)
+      if (itemNaMemoria) return itemNaMemoria
 
-    return null
-  } catch (error) {
-    return null
+      await carregarTodos()
+      const itemCarregado = todosItens.value.find(item => item.id == id)
+      if (itemCarregado) return itemCarregado
+
+      let item = await buscarNoticiaPorId(id)
+      if (item) return { ...item, tipo: 'noticia' }
+
+      item = await buscarCampanhaPorId(id)
+      if (item) return { ...item, tipo: 'campanha' }
+
+      return null
+    } catch (error) {
+      console.error('❌ Erro ao buscar item unificado:', error)
+      return null
+    }
   }
-}
-const alterarStatus = async (id, novoStatus, tipo) => {
-  if (tipo === 'campanha') {
-    return await alterarStatusCampanha(id, novoStatus)
-  } else {
-    return await alterarStatusNoticia(id, novoStatus)
-  }
-}
 
+  const alterarStatus = async (id, novoStatus, tipo) => {
+    if (tipo === 'campanha') {
+      return await alterarStatusCampanha(id, novoStatus)
+    } else {
+      return await alterarStatusNoticia(id, novoStatus)
+    }
+  }
 
   const limparErro = () => {
+    erro.value = null
   }
 
   return {
@@ -115,7 +132,6 @@ const alterarStatus = async (id, novoStatus, tipo) => {
     campanhas,
     carregando,
     erro,
-
     carregarTodos,
     adicionarItem,
     editarItem,
@@ -123,7 +139,6 @@ const alterarStatus = async (id, novoStatus, tipo) => {
     buscarItemPorId,
     alterarStatus,
     limparErro,
-
     carregarNoticias,
     carregarCampanhas,
     adicionarNoticia,

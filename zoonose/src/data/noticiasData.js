@@ -186,7 +186,6 @@ export function useNoticias() {
     }
   }
 
-  // Remover notícia
   const removerNoticiaPorId = async (id) => {
     carregando.value = true
     erro.value = null
@@ -233,7 +232,6 @@ export function useNoticias() {
     }
   }
 
-  // Buscar notícia por ID
   const buscarNoticiaPorId = async (id) => {
     try {
       const response = await fetch(`${API_URL}/${id}`, {

@@ -48,7 +48,6 @@ const extractTimeFromDateTime = (startDateTime, endDateTime) => {
     const startDate = new Date(startDateTime)
     const endDate = endDateTime ? new Date(endDateTime) : null
 
-    // ❗ Usa UTC para não aplicar deslocamento local automático
     const startTime = startDate.toLocaleTimeString('pt-BR', {
       hour: '2-digit',
       minute: '2-digit',
@@ -121,7 +120,6 @@ const mapFrontendToBackend = (frontendCampaign) => {
   const dataInicio = formatarData(frontendCampaign.dataInicioCampanha)
   const dataFim = formatarData(frontendCampaign.dataFimCampanha)
 
-  // 🔒 Garante sempre um timestamp completo no formato ISO
   const startDateTime = createDateTime(dataInicio, frontendCampaign.horaInicioCampanha || '00:00')
   const endDateTime = dataFim ? createDateTime(dataFim, frontendCampaign.horaFimCampanha || '00:00') : null
 
@@ -134,14 +132,13 @@ const mapFrontendToBackend = (frontendCampaign) => {
     startDateTime,
     endDateTime,
     imageUrl: frontendCampaign.urlImagem || undefined,
-    animalId: frontendCampaign.animalId || null // pronto pra integração futura
+    animalId: frontendCampaign.animalId || null
   }
 }
 
 const createDateTime = (date, time) => {
   if (!date) return null
 
-  // Converte formato BR (dd/MM/yyyy → yyyy-MM-dd)
   if (date.includes('/')) {
     const [dia, mes, ano] = date.split('/')
     date = `${ano}-${mes.padStart(2, '0')}-${dia.padStart(2, '0')}`
@@ -149,7 +146,7 @@ const createDateTime = (date, time) => {
 
   const [hora, minuto] = (time || '00:00').split(':')
   
-  // Cria a data em horário local e corrige para UTC (para evitar shift no backend)
+  // Cria a data em horário local e corrige para UTC (para evitar shift no backend) tirado do nosso gerador de porcaria de texto.
   const localDate = new Date(`${date}T${hora.padStart(2, '0')}:${minuto.padStart(2, '0')}:00`)
   const offset = localDate.getTimezoneOffset() * 60000 // diferença do fuso em ms
   const adjusted = new Date(localDate.getTime() - offset)
@@ -321,7 +318,6 @@ export function useCampanhas() {
         throw new Error(errorText || 'Erro ao excluir campanha')
       }
       
-      // Remover da lista local
       campanhas.value = campanhas.value.filter(c => c.id !== id)
       
       console.log('✅ Campanha removida com sucesso:', id)
@@ -335,7 +331,6 @@ export function useCampanhas() {
     }
   }
 
-  // Buscar campanha por ID
   const buscarCampanhaPorId = async (id) => {
     try {
       console.log('🔍 [campanhasData] Buscando campanha por ID:', id)

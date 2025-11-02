@@ -6,7 +6,6 @@ const erro = ref(null)
 
 const API_URL = 'http://localhost:8080/api/animals'
 
-// 🔐 Token e headers ---------------------------------------------
 const getAuthToken = () => localStorage.getItem('token')
 
 const getAuthHeaders = () => {
@@ -19,7 +18,6 @@ const getAuthHeaders = () => {
   return headers
 }
 
-// 🔄 Map backend → frontend --------------------------------------
 const mapBackendToFrontend = (animal) => ({
   id: animal.id,
   name: animal.name,
@@ -36,7 +34,6 @@ const mapBackendToFrontend = (animal) => ({
   userName: animal.user?.name || 'Sistema'
 })
 
-// 🔁 Map frontend → backend --------------------------------------
 const mapFrontendToBackend = (animal) => ({
   name: animal.name,
   breed: animal.breed || 'SRD',
@@ -49,10 +46,8 @@ const mapFrontendToBackend = (animal) => ({
   gender: animal.gender
 })
 
-// 📦 Funções principais ------------------------------------------
 export function useAnimais() {
 
-  // 🔍 Listar todos os animais
   const carregarAnimais = async () => {
     carregando.value = true
     erro.value = null
@@ -67,7 +62,7 @@ export function useAnimais() {
 
       const data = await response.json()
       animais.value = (data.content || data).map(mapBackendToFrontend)
-      console.log('🐶 Animais carregados:', animais.value.length)
+      console.log('Animais carregados:', animais.value.length)
     } catch (e) {
       erro.value = 'Erro ao carregar animais: ' + e.message
       console.error(erro.value)
@@ -89,7 +84,7 @@ export function useAnimais() {
       if (!response.ok) throw new Error(`Erro HTTP ${response.status}`)
       const data = await response.json()
       animais.value = (data.content || data).map(mapBackendToFrontend)
-      console.log('🐾 Animais para adoção carregados:', animais.value.length)
+      console.log('Animais para adoção carregados:', animais.value.length)
     } catch (e) {
       erro.value = 'Erro ao carregar animais para adoção: ' + e.message
       console.error(erro.value)
@@ -98,7 +93,6 @@ export function useAnimais() {
     }
   }
 
-  // ➕ Cadastrar animal
   const adicionarAnimal = async (animalForm) => {
     carregando.value = true
     erro.value = null
@@ -130,7 +124,6 @@ export function useAnimais() {
     }
   }
 
-  // ✏️ Atualizar animal
   const atualizarAnimal = async (id, animalForm) => {
     carregando.value = true
     erro.value = null
@@ -164,7 +157,6 @@ export function useAnimais() {
     }
   }
 
-  // 🗑️ Remover animal
   const removerAnimal = async (id) => {
     carregando.value = true
     erro.value = null
