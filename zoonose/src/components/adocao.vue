@@ -131,7 +131,7 @@ function requestAdoption(animal) {
   selected.value = animal
 }
 function confirmAdoption(animal) {
-  alert(`Pedido de adoção enviado para ${animal.name}! ❤️`)
+  alert(`Pedido de adoção enviado para ${animal.name}! `)
   closeModal()
 }
 </script>

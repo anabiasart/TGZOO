@@ -100,6 +100,15 @@
           <span class="link" @click="alternarModo">
             {{ modoCadastro ? "Faça login" : "Cadastre-se" }}
           </span>
+        
+        </p>
+
+          <p class="text-sm mt-3">
+          {{ modoCadastro ? ";" : "Esqueceu a senha?" }}
+          <span class="link" @click="alternarModo">
+            {{ modoCadastro ? ";" : "Recupere a senha" }}
+          </span>
+        
         </p>
         <div v-if="mensagem" :class="['mensagem', 'mt-3', tipoMensagem]">
           {{ mensagem }}
