@@ -232,8 +232,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 0 2rem;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  padding: 2rem 6rem;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.08);
   z-index: 100;
 }
 
@@ -341,7 +341,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 
 .service {
   background: linear-gradient(135deg, #d1fae5, #a5f3fc);
-  padding: 20px;
+  padding: 50px;
   border-radius: 20px;
   text-align: center;
   transition: transform 0.3s ease, box-shadow 0.3s ease;
@@ -349,7 +349,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 
 .service:hover {
   transform: scale(1.05);
-  box-shadow: 0 8px 16px rgba(0,0,0,0.2);
+  box-shadow: 0 5px 10px rgba(0,0,0,0.2);
 }
 
 .icon {
@@ -360,12 +360,12 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 }
 
 .service h3 {
-  font-size: 20px;
+  font-size: 40px;
   margin: 10px 0;
 }
 
 .service p {
-  font-size: 14px;
+  font-size: 18px;
   color: #555;
 }
 
@@ -375,7 +375,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   padding: 8px 14px;
   margin-top: 10px;
   border-radius: 9999px;
-  font-size: 14px;
+  font-size: 20px;
   transition: transform 0.2s ease;
 }
 
@@ -385,21 +385,22 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 
 .texto-zoonoses {
   background: white;
-  padding: 20px;
+  padding: 15px;
+  font-size: 1.3rem;
   border-radius: 16px;
   margin-bottom: 40px;
   box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
 
 .texto-zoonoses h2 {
-  font-size: 1.25rem;
+  font-size: 1.55rem;
   font-weight: 600;
   color: #0ea5e9;
   margin-bottom: 10px;
 }
 
 .titulo {
-  font-size: 1.5rem;
+  font-size: 1.75rem;
   font-weight: bold;
   color: #0ea5e9;
   margin-bottom: 20px;
@@ -407,7 +408,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 
 .lista-noticias {
   display: grid;
-  gap: 20px;
+  gap: 30px;
 }
 
 .card-noticia {
@@ -434,7 +435,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 .card-badge span {
   padding: 6px 12px;
   border-radius: 20px;
-  font-size: 0.75rem;
+  font-size: 0.95rem;
   font-weight: 600;
   display: inline-block;
 }
@@ -460,13 +461,13 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 }
 
 .conteudo h4 {
-  font-size: 18px;
+  font-size: 28px;
   font-weight: bold;
   margin-bottom: 8px;
 }
 
 .conteudo p {
-  font-size: 14px;
+  font-size: 22px;
   color: #555;
   margin-bottom: 12px;
 }
@@ -476,7 +477,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   color: white;
   padding: 6px 14px;
   border-radius: 9999px;
-  font-size: 14px;
+  font-size: 19px;
   transition: background 0.2s;
   border: none;
   cursor: pointer;
@@ -515,7 +516,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   width: 48px;
   height: 48px;
   border: none;
-  font-size: 22px;
+  font-size: 40px;
   cursor: pointer;
   z-index: 10;
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
@@ -566,6 +567,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   padding: 20px;
   border-radius: 16px;
   margin-top: 40px;
+    font-size: 1.26rem;
+
   box-shadow: 0 2px 10px rgba(0,0,0,0.15);
 }
 
@@ -585,8 +588,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   background: #f1f5f9;
   padding: 10px 14px;
   border-radius: 8px;
-  font-weight: bold;
   display: flex;
+    font-size: 1.3rem;
   justify-content: space-between;
   cursor: pointer;
   transition: background 0.2s ease;
@@ -599,7 +602,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 
 .faq-answer {
   margin-top: 8px;
-  font-size: 14px;
+  font-size: 18px;
   color: #444;
   padding-left: 5px;
 }
