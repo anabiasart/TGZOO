@@ -23,7 +23,6 @@ onMounted(async () => {
     console.error('Erro ao carregar notícias:', erro)
   }
 })
-// Função para pegar o título correto
 function getTitulo(item) {
   if (item.tipo === 'campanha') {
     return item.nomeCampanha || item.titulo
@@ -71,7 +70,7 @@ watch(todasNoticias, () => {
       titulo: getTitulo(n),
       resumo: getResumo(n),
       imagem: getImagem(n),
-      badge: n.tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia'
+      badge: n.tipo === 'campanha' ? ' Campanha' : ' Notícia'
     }))
 })
 
@@ -148,7 +147,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <div class="template2">
       <main class="col-central">
         <section class="noticias">
-          <h3 class="titulo"> > Últimas Notícias & Campanhas</h3>
+          <h3 class="titulo">  Últimas Notícias & Campanhas</h3>
           <div class="lista-noticias">
             <div v-for="n in noticias" :key="n.id" class="card-noticia">
               <div class="card-badge">
@@ -186,7 +185,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
         </div>
 
         <section class="faq">
-          <h3>> Dúvidas Frequentes</h3>
+          <h3>Dúvidas Frequentes</h3>
           <div v-for="(item, i) in faq" :key="i" class="faq-item">
             <button class="faq-question" @click="toggleFaq(i)">
               {{ item.pergunta }}
@@ -356,7 +355,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   width: 56px;
   height: 56px;
   margin-bottom: 12px;
-  color: #059669;
+  color: #1e40af;
 }
 
 .service h3 {
@@ -370,8 +369,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 }
 
 .btn-action {
-  background: #059669;
-  color: white;
+  background: linear-gradient(135deg, #1e40af, #a5f3fc, #93c5fd); 
+  color: #1e40af;
   padding: 8px 14px;
   margin-top: 10px;
   border-radius: 9999px;
@@ -473,8 +472,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 }
 
 .btn-leia {
-  background: #2563eb;
-  color: white;
+  background: linear-gradient(135deg, #1e40af, #a5f3fc, #93c5fd); 
+  color: #1e40af;
   padding: 6px 14px;
   border-radius: 9999px;
   font-size: 19px;
@@ -484,7 +483,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 }
 
 .btn-leia:hover {
-  background: #1e40af;
+  background: #a5f3fc;
 }
 
 .carrossel-container {
@@ -545,8 +544,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   bottom: 50px;
   left: 50%;
   transform: translateX(-50%);
-  background: rgba(14,165,233,0.8); 
-  color: white;
+  background: linear-gradient(135deg, #1e40af, #8dbabf, #93c5fd); 
+  color: rgb(203, 243, 255);
   padding: 16px 32px;
   border-radius: 16px;
   font-size: 24px;

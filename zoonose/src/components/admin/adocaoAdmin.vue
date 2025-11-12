@@ -4,7 +4,6 @@
     <header class="dashboard-header">
       <div class="header-content">
         <h1>
-          <span class="icon">🐾</span>
           Gerenciar Adoções
         </h1>
         <div class="header-stats">
@@ -30,10 +29,10 @@
         <input
           v-model="filtro"
           type="text"
-          placeholder="🔍 Buscar por nome, espécie..."
+          placeholder=" Buscar por nome, espécie..."
           class="search-input"
         />
-        <button @click="abrirModal()" class="btn-primary btn-sm">
+        <button @click="abrirModal()" class="btn-secondary btn-sm">
           ➕ Novo Animal
         </button>
       </div>
@@ -55,6 +54,7 @@
         <div class="card-header">
           <span class="badge" :class="a.species === 'CANINE' ? 'badge-cachorro' : 'badge-gato'">
             {{ traduzirEspecie(a.species) }}
+
           </span>
           <span class="badge-status">{{ traduzirGenero(a.gender) }}</span>
         </div>
@@ -69,20 +69,20 @@
 
         <div class="card-footer">
           <div class="card-meta">
-            <span>🐕 Porte: {{ traduzirPorte(a.size) }}</span>
-            <span>💉 {{ a.isVaccinated ? 'Vacinado' : 'Não vacinado' }}</span>
+            <span> Porte: {{ traduzirPorte(a.size) }}</span>
+            <span>{{ a.isVaccinated ? 'Vacinado' : 'Não vacinado' }}</span>
           </div>
 
           <div class="card-actions">
-            <button class="btn-secondary btn-sm" @click="editarAnimal(a)">✏️ Editar</button>
-            <button class="btn-danger btn-sm" @click="removerAnimal(a.id)">🗑️ Excluir</button>
+            <button class="btn-secondary btn-sm" @click="editarAnimal(a)">Editar</button>
+            <button class="btn-danger btn-sm" @click="removerAnimal(a.id)">Excluir</button>
           </div>
         </div>
-      </div>
+      </div>-
 
       <div v-if="animaisFiltrados.length === 0" class="empty-state">
         <div class="empty-content">
-          <span class="empty-icon">🐾</span>
+          <span class="empty-icon"></span>
           <h3>Nenhum animal encontrado</h3>
           <button @click="abrirModal()" class="btn-primary">➕ Cadastrar Novo</button>
         </div>
@@ -95,7 +95,7 @@
         <div v-if="mostrarModal" class="modal-overlay" @click.self="fecharModal">
           <div class="modal-content" @click.stop>
             <div class="modal-header">
-              <h2>{{ editando ? '✏️ Editar Animal' : '➕ Novo Animal' }}</h2>
+              <h2>{{ editando ? 'Editar Animal' : '➕ Novo Animal' }}</h2>
               <button @click="fecharModal" class="btn-close">✕</button>
             </div>
 
@@ -111,8 +111,8 @@
                     <label>Espécie <span>*</span></label>
                     <select v-model="form.species" required>
                       <option value="">Selecione</option>
-                      <option value="CANINE">🐶 Cachorro</option>
-                      <option value="FELINE">🐱 Gato</option>
+                      <option value="CANINE"> Cachorro</option>
+                      <option value="FELINE"> Gato</option>
                     </select>
                   </div>
 
@@ -189,17 +189,17 @@
                 <div class="checkbox-group">
                   <label>
                     <input type="checkbox" v-model="form.isVaccinated" />
-                    💉 Vacinado
+                     Vacinado
                   </label>
                   <label>
                     <input type="checkbox" v-model="form.isNeutered" />
-                    ✂️ Castrado
+                     Castrado
                   </label>
                 </div>
 
                 <div class="modal-actions">
                   <button type="button" class="btn-secondary" @click="fecharModal">Cancelar</button>
-                  <button type="submit" class="btn-primary">
+                  <button type="submit" class="btn-secondary">
                     {{ editando ? 'Salvar Alterações' : 'Cadastrar' }}
                   </button>
                 </div>
@@ -282,7 +282,10 @@ async function carregarAnimais() {
 
 function abrirModal(animal = null) {
   form.value = animal
-    ? { ...animal }
+    ? {  ...animal,
+        isVaccinated: animal.isVaccinated ?? false,
+        isNeutered: animal.isNeutered ?? false
+      } 
     : { id: null, name: '', breed: '', species: '', size: '', gender: '', description: '', imageUrl: '', isVaccinated: false, isNeutered: false }
   editando.value = !!animal
   mostrarModal.value = true
@@ -309,6 +312,9 @@ async function salvarAnimal() {
     console.error('Erro ao salvar animal:', err)
     alert('Erro ao salvar animal.')
   }
+  form.value.isVaccinated = !!form.value.isVaccinated
+form.value.isNeutered = !!form.value.isNeutered
+
 }
 
 async function removerAnimal(id) {
@@ -437,21 +443,26 @@ onMounted(carregarAnimais)
   z-index: 2;
 }
 .badge {
-  font-weight: 600;
-  padding: 0.4rem 0.8rem;
-  border-radius: 10px;
-  font-size: 0.9rem;
+  font-weight: 300;
+  padding: 0.6rem 0.9rem;
+  border-radius: 15px;
+  font-size: 1rem;
   color: #fff;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
 }
 .badge-cachorro {
-  background: linear-gradient(135deg, #16a34a, #4ade80);
+   background: linear-gradient(150deg, #3b82f6, #a5f3fc); 
 }
 .badge-gato {
   background: linear-gradient(135deg, #3b82f6, #60a5fa);
 }
 .badge-status {
-  background: linear-gradient(135deg, #f59e0b, #fbbf24);
+  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
+  border-radius: 12px;
+  padding: 0.6rem 0.9rem;
+  font-size: 1rem;
+
+
 }
 
 /* IMAGEM */
@@ -530,6 +541,9 @@ onMounted(carregarAnimais)
 .btn-secondary {
   background: linear-gradient(135deg, #3b82f6, #60a5fa);
   color: white;
+    border-radius: 8px;
+  padding: 0.5rem 1rem;
+
 }
 .btn-secondary:hover {
   background: #2563eb;

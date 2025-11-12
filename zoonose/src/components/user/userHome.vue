@@ -7,22 +7,18 @@
         <h2>Atalhos Rápidos</h2>
         <div class="cards-grid">
           <div class="card" @click="router.push('/perfil')">
-            <div class="card-icon">👤</div>
             <h3>Meu Perfil</h3>
             <p>Visualize e edite suas informações</p>
           </div>
           <div class="card" @click="router.push('/meus-atendimentos')">
-            <div class="card-icon">📋</div>
             <h3>Meus Atendimentos</h3>
             <p>Consulte seu histórico</p>
           </div>
           <div class="card" @click="router.push('/agendar')">
-            <div class="card-icon">📅</div>
             <h3>Agendar</h3>
             <p>Solicite um novo atendimento</p>
           </div>
           <div class="card" @click="router.push('/configuracoes')">
-            <div class="card-icon">⚙️</div>
             <h3>Configurações</h3>
             <p>Ajuste suas preferências</p>
           </div>
@@ -34,17 +30,14 @@
         <h2>Meu Resumo</h2>
         <div class="cards-grid">
           <div class="card-resumo">
-            <div class="icon">📋</div>
             <p class="label">Total de Atendimentos</p>
             <p class="valor">{{ totalAtendimentos }}</p>
           </div>
           <div class="card-resumo">
-            <div class="icon">⏳</div>
             <p class="label">Pendentes</p>
             <p class="valor">{{ atendimentosPendentes }}</p>
           </div>
           <div class="card-resumo">
-            <div class="icon">✅</div>
             <p class="label">Concluídos</p>
             <p class="valor">{{ atendimentosConcluidos }}</p>
           </div>
@@ -65,7 +58,7 @@
           <!-- Campanhas Ativas -->
           <div class="noticias-card campanhas-card">
             <div class="card-header campanhas-header">
-              <h3>📢 Campanhas Ativas</h3>
+              <h3>Campanhas Ativas</h3>
               <span class="badge-count">{{ campanhas.length }}</span>
             </div>
             <div class="noticias-lista">
@@ -75,7 +68,6 @@
                 class="noticia-item campanha-item"
                 @click="verDetalhes(campanha)"
               >
-                <div class="noticia-icon campanha-icon">📢</div>
                 <div class="noticia-info">
                   <p class="noticia-titulo">{{ campanha.titulo }}</p>
                   <p class="noticia-data">📅 {{ formatarData(campanha.data) }}</p>
@@ -94,7 +86,7 @@
           <!-- Notícias Recentes -->
           <div class="noticias-card">
             <div class="card-header noticias-header">
-              <h3>📝 Notícias Recentes</h3>
+              <h3> Notícias Recentes</h3>
               <span class="badge-count">{{ noticias.length }}</span>
             </div>
             <div class="noticias-lista">

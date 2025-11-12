@@ -188,13 +188,13 @@
               class="btn-secondary btn-sm"
               target="_blank"
             >
-              👁️ Ver
+               Ver
             </router-link>
             <button 
               @click="editarNoticia(noticia)" 
               class="btn-primary btn-sm"
             >
-              ✏️ Editar
+               Editar
             </button>
           </div>
         </div>
@@ -203,7 +203,7 @@
       <!-- Empty State -->
       <div v-if="noticiasFiltradas.length === 0" class="empty-state">
         <div class="empty-content">
-          <span class="empty-icon">📰</span>
+          <span class="empty-icon"></span>
           <h3>Nenhum item encontrado</h3>
           <p v-if="temFiltrosAtivos">Tente ajustar os filtros ou criar um novo item.</p>
           <p v-else>Comece criando seu primeiro item!</p>
@@ -229,7 +229,7 @@
             <div class="modal-body">
               <!-- Seletor de Tipo -->
               <div class="form-section">
-                <h3>📋 Tipo de Publicação</h3>
+                <h3> Tipo de Publicação</h3>
                 <div class="form-group">
                   <div class="radio-group">
                     <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'campanha' }">
@@ -239,7 +239,7 @@
                         value="campanha"
                         class="radio-input"
                       />
-                      <span class="radio-text">📢 Campanha</span>
+                      <span class="radio-text">Campanha</span>
                     </label>
                     <label class="radio-label" :class="{ 'radio-active': noticiaForm.tipo === 'noticia' }">
                       <input 
@@ -248,7 +248,7 @@
                         value="noticia"
                         class="radio-input"
                       />
-                      <span class="radio-text">📝 Notícia</span>
+                      <span class="radio-text"> Notícia</span>
                     </label>
                   </div>
                 </div>
@@ -256,7 +256,7 @@
 
               <!-- Formulário CAMPANHA -->
               <div v-if="noticiaForm.tipo === 'campanha'" class="form-section">
-                <h3>📢 Dados da Campanha</h3>
+                <h3> Dados da Campanha</h3>
                 
                 <div class="form-group">
                   <label for="nomeCampanha">Nome da Campanha *</label>
@@ -384,7 +384,7 @@
 
               <!-- Informações Adicionais -->
               <div class="form-section">
-                <h3>ℹ️ Informações Adicionais</h3>
+                <h3>Informações Adicionais</h3>
                 
                 <div class="form-row">
                   <div class="form-group">
@@ -401,8 +401,8 @@
                     <label for="status">Status</label>
                     <select id="status" v-model="noticiaForm.status">
                       <option value="ativo">✅ Ativo</option>
-                      <option value="rascunho">📝 Rascunho</option>
-                      <option value="arquivado">📦 Arquivado</option>
+                      <option value="rascunho">Rascunho</option>
+                      <option value="arquivado">Arquivado</option>
                     </select>
                   </div>
                 </div>
@@ -417,7 +417,7 @@
                     @click="excluirDoModal" 
                     class="btn-danger"
                   >
-                    🗑️ Excluir
+                     Excluir
                   </button>
                 </div>
                 <div class="modal-actions-right">
@@ -442,7 +442,7 @@
         <div v-if="modalExclusao.aberto" class="modal-overlay" @click="cancelarExclusao">
           <div class="modal-content modal-small" @click.stop>
             <div class="modal-header">
-              <h2>🗑️ Confirmar Exclusão</h2>
+              <h2> Confirmar Exclusão</h2>
             </div>
             
             <div class="modal-body">
@@ -658,7 +658,6 @@ async function salvarNoticia() {
       dadosParaSalvar.autor = noticiaForm.value.autor || 'Administrador'
     }
 
-    console.log('📤 Enviando dados:', JSON.stringify(dadosParaSalvar, null, 2))
 
     if (modoEdicao.value) {
       await editarNoticiaData(noticiaEditandoId.value, dadosParaSalvar)
@@ -707,7 +706,6 @@ async function alterarStatus(id, novoStatus) {
   }
 }
 
-// ✅ Exclusão
 function confirmarExclusao(noticia) {
   modalExclusao.value = { aberto: true, noticia }
 }
@@ -750,8 +748,8 @@ function getTipoLabel(tipo) {
 function getStatusLabel(status) {
   const map = {
     ativo: '✅ Ativo',
-    rascunho: '📝 Rascunho',
-    arquivado: '📦 Arquivado'
+    rascunho: 'Rascunho',
+    arquivado: ' Arquivado'
   }
   return map[status] || map.ativo
 }

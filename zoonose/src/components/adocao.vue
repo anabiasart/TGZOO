@@ -32,7 +32,7 @@
             <p class="desc">{{ truncate(animal.description, 100) }}</p>
             <div class="actions">
               <button class="btn primary" @click="openModal(animal)">Ver detalhes</button>
-              <button class="btn" @click="requestAdoption(animal)">Quero adotar ❤️</button>
+              <button class="btn" @click="requestAdoption(animal)">Quero adotar</button>
             </div>
           </div>
         </article>
