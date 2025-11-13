@@ -1,7 +1,7 @@
 <script setup>
 import { formatDataBR, formatHoraBR } from '@/utils/datetime'
 
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { Syringe, User, Calendar } from 'lucide-vue-next'
 import vete from "../assets/img/vete.jpg"
@@ -14,6 +14,19 @@ const { todosItens: todasNoticias, carregarTodos: carregarNoticias } = useEditai
 const noticias = ref([])
 const router = useRouter()
 const menuAberto = ref(false)
+
+const campanhasAtivasDropdown = computed(() => {
+  return todasNoticias.value
+    .filter(i => i.tipo === 'campanha')
+    .slice(0, 10)
+})
+
+const noticiasDropdown = computed(() => {
+  return todasNoticias.value
+    .filter(i => i.tipo === 'noticia')
+    .slice(0, 10)
+})
+
 
 onMounted(async () => {
   try {
@@ -111,13 +124,58 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <img :src="zoo" alt="ZoonoSys Logo" class="logo" />
   </div>
 
-  <ul class="navbar-links">
-    <li @click="router.push('/')">Início</li>
-    <li @click="router.push('/edital/noticias')">Noticias</li> 
-    <li @click="router.push('/edital/campanhas')">Campanhas</li>
-    <li @click="router.push('/login')">Login</li>
-    <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
-  </ul>
+<ul class="navbar-links">
+  
+  <li @click="router.push('/')">Início</li>
+
+  <!-- NOTÍCIAS -->
+  <li class="relative group">
+    <span class="cursor-pointer">Notícias</span>
+
+    <ul
+      class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
+             group-hover:opacity-100 group-hover:visible transition-all duration-200
+             transform group-hover:translate-y-1 z-50">
+
+      <li v-for="n in noticiasDropdown" :key="n.id">
+        <span
+          class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+          @click="router.push(`/edital/${n.id}`)"
+        >
+          {{ n.nomeNoticia || n.titulo }}
+        </span>
+      </li>
+    </ul>
+  </li>
+
+  <!-- CAMPANHAS -->
+  <li class="relative group">
+    <span class="cursor-pointer">Campanhas</span>
+
+    <ul
+      class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
+             group-hover:opacity-100 group-hover:visible transition-all duration-200
+             transform group-hover:translate-y-1 z-50">
+
+      <li v-for="c in campanhasAtivasDropdown" :key="c.id">
+        <span
+          class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+          @click="router.push(`/edital/${c.id}`)"
+        >
+          {{ c.nomeCampanha || c.titulo }}
+        </span>
+      </li>
+
+      <li v-if="campanhasAtivasDropdown.length === 0"
+          class="px-4 py-2 text-gray-500 text-sm">
+        Nenhuma campanha ativa
+      </li>
+    </ul>
+  </li>
+
+  <li @click="router.push('/login')">Login</li>
+  <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
+</ul>
 
   <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>
 
