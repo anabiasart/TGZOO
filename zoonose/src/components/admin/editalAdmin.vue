@@ -4,7 +4,7 @@
     <header class="dashboard-header">
       <div class="header-content">
         <h1>
-          <span class="icon">📰</span>
+          <span class="icon"></span>
           Gerenciar Editais
         </h1>
         <div class="header-stats">
@@ -52,8 +52,8 @@
             class="filter-select"
           >
             <option value="">Todos os tipos</option>
-            <option value="campanha">📢 Campanhas</option>
-            <option value="noticia">📝 Notícias</option>
+            <option value="campanha"> Campanhas</option>
+            <option value="noticia"> Notícias</option>
           </select>
           
           <select 
@@ -87,7 +87,6 @@
     <!-- Error State -->
     <div v-if="erro" class="error-container">
       <div class="error-content">
-        <span class="error-icon">⚠️</span>
         <p>{{ erro }}</p>
         <button @click="limparErro" class="btn-secondary">Fechar</button>
       </div>
@@ -173,11 +172,9 @@
         <div class="card-footer">
           <div class="card-meta">
             <span class="meta-item">
-              <span class="meta-icon">👤</span>
               {{ noticia.autor || 'Sistema' }}
             </span>
             <span class="meta-item">
-              <span class="meta-icon">📅</span>
               {{(noticia.dataPublicacao) }}
             </span>
           </div>
@@ -208,7 +205,7 @@
           <p v-if="temFiltrosAtivos">Tente ajustar os filtros ou criar um novo item.</p>
           <p v-else>Comece criando seu primeiro item!</p>
           <button @click="abrirModalNoticia()" class="btn-primary">
-            ➕ Criar Primeiro Item
+             Criar Primeiro Item
           </button>
         </div>
       </div>
@@ -221,7 +218,7 @@
           <div class="modal-content" @click.stop>
             <div class="modal-header">
               <h2>
-                {{ modoEdicao ? '✏️ Editar Item' : '➕ Novo Item' }}
+                {{ modoEdicao ? 'Editar Item' : ' Novo Item' }}
               </h2>
               <button @click="fecharModal" class="btn-close">✕</button>
             </div>
@@ -330,13 +327,13 @@
                 <!-- Preview da Imagem -->
                 <div v-if="noticiaForm.urlImagem" class="image-preview">
                   <img :src="noticiaForm.urlImagem" alt="Preview" @error="imagemComErro = true" />
-                  <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
+                  <p v-if="imagemComErro" class="error-text"> Não foi possível carregar a imagem</p>
                 </div>
               </div>
 
               <!-- Formulário NOTÍCIA -->
               <div v-else class="form-section">
-                <h3>📝 Dados da Notícia</h3>
+                <h3> Dados da Notícia</h3>
                 
                 <div class="form-group">
                   <label for="nomeNoticia">Nome da Notícia *</label>
@@ -378,7 +375,7 @@
                 <!-- Preview da Imagem -->
                 <div v-if="noticiaForm.urlImagemNoticia" class="image-preview">
                   <img :src="noticiaForm.urlImagemNoticia" alt="Preview" @error="imagemComErro = true" />
-                  <p v-if="imagemComErro" class="error-text">⚠️ Não foi possível carregar a imagem</p>
+                  <p v-if="imagemComErro" class="error-text"> Não foi possível carregar a imagem</p>
                 </div>
               </div>
 
@@ -448,7 +445,7 @@
             <div class="modal-body">
               <p>Tem certeza que deseja excluir permanentemente:</p>
               <strong class="item-destaque">"{{ getTitulo(modalExclusao.noticia) }}"</strong>
-              <p class="warning-text">⚠️ Esta ação não pode ser desfeita!</p>
+              <p class="warning-text"> Esta ação não pode ser desfeita!</p>
             </div>
             
             <div class="modal-actions">
@@ -724,7 +721,7 @@ async function confirmarExclusaoFinal() {
   try {
     excluindo.value = true
     await removerNoticiaPorId(modalExclusao.value.noticia.id)
-    mostrarToast('success', '🗑️ Deletado!')
+    mostrarToast('success', 'Deletado!')
   } catch {
     mostrarToast('error', '❌ Falha ao excluir!')
   } finally {
@@ -742,7 +739,7 @@ function aplicarFiltros() {
 }
 
 function getTipoLabel(tipo) {
-  return tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia'
+  return tipo === 'campanha' ? 'Campanha' : ' Notícia'
 }
 
 function getStatusLabel(status) {

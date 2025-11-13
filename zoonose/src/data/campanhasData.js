@@ -13,7 +13,6 @@ const getAuthToken = () => {
 
 const getAuthHeaders = () => {
   const token = getAuthToken()
-  console.log('🔑 Token encontrado:', token ? 'SIM ✅' : 'NÃO ❌')
   
   const headers = {
     'Content-Type': 'application/json',
@@ -22,7 +21,6 @@ const getAuthHeaders = () => {
   
   if (token) {
     headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`
-    console.log('📤 Authorization header:', headers['Authorization'].substring(0, 20) + '...')
   } else {
     console.warn('⚠️ Nenhum token encontrado! Você precisa fazer login primeiro.')
   }
@@ -36,7 +34,6 @@ const formatarDataParaExibicao = (dataISO) => {
     const data = new Date(dataISO)
     return data.toLocaleDateString('pt-BR')
   } catch (error) {
-    console.error('Erro ao formatar data:', error)
     return ''
   }
 }
@@ -123,8 +120,6 @@ const mapFrontendToBackend = (frontendCampaign) => {
   const startDateTime = createDateTime(dataInicio, frontendCampaign.horaInicioCampanha || '00:00')
   const endDateTime = dataFim ? createDateTime(dataFim, frontendCampaign.horaFimCampanha || '00:00') : null
 
-  console.log('🕒 Enviando startDateTime:', startDateTime)
-  console.log('🕒 Enviando endDateTime:', endDateTime)
 
   return {
     name: frontendCampaign.nomeCampanha,
@@ -220,7 +215,6 @@ export function useCampanhas() {
       const novaCampanha = await response.json()
       campanhas.value.unshift(mapBackendToFrontend(novaCampanha))
       
-      console.log('✅ Campanha criada com sucesso:', novaCampanha.id)
       
     } catch (error) {
       erro.value = error.message
@@ -242,8 +236,6 @@ export function useCampanhas() {
       }
 
       const payload = mapFrontendToBackend(campanhaForm)
-      console.log('📝 Editando campanha ID:', id)
-      console.log('📤 Enviando payload:', payload)
       
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
@@ -274,11 +266,9 @@ export function useCampanhas() {
         campanhas.value[index] = mapBackendToFrontend(campanhaAtualizada)
       }
       
-      console.log('✅ Campanha atualizada com sucesso:', id)
       
     } catch (error) {
       erro.value = error.message
-      console.error('❌ Erro ao editar campanha:', error)
       throw error
     } finally {
       carregando.value = false
@@ -295,7 +285,6 @@ export function useCampanhas() {
         throw new Error('Você precisa estar autenticado como administrador')
       }
 
-      console.log('🗑️ Removendo campanha ID:', id)
       
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
@@ -320,11 +309,10 @@ export function useCampanhas() {
       
       campanhas.value = campanhas.value.filter(c => c.id !== id)
       
-      console.log('✅ Campanha removida com sucesso:', id)
+
       
     } catch (error) {
       erro.value = error.message
-      console.error('❌ Erro ao remover campanha:', error)
       throw error
     } finally {
       carregando.value = false
@@ -333,7 +321,6 @@ export function useCampanhas() {
 
   const buscarCampanhaPorId = async (id) => {
     try {
-      console.log('🔍 [campanhasData] Buscando campanha por ID:', id)
       
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'GET',
@@ -344,23 +331,18 @@ export function useCampanhas() {
         mode: 'cors'
       })
       
-      console.log('📡 Response status:', response.status)
       
       if (!response.ok) {
-        console.error(`❌ Erro ao buscar campanha: ${response.status}`)
         return null
       }
       
       const campanha = await response.json()
-      console.log('✅ Campanha bruta do backend:', campanha)
       
       const campanhaFormatada = mapBackendToFrontend(campanha)
-      console.log('✅ Campanha formatada:', campanhaFormatada)
       
       return campanhaFormatada
       
     } catch (error) {
-      console.error('❌ Erro ao buscar campanha:', error)
       return null
     }
   }

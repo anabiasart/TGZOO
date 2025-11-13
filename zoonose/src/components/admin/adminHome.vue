@@ -25,17 +25,14 @@
         <h2>Resumo</h2>
         <div class="cards-grid">
           <div class="card-resumo">
-            <div class="icon">👤</div>
             <p class="label">Total de Usuários</p>
             <p class="valor">{{ usuarios.length }}</p>
           </div>
           <div class="card-resumo">
-            <div class="icon">📅</div>
             <p class="label">Atendimentos Hoje</p>
             <p class="valor">8</p>
           </div>
           <div class="card-resumo">
-            <div class="icon">⚠️</div>
             <p class="label">Pendências</p>
             <p class="valor">3</p>
           </div>
@@ -49,7 +46,6 @@
 
       <div v-if="erro" class="error-section">
         <div class="error-content">
-          <span class="error-icon">⚠️</span>
           <p>{{ erro }}</p>
           <button @click="limparErro" class="btn-secondary">Fechar</button>
         </div>
@@ -57,13 +53,13 @@
 
       <!-- Lista de Usuários -->
       <section class="lista-usuarios" v-if="!carregando">
-        <h2>👥 Usuários Cadastrados</h2>
+        <h2> Usuários Cadastrados</h2>
         
         <div class="usuarios-container">
           <!-- Administradores -->
           <div class="usuarios-card">
             <div class="card-header admin-header">
-              <h3>🔑 Administradores</h3>
+              <h3> Administradores</h3>
               <span class="badge-count">{{ administradores.length }}</span>
             </div>
             <div class="usuarios-lista">
@@ -78,7 +74,7 @@
                 <div class="usuario-info">
                   <p class="usuario-nome">{{ admin.name }}</p>
                   <p class="usuario-email">{{ admin.email }}</p>
-                  <p class="usuario-telefone">📱 {{ formatarTelefone(admin.phone) }}</p>
+                  <p class="usuario-telefone"> {{ formatarTelefone(admin.phone) }}</p>
                 </div>
                 <span class="usuario-badge admin">Admin</span>
               </div>
@@ -93,7 +89,7 @@
           <!-- Usuários Comuns -->
           <div class="usuarios-card">
             <div class="card-header user-header">
-              <h3>👤 Usuários Comuns</h3>
+              <h3> Usuários Comuns</h3>
               <span class="badge-count">{{ usuariosComuns.length }}</span>
             </div>
             <div class="usuarios-lista">
@@ -108,7 +104,7 @@
                 <div class="usuario-info">
                   <p class="usuario-nome">{{ user.name }}</p>
                   <p class="usuario-email">{{ user.email }}</p>
-                  <p class="usuario-telefone">📱 {{ formatarTelefone(user.phone) }}</p>
+                  <p class="usuario-telefone">{{ formatarTelefone(user.phone) }}</p>
                 </div>
                 <span class="usuario-badge user">Usuário</span>
               </div>

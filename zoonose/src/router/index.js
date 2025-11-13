@@ -114,12 +114,12 @@ router.beforeEach((to, from, next) => {
 
   if (to.meta?.requiresAuth) {
     if (!token || !userRole) {
-      console.log('❌ Sem autenticação, redirecionando para login')
+      console.log(' Sem autenticação, redirecionando para login')
       return next('/login')
     }
 
     if (to.meta.role && userRole !== to.meta.role) {
-      console.log(`❌ Role inválida. Usuário: ${userRole}, Necessária: ${to.meta.role}`)
+      console.log(` Role inválida. Usuário: ${userRole}, Necessária: ${to.meta.role}`)
 
       if (userRole === 'ROLE_ADMINISTRATOR') return next('/admin')
       if (userRole === 'ROLE_CUSTOMER') return next('/user')

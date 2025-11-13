@@ -97,7 +97,6 @@ async function carregarAnimais() {
     if (!res.ok) throw new Error(`Erro HTTP ${res.status}`)
     const data = await res.json()
     animais.value = data.content || data
-    console.log('🐾 Animais carregados:', animais.value.length)
   } catch (err) {
     console.error('Erro ao carregar animais:', err)
   }

@@ -12,7 +12,6 @@ const getAuthToken = () => {
 
 const getAuthHeaders = () => {
   const token = getAuthToken()
-  console.log('🔑 Token encontrado:', token ? 'SIM ✅' : 'NÃO ❌')
   
   const headers = {
     'Content-Type': 'application/json',
@@ -22,7 +21,7 @@ const getAuthHeaders = () => {
   if (token) {
     headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`
   } else {
-    console.warn('⚠️ Nenhum token encontrado! Você precisa fazer login primeiro.')
+    console.warn(' Nenhum token encontrado! Você precisa fazer login primeiro.')
   }
   
   return headers
@@ -75,7 +74,6 @@ export function useNoticias() {
       const data = await response.json()
       noticias.value = data.content.map(mapBackendToFrontend)
       
-      console.log('✅ Notícias carregadas:', noticias.value.length)
       
     } catch (error) {
       erro.value = `Erro ao carregar notícias: ${error.message}`
@@ -97,7 +95,6 @@ export function useNoticias() {
       }
 
       const payload = mapFrontendToBackend(noticiaForm)
-      console.log('📤 Enviando payload de notícia:', payload)
       
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -121,7 +118,6 @@ export function useNoticias() {
       const novaNoticia = await response.json()
       noticias.value.unshift(mapBackendToFrontend(novaNoticia))
       
-      console.log('✅ Notícia criada com sucesso:', novaNoticia.id)
       
     } catch (error) {
       erro.value = error.message
@@ -143,8 +139,6 @@ export function useNoticias() {
       }
 
       const payload = mapFrontendToBackend(noticiaForm)
-      console.log('📝 Editando notícia ID:', id)
-      console.log('📤 Enviando payload:', payload)
       
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
@@ -175,11 +169,10 @@ export function useNoticias() {
         noticias.value[index] = mapBackendToFrontend(noticiaAtualizada)
       }
       
-      console.log('✅ Notícia atualizada com sucesso:', id)
       
     } catch (error) {
       erro.value = error.message
-      console.error('❌ Erro ao editar notícia:', error)
+      console.error(' Erro ao editar notícia:', error)
       throw error
     } finally {
       carregando.value = false
@@ -196,7 +189,6 @@ export function useNoticias() {
         throw new Error('Você precisa estar autenticado como administrador')
       }
 
-      console.log('🗑️ Removendo notícia ID:', id)
       
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'DELETE',
@@ -221,7 +213,6 @@ export function useNoticias() {
       
       noticias.value = noticias.value.filter(n => n.id !== id)
       
-      console.log('✅ Notícia removida com sucesso:', id)
       
     } catch (error) {
       erro.value = error.message

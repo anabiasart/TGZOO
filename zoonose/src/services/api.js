@@ -25,7 +25,7 @@ api.interceptors.request.use(
     return config;
   },
   (error) => {
-    console.error("❌ Erro na requisição:", error);
+    console.error("Erro na requisição:", error);
     return Promise.reject(error);
   }
 );
@@ -33,7 +33,6 @@ api.interceptors.request.use(
 // Interceptor de Response
 api.interceptors.response.use(
   (response) => {
-    console.log(`✅ ${response.status} ${response.config.url}`);
     
     const isAuthEndpoint = response.config.url?.includes('/login') || 
                           response.config.url?.includes('/register');
@@ -41,7 +40,6 @@ api.interceptors.response.use(
     if (isAuthEndpoint) {
       const newToken = response.headers["authorization"];
       if (newToken) {
-        console.log("🔄 Atualizando token de autenticação");
         localStorage.setItem("token", newToken);
       }
     }
@@ -50,10 +48,8 @@ api.interceptors.response.use(
   },
   (error) => {
     if (error.response) {
-      console.error(`❌ Erro ${error.response.status}:`, error.response.data);
       
       if ([401, 403].includes(error.response.status)) {
-        console.warn("🔒 Token inválido - limpando localStorage");
         localStorage.clear();
         window.location.href = '/login';
       }
@@ -107,7 +103,6 @@ export const authAPI = {
     try {
       await api.post("/users/logout");
     } catch (error) {
-      console.warn("Logout no servidor falhou:", error.message);
     } finally {
       localStorage.clear();
       window.location.href = "/login";

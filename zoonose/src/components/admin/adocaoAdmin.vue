@@ -337,14 +337,12 @@ onMounted(carregarAnimais)
 </script>
 
 <style scoped>
-/* Mantém o visual geral e o novo modal refinado */
 .admin-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
   font-family: 'Inter', sans-serif;
 }
 
-/* Header */
 .dashboard-header {
   background: linear-gradient(135deg, white, #a5f3fc);
   padding: 2rem;

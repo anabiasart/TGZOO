@@ -62,16 +62,13 @@ export function useAnimais() {
 
       const data = await response.json()
       animais.value = (data.content || data).map(mapBackendToFrontend)
-      console.log('Animais carregados:', animais.value.length)
     } catch (e) {
       erro.value = 'Erro ao carregar animais: ' + e.message
-      console.error(erro.value)
     } finally {
       carregando.value = false
     }
   }
 
-  // 🔍 Listar animais disponíveis para adoção (público)
   const carregarAnimaisAdocao = async () => {
     carregando.value = true
     erro.value = null
@@ -84,7 +81,6 @@ export function useAnimais() {
       if (!response.ok) throw new Error(`Erro HTTP ${response.status}`)
       const data = await response.json()
       animais.value = (data.content || data).map(mapBackendToFrontend)
-      console.log('Animais para adoção carregados:', animais.value.length)
     } catch (e) {
       erro.value = 'Erro ao carregar animais para adoção: ' + e.message
       console.error(erro.value)
@@ -98,7 +94,6 @@ export function useAnimais() {
     erro.value = null
     try {
       const payload = mapFrontendToBackend(animalForm)
-      console.log('📦 Enviando novo animal:', payload)
 
       const response = await fetch(`${API_URL}/register`, {
         method: 'POST',
@@ -114,10 +109,9 @@ export function useAnimais() {
 
       const novoAnimal = await response.json()
       animais.value.unshift(mapBackendToFrontend(novoAnimal))
-      console.log('✅ Animal cadastrado com sucesso:', novoAnimal.id)
     } catch (e) {
       erro.value = e.message
-      console.error('❌ Erro ao adicionar animal:', e)
+      console.error(' Erro ao adicionar animal:', e)
       throw e
     } finally {
       carregando.value = false
@@ -129,7 +123,6 @@ export function useAnimais() {
     erro.value = null
     try {
       const payload = mapFrontendToBackend(animalForm)
-      console.log('📝 Atualizando animal ID:', id, payload)
 
       const response = await fetch(`${API_URL}/${id}`, {
         method: 'PUT',
@@ -147,7 +140,6 @@ export function useAnimais() {
       const index = animais.value.findIndex(a => a.id === id)
       if (index !== -1) animais.value[index] = mapBackendToFrontend(atualizado)
 
-      console.log('✅ Animal atualizado:', id)
     } catch (e) {
       erro.value = e.message
       console.error('❌ Erro ao atualizar animal:', e)
@@ -173,7 +165,6 @@ export function useAnimais() {
       }
 
       animais.value = animais.value.filter(a => a.id !== id)
-      console.log('🗑️ Animal removido:', id)
     } catch (e) {
       erro.value = e.message
       console.error('❌ Erro ao remover animal:', e)

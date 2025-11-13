@@ -110,7 +110,7 @@ export function useUsuarios() {
       return isAdmin
     }
     
-    console.log('  ⚠️ Formato de roles não reconhecido')
+    console.log(' Formato de roles não reconhecido')
     return false
   }
 

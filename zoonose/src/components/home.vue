@@ -18,7 +18,6 @@ const menuAberto = ref(false)
 onMounted(async () => {
   try {
     await carregarNoticias()
-    console.log('Notícias carregadas:', todasNoticias.value)
   } catch (erro) {
     console.error('Erro ao carregar notícias:', erro)
   }

@@ -116,22 +116,18 @@
 
       <!-- Acesso Rápido -->
       <section class="acesso-rapido">
-        <h2>🔗 Links Úteis</h2>
+        <h2> Links Úteis</h2>
         <div class="links-grid">
           <a href="#" class="link-card">
-            <span class="link-icon">📞</span>
             <span class="link-texto">Contato</span>
           </a>
           <a href="#" class="link-card">
-            <span class="link-icon">❓</span>
             <span class="link-texto">FAQ</span>
           </a>
           <a href="#" class="link-card">
-            <span class="link-icon">📖</span>
             <span class="link-texto">Guia</span>
           </a>
           <a href="#" class="link-card">
-            <span class="link-icon">🏥</span>
             <span class="link-texto">Unidades</span>
           </a>
         </div>

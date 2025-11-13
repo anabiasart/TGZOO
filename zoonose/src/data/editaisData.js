@@ -48,21 +48,17 @@ export function useEditais() {
   const adicionarItem = async (itemForm) => {
     if (itemForm.tipo === 'campanha') {
       const nova = await adicionarCampanha(itemForm)
-      console.log('🟢 Nova campanha adicionada:', nova)
       return nova
     } else {
       const nova = await adicionarNoticia(itemForm)
-      console.log('🟢 Nova notícia adicionada:', nova)
       return nova
     }
   }
 
   const editarItem = async (id, itemForm) => {
     if (itemForm.tipo === 'campanha') {
-      console.log('✏️ Editando campanha ID:', id)
       return await editarCampanha(id, itemForm)
     } else {
-      console.log('✏️ Editando notícia ID:', id)
       return await editarNoticia(id, itemForm)
     }
   }
@@ -73,26 +69,21 @@ export function useEditais() {
       const tipoDefinido = tipo || item?.tipo
 
       if (!tipoDefinido) {
-        console.warn(`⚠️ Tipo não informado nem encontrado para ID ${id}. Tentando excluir como notícia por padrão.`)
         return await removerNoticiaPorId(id)
       }
 
       if (tipoDefinido === 'campanha') {
-        console.log(`🗑️ Excluindo CAMPANHA ID: ${id}`)
         return await removerCampanha(id)
       } else {
-        console.log(`🗑️ Excluindo NOTÍCIA ID: ${id}`)
         return await removerNoticiaPorId(id)
       }
     } catch (error) {
-      console.error(`❌ Erro ao remover ${tipo || 'item'}:`, error)
       throw error
     }
   }
 
   const buscarItemPorId = async (id) => {
     try {
-      console.log('🔍 Buscando item unificado ID:', id)
 
       const itemNaMemoria = todosItens.value.find(item => item.id == id)
       if (itemNaMemoria) return itemNaMemoria
