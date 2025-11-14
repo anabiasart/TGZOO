@@ -1,8 +1,7 @@
 <template>
   <div class="adminHome">
-    <Header :usuario="nomeUsuario" />
-
-    <div class="container">
+<Header :usuario="usuario"/>   
+ <div class="container">
       <section class="atalhos-rapidos">
         <h2>Atalhos Rápidos</h2>
         <div class="cards-grid">
@@ -127,8 +126,15 @@ import { useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
 import { useUsuarios } from '@/data/usuariosData.js'
 
+
 const router = useRouter()
-const nomeUsuario = ref('Admin')
+const usuario = ref("Admin")
+
+
+onMounted(() => {
+  const user = JSON.parse(localStorage.getItem("user"))
+  if (user?.name) usuario.value = user.name
+})
 
 const { 
   usuarios, 
@@ -194,24 +200,25 @@ section {
 
 h2 {
   color: #3b6e54;
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-  font-weight: 600;
+  font-size: 2rem;
+  margin-bottom: 1.3rem;
+  font-weight: 500;
 }
 
 .atalhos-rapidos .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1.5rem;
+  gap: 0.8rem;
 }
 
 .card {
   background: white;
-  padding: 2rem;
-  border-radius: 16px;
+  padding: 1rem;
+  border-radius: 26px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   cursor: pointer;
   transition: all 0.3s ease;
+
 }
 
 .card:hover {
@@ -221,44 +228,48 @@ h2 {
 
 .card h3 {
   color: #0ea5e9;
-  font-size: 1.25rem;
-  margin-bottom: 0.5rem;
+  font-size: 1.3rem;
+  margin-bottom: 0.3rem;
+  font-weight: 600;
+
 }
 
 .card p {
   color: #666;
-  font-size: 0.95rem;
+  font-size: 1.3rem;
+  font-weight: 500;
+
 }
 
 .resumo .cards-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 1.5rem;
+  gap: 0.9rem;
 }
 
 .card-resumo {
   background: white;
-  padding: 2rem;
+  padding: 1rem;
   border-radius: 16px;
   text-align: center;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
 
 .card-resumo .icon {
-  font-size: 3rem;
+  font-size: 1rem;
   margin-bottom: 1rem;
 }
 
 .card-resumo .label {
   color: #666;
-  font-size: 0.95rem;
+  font-size: 1.3rem;
   margin-bottom: 0.5rem;
 }
 
 .card-resumo .valor {
   color: #0ea5e9;
-  font-size: 2.5rem;
-  font-weight: bold;
+  font-size: 3.5rem;
+  font-weight: 600;
 }
 
 .loading-section, .error-section {
@@ -318,19 +329,19 @@ h2 {
 
 .usuarios-container {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(450px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fit, minmax(550px, 1fr, 2fr));
+  gap: 3rem;
 }
 
 .usuarios-card {
   background: white;
-  border-radius: 16px;
+  border-radius: 26px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   overflow: hidden;
 }
 
 .card-header {
-  padding: 1.5rem;
+  padding: 1.3rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
@@ -357,23 +368,23 @@ h2 {
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
   font-weight: bold;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .usuarios-lista {
   max-height: 400px;
   overflow-y: auto;
-  padding: 1rem;
+  padding: 1.7rem;
 }
 
 .usuario-item {
   display: flex;
   align-items: center;
   gap: 1rem;
-  padding: 1rem;
+  padding: 1.3rem;
   border-radius: 12px;
   transition: background 0.2s ease;
-  margin-bottom: 0.5rem;
+  margin-bottom: 0rem;
 }
 
 .usuario-item:hover {
@@ -381,16 +392,17 @@ h2 {
 }
 
 .usuario-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+  width: 58px;
+  height: 58px;
+  border-radius: 60%;
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: bold;
-  font-size: 1.2rem;
+  font-size: 2.2rem;
   flex-shrink: 0;
+  font-weight: 500;
+
 }
 
 .admin-avatar {
@@ -406,16 +418,18 @@ h2 {
 }
 
 .usuario-nome {
-  font-weight: 600;
+  font-weight: 400;
   color: #333;
   margin: 0;
-  font-size: 1rem;
+  font-size: 1.2rem;
 }
 
 .usuario-email {
   color: #666;
-  font-size: 0.85rem;
+  font-size: 1.2rem;
   margin: 0.2rem 0;
+  font-weight: 700;
+
 }
 
 .usuario-telefone {
@@ -425,9 +439,9 @@ h2 {
 }
 
 .usuario-badge {
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.75rem;
+  padding: 0.6rem 0.9rem;
+  border-radius: 60px;
+  font-size: 1rem;
   font-weight: 600;
 }
 
@@ -443,7 +457,7 @@ h2 {
 
 .empty-state {
   text-align: center;
-  padding: 3rem 1rem;
+  padding: 2rem 1rem;
   color: #999;
 }
 
@@ -453,7 +467,7 @@ h2 {
 }
 
 .usuarios-lista::-webkit-scrollbar {
-  width: 8px;
+  width: 10px;
 }
 
 .usuarios-lista::-webkit-scrollbar-track {
@@ -486,7 +500,7 @@ h2 {
   }
   
   .usuarios-container {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr,2fr;
   }
 }
 </style>

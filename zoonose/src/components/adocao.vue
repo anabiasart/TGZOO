@@ -76,7 +76,6 @@ const selected = ref(null)
 const animais = ref([])
 const placeholder = '/src/assets/img/vete.jpg'
 
-// funções de tradução
 function traduzirEspecie(v) {
   const mapa = { CANINE: 'Cachorro', FELINE: 'Gato' }
   return mapa[v] || 'Outros'
@@ -104,7 +103,6 @@ async function carregarAnimais() {
 
 onMounted(carregarAnimais)
 
-// filtro e busca
 const filteredAnimals = computed(() => {
   const term = q.value.trim().toLowerCase()
   return animais.value.filter(a => {
@@ -114,7 +112,6 @@ const filteredAnimals = computed(() => {
   })
 })
 
-// funções auxiliares
 function truncate(text, n) {
   if (!text) return ''
   return text.length > n ? text.slice(0, n) + '...' : text

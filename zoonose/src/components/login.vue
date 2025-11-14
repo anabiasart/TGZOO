@@ -241,7 +241,8 @@ const login = async () => {
     
     const userData = {
       email: form.email,
-      role: role
+      role: role,
+      name: form.email.split("@")[0]
     };
     localStorage.setItem("user", JSON.stringify(userData));
     
