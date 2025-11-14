@@ -7,9 +7,7 @@
       </div>
 
       <div v-else>
-        <div class="font mb-2">
-          <p class="italic text-blue-200">Cuide-se bem...</p>
-        </div>
+        
 
         <h1 class="text-3xl font-medium mb-3">
           {{ modoCadastro ? "Cadastro" : "Login" }}
@@ -398,8 +396,8 @@ const cadastrar = async () => {
 .container {
   background: white;
   border-radius: 12px;
-  padding: 40px;
-  width: 380px;
+  padding: 30px;
+  width: 680px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
   text-align: center;
 }
@@ -407,10 +405,10 @@ const cadastrar = async () => {
 .input-field {
   border: 2px solid #e2e8f0;
   border-radius: 8px;
-  padding: 12px;
-  margin-bottom: 16px;
+  padding: 15px;
+  margin-bottom: 10px;
   width: 100%;
-  font-size: 16px;
+  font-size: 18px;
   transition: border-color 0.2s;
 }
 

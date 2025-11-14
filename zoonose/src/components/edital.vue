@@ -16,7 +16,7 @@
             <h1>{{ getTitulo() }}</h1>
             <div class="header-badge">
               <span :class="item.tipo === 'campanha' ? 'badge-campanha' : 'badge-noticia'">
-                {{ item.tipo === 'campanha' ? '📢 Campanha' : '📝 Notícia' }}
+                {{ item.tipo === 'campanha' ? 'Campanha' : ' Notícia' }}
               </span>
             </div>
           </div>
@@ -25,11 +25,9 @@
           
           <div class="metadata">
             <span class="data-publicacao">
-              <span class="icon">📅</span>
               Publicado em: {{ formatarData(item.dataPublicacao) }}
             </span>
             <span v-if="item.autor" class="autor">
-              <span class="icon">👤</span>
               Por: {{ item.autor }}
             </span>
           </div>

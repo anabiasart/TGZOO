@@ -165,9 +165,7 @@ function verDetalhes(item) {
   router.push(`/noticia/${item.id}`)
 }
 
-// Lifecycle
 onMounted(() => {
-  // Simular carregamento
   setTimeout(() => {
     carregando.value = false
   }, 1000)
@@ -181,7 +179,7 @@ onMounted(() => {
 }
 
 .container {
-  padding: 2rem;
+  padding: 1rem;
   max-width: 1400px;
   margin: 0 auto;
 }
@@ -233,7 +231,7 @@ h2 {
 
 .card p {
   color: #666;
-  font-size: 0.95rem;
+  font-size: 1.2rem;
   margin: 0;
 }
 
@@ -265,7 +263,7 @@ h2 {
 
 .card-resumo .label {
   color: #666;
-  font-size: 0.95rem;
+  font-size: 1.4rem;
   margin-bottom: 0.5rem;
 }
 

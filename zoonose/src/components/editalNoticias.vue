@@ -16,7 +16,7 @@
             <input 
               v-model="filtros.busca" 
               type="text"
-              placeholder="🔍 Buscar notícias..."
+              placeholder=" Buscar notícias..."
               @input="aplicarFiltros"
             />
           </div>
@@ -43,7 +43,7 @@
             @click="verNoticia(noticia.id)"
           >
             <div class="card-badge">
-              <span class="badge-noticia">📝 Notícia</span>
+              <span class="badge-noticia">Notícia</span>
             </div>
 
             <div class="card-image">

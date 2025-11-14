@@ -17,14 +17,12 @@ const menuAberto = ref(false)
 
 const campanhasAtivasDropdown = computed(() => {
   return todasNoticias.value
-    .filter(i => i.tipo === 'campanha')
-    .slice(0, 10)
+    .filter(i => i.tipo?.toLowerCase() === 'campanha')
 })
 
 const noticiasDropdown = computed(() => {
   return todasNoticias.value
-    .filter(i => i.tipo === 'noticia')
-    .slice(0, 10)
+    .filter(i => i.tipo?.toLowerCase() === 'noticia')
 })
 
 
@@ -130,48 +128,68 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 
   <!-- NOTÍCIAS -->
   <li class="relative group">
-    <span class="cursor-pointer">Notícias</span>
+  <span
+    class="cursor-pointer"
+    @click.stop="router.push('/edital/noticias')"
+  >
+    Notícias
+  </span>
 
-    <ul
-      class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
-             group-hover:opacity-100 group-hover:visible transition-all duration-200
-             transform group-hover:translate-y-1 z-50">
+  <ul
+    class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
+           group-hover:opacity-100 group-hover:visible transition-all duration-200
+           transform group-hover:translate-y-1 z-50"
+  >
+    <li v-for="n in noticiasDropdown" :key="n.id">
+      <span
+        class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        @click="router.push(`/edital/${n.id}`)"
+      >
+        {{ n.nomeNoticia || n.titulo }}
+      </span>
+    </li>
 
-      <li v-for="n in noticiasDropdown" :key="n.id">
-        <span
-          class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-          @click="router.push(`/edital/${n.id}`)"
-        >
-          {{ n.nomeNoticia || n.titulo }}
-        </span>
-      </li>
-    </ul>
-  </li>
+    <li
+      v-if="noticiasDropdown.length === 0"
+      class="px-4 py-2 text-gray-500 text-sm"
+    >
+      Nenhuma notícia encontrada
+    </li>
+  </ul>
+</li>
+
 
   <!-- CAMPANHAS -->
-  <li class="relative group">
-    <span class="cursor-pointer">Campanhas</span>
+<li class="relative group">
+  <span
+    class="cursor-pointer"
+    @click.stop="router.push('/edital/campanhas')"
+  >
+    Campanhas
+  </span>
 
-    <ul
-      class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
-             group-hover:opacity-100 group-hover:visible transition-all duration-200
-             transform group-hover:translate-y-1 z-50">
+  <ul
+    class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
+           group-hover:opacity-100 group-hover:visible transition-all duration-200
+           transform group-hover:translate-y-1 z-50"
+  >
+    <li v-for="c in campanhasAtivasDropdown" :key="c.id">
+      <span
+        class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        @click="router.push(`/edital/${c.id}`)"
+      >
+        {{ c.nomeCampanha || c.titulo }}
+      </span>
+    </li>
 
-      <li v-for="c in campanhasAtivasDropdown" :key="c.id">
-        <span
-          class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
-          @click="router.push(`/edital/${c.id}`)"
-        >
-          {{ c.nomeCampanha || c.titulo }}
-        </span>
-      </li>
-
-      <li v-if="campanhasAtivasDropdown.length === 0"
-          class="px-4 py-2 text-gray-500 text-sm">
-        Nenhuma campanha ativa
-      </li>
-    </ul>
-  </li>
+    <li
+      v-if="campanhasAtivasDropdown.length === 0"
+      class="px-4 py-2 text-gray-500 text-sm"
+    >
+      Nenhuma campanha encontrada
+    </li>
+  </ul>
+</li>
 
   <li @click="router.push('/login')">Login</li>
   <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
@@ -268,13 +286,17 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 }
 
 .content {
-  flex: 1; 
+  flex: 1;
   display: flex;
   justify-content: center;
   align-items: flex-start;
-  padding: 2rem;
+  padding: 1rem;
   width: 100%;
-  margin-top: 70px;
+  margin-top: 30px;
+
+  max-width: 1900px;      /* segura tudo no centro */
+  margin-left:auto;      /* centra */
+  margin-right: auto;
 }
 
 .navbar {
@@ -550,7 +572,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   height: 500px;            
   overflow: hidden;
   margin: 0;               
-  margin-top: 70px;
+  margin-top: 0px;
   border-radius: 0;         
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }

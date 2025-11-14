@@ -119,7 +119,7 @@ export default {
   justify-content: space-between;
   align-items: center;
    background: linear-gradient(120deg, #ffffff, #dff7ff);
-  padding: 2.2rem 2rem;
+  padding: 1rem 3rem;
   border-radius: 1rem 1rem 0 0;
 }
 
@@ -134,7 +134,7 @@ export default {
   top: 0;
   background: rgba(255,255,255,0.9);
   backdrop-filter: blur(20px);
-  padding: 1rem 2rem;
+  padding: 1rem 1rem;
   display: flex;
   justify-content: space-between;
   align-items: center;
