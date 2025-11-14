@@ -38,8 +38,11 @@
       </div>
 
       <main class="conteudo">
+        <section v-if="item.tipo === 'campanha' && item.resumo" class="resumo">
+  <div class="conteudo-texto" v-html="formatarConteudo(item.resumo)"></div>
+</section>
         <section v-if="item.tipo === 'campanha'" class="campanha-info">
-          <h2>📢 Informações da Campanha</h2>
+          <h2>Informações da Campanha</h2>
           <div class="grid-detalhes campanha-grid">
             <div v-if="item.nomeCampanha" class="detalhe-item destaque">
               <strong>📋 Nome da Campanha</strong>

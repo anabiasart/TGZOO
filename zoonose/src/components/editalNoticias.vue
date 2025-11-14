@@ -5,7 +5,7 @@
           ← Voltar
         </button>
         <div class="header-content">
-          <h1>📝 Notícias</h1>
+          <h1> Notícias</h1>
           <p>Fique por dentro de todas as novidades e informações importantes</p>
         </div>
       </header>
@@ -30,7 +30,6 @@
 
       <main class="noticias-container" v-else>
         <div v-if="noticiasFiltradas.length === 0" class="empty-state">
-          <span class="empty-icon">📝</span>
           <h3>Nenhuma notícia encontrada</h3>
           <p>Tente ajustar os filtros ou volte mais tarde para novas publicações.</p>
         </div>

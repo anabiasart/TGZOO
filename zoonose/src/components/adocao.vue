@@ -31,9 +31,12 @@
             <p class="meta">{{ traduzirPorte(animal.size) }} • {{ traduzirGenero(animal.gender) }}</p>
             <p class="desc">{{ truncate(animal.description, 100) }}</p>
             <div class="actions">
-              <button class="btn primary" @click="openModal(animal)">Ver detalhes</button>
-              <button class="btn" @click="requestAdoption(animal)">Quero adotar</button>
-            </div>
+<button class="btn primary" @click="openModal(animal)">
+  Ver detalhes
+</button>             
+<button class="btn" @click="openConfirm(animal)">
+  Quero adotar
+</button>            </div>
           </div>
         </article>
 
@@ -42,39 +45,101 @@
         </div>
       </main>
 
-      <!-- Modal -->
-      <div v-if="selected" class="modal-overlay" @click.self="closeModal">
-        <div class="modal">
-          <button class="close" @click="closeModal">×</button>
-          <div class="modal-body">
-            <img :src="selected.imageUrl || placeholder" :alt="selected.name" />
-            <div class="detail">
-              <h3>
-                {{ selected.name }}
-                <small>({{ traduzirEspecie(selected.species) }})</small>
-              </h3>
-              <p class="meta">{{ traduzirPorte(selected.size) }} • {{ traduzirGenero(selected.gender) }}</p>
-              <p class="desc">{{ selected.description }}</p>
-              <div class="modal-actions">
-                <button class="btn primary" @click="confirmAdoption(selected)">Enviar pedido de adoção</button>
-                <button class="btn" @click="closeModal">Fechar</button>
-              </div>
-            </div>
-          </div>
+      <!--  Detalhes animal -->
+<div v-if="selected" class="modal-overlay" @click.self="closeModal">
+  <div class="modal">
+    <button class="close" @click="closeModal">×</button>
+
+    <div class="modal-body">
+      <img :src="selected.imageUrl || placeholder" :alt="selected.name" />
+
+      <div class="detail">
+        <h3>
+          {{ selected.name }}
+          <small>({{ traduzirEspecie(selected.species) }})</small>
+        </h3>
+
+        <p class="meta">
+          {{ traduzirPorte(selected.size) }} • {{ traduzirGenero(selected.gender) }}
+        </p>
+
+        <p class="desc">{{ selected.description }}</p>
+
+        <div class="modal-actions">
+          <button class="btn primary" @click="openConfirm(selected)">
+            Enviar pedido de adoção
+          </button>
+
+          <button class="btn" @click="closeModal">
+            Fechar
+          </button>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+<!-- Modal de Confirmação para adotar -->
+<div v-if="showConfirm" class="confirm-overlay" @click.self="closeConfirm">
+  <div class="confirm-box">
+    <h3>Confirmar adoção</h3>
+
+    <p>
+      Deseja realmente enviar um pedido de adoção para 
+      <strong>{{ animalToConfirm?.name }}</strong>?
+    </p>
+
+    <div class="confirm-actions">
+      <button class="btn primary" @click="sendAdoption">Confirmar</button>
+      <button class="btn" @click="closeConfirm">Cancelar</button>
+    </div>
+  </div>
+</div>
+
     </section>
+    <!-- Toast-->
+<div v-if="showToast" class="toast">
+  {{ toastMessage }}
+</div>
+
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue'
-
+const showToast = ref(false)
+const toastMessage = ref('')
 const q = ref('')
 const filterType = ref('')
 const selected = ref(null)
 const animais = ref([])
 const placeholder = '/src/assets/img/vete.jpg'
+
+function toast(msg) {
+  toastMessage.value = msg
+  showToast.value = true
+  setTimeout(() => {
+    showToast.value = false
+  }, 3000) 
+}
+
+const showConfirm = ref(false)
+const animalToConfirm = ref(null)
+
+function openConfirm(a) {
+  animalToConfirm.value = a
+  showConfirm.value = true
+}
+
+function closeConfirm() {
+  showConfirm.value = false
+  animalToConfirm.value = null
+}
+
+function sendAdoption() {
+  toast(`Pedido de adoção enviado com sucesso para ${animalToConfirm.value.name}!`)
+  closeConfirm()
+  closeModal()
+}
 
 function traduzirEspecie(v) {
   const mapa = { CANINE: 'Cachorro', FELINE: 'Gato' }
@@ -123,13 +188,8 @@ function openModal(animal) {
 function closeModal() {
   selected.value = null
 }
-function requestAdoption(animal) {
-  selected.value = animal
-}
-function confirmAdoption(animal) {
-  alert(`Pedido de adoção enviado para ${animal.name}! `)
-  closeModal()
-}
+
+
 </script>
 
 <style scoped>
@@ -302,6 +362,65 @@ function confirmAdoption(animal) {
   display: flex;
   gap: 8px;
 }
+/**confirmar adoção */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  background: #4ade80;
+  color: #063e1e;
+  padding: 12px 20px;
+  border-radius: 10px;
+  font-weight: 600;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
+  animation: fade-in 0.3s ease;
+  z-index: 9999;
+}
+
+.confirm-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 80;
+}
+
+.confirm-box {
+  width: 90%;
+  max-width: 380px;
+  background: #fff;
+  padding: 22px;
+  border-radius: 14px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  animation: scaleIn .3s ease;
+}
+
+.confirm-box h3 {
+  margin-top: 0;
+  color: #2563eb;
+}
+
+.confirm-actions {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.9); opacity: 0; }
+  to   { transform: scale(1); opacity: 1; }
+}
+
+
+@keyframes fade-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
 @media (max-width: 720px) {
   .modal-body {
     flex-direction: column;

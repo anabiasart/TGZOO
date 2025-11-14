@@ -159,9 +159,10 @@
             
           </div>
 
-          <!-- Conteúdo Notícia -->
-          <p v-else class="card-description">{{ cortarTexto(noticia.resumo, 120) }}</p>
-          
+          <!-- Conteúdo Notícia / Campanha -->
+<p class="card-description" v-if="noticia.tipo === 'campanha' && noticia.resumo">
+  {{ cortarTexto(noticia.resumo, 120) }}
+</p>          
           <!-- Imagem Preview -->
           <div v-if="getImagem(noticia)" class="card-image">
             <img :src="getImagem(noticia)" :alt="getTitulo(noticia)" />
@@ -322,8 +323,18 @@
                     type="url"
                     placeholder="https://exemplo.com/imagem.jpg"
                   />
-                </div>
 
+                  <textarea 
+  id="resumo"
+  v-model="noticiaForm.resumo"
+  placeholder="Escreva um resumo da campanha"
+  rows="4"
+  maxlength="500"
+  required
+></textarea>
+                </div>
+ 
+<small>{{ noticiaForm.resumo?.length || 0 }}/500 caracteres</small>
                 <!-- Preview da Imagem -->
                 <div v-if="noticiaForm.urlImagem" class="image-preview">
                   <img :src="noticiaForm.urlImagem" alt="Preview" @error="imagemComErro = true" />
@@ -632,44 +643,63 @@ function fecharModal() {
 }
 async function salvarNoticia() {
   try {
-    salvando.value = true
+    salvando.value = true;
 
     const dadosParaSalvar = {
       ...noticiaForm.value,
-      dataPublicacao: noticiaForm.value.dataPublicacao || new Date().toISOString().split('T')[0]
-    }
+      dataPublicacao:
+        noticiaForm.value.dataPublicacao ||
+        new Date().toISOString().split("T")[0],
+    };
 
-    if (noticiaForm.value.tipo === 'campanha') {
+    if (noticiaForm.value.tipo === "campanha") {
       if (!noticiaForm.value.nomeCampanha) {
-        throw new Error('O nome da campanha é obrigatório')
+        throw new Error("O nome da campanha é obrigatório");
       }
 
-      if (!noticiaForm.value.dataInicioCampanha || !noticiaForm.value.horaInicioCampanha) {
-        throw new Error('Data e hora de início são obrigatórias')
+      if (
+        !noticiaForm.value.dataInicioCampanha ||
+        !noticiaForm.value.horaInicioCampanha
+      ) {
+        throw new Error("Data e hora de início são obrigatórias");
       }
 
-      dadosParaSalvar.tipo = 'campanha'
-      dadosParaSalvar.resumo = noticiaForm.value.resumo || 'Sem descrição'
-      dadosParaSalvar.urlImagem = noticiaForm.value.urlImagem || ''
-      dadosParaSalvar.status = noticiaForm.value.status || 'ativo'
-      dadosParaSalvar.autor = noticiaForm.value.autor || 'Administrador'
+      dadosParaSalvar.tipo = "campanha";
+      dadosParaSalvar.resumo =
+        noticiaForm.value.resumo || "Sem descrição";
+      dadosParaSalvar.urlImagem =
+        noticiaForm.value.urlImagem || "";
+      dadosParaSalvar.status =
+        noticiaForm.value.status || "ativo";
+      dadosParaSalvar.autor =
+        noticiaForm.value.autor || "Administrador";
     }
-
 
     if (modoEdicao.value) {
-      await editarNoticiaData(noticiaEditandoId.value, dadosParaSalvar)
-      mostrarToast('success', '✅ Item atualizado com sucesso!')
-    } else {
-      await adicionarNoticia(dadosParaSalvar)
-      mostrarToast('success', '✅ Item criado com sucesso!')
+      await editarNoticiaData(
+        noticiaEditandoId.value,
+        dadosParaSalvar
+      );
+
+      await carregarNoticias(); 
+
+      mostrarToast("success", "Item atualizado com sucesso!");
     }
 
-    fecharModal()
+    else {
+      await adicionarNoticia(dadosParaSalvar);
+
+      await carregarNoticias();
+
+      mostrarToast("success", "Item criado com sucesso!");
+    }
+
+    fecharModal();
   } catch (error) {
-    console.error('❌ Erro ao salvar:', error)
-    mostrarToast('error', '❌ ' + error.message)
+    console.error("❌ Erro ao salvar:", error);
+    mostrarToast("error", "❌ " + error.message);
   } finally {
-    salvando.value = false
+    salvando.value = false;
   }
 }
 

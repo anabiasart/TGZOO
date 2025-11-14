@@ -5,7 +5,7 @@
         ← Voltar
       </button>
       <div class="header-content">
-        <h1>📢 Campanhas</h1>
+        <h1>Campanhas</h1>
         <p>Confira todas as campanhas ativas e programadas</p>
       </div>
     </header>
@@ -30,7 +30,6 @@
 
     <main class="campanhas-container" v-else>
       <div v-if="campanhasFiltradas.length === 0" class="empty-state">
-        <span class="empty-icon">📢</span>
         <h3>Nenhuma campanha encontrada</h3>
         <p>Não há campanhas ativas no momento. Volte mais tarde!</p>
       </div>
@@ -50,25 +49,28 @@
             <img :src="getImagem(campanha)" :alt="getTitulo(campanha)" />
           </div>
 
-          <div class="card-content">
-            <h3>{{ getTitulo(campanha) }}</h3>
-            
-            <div class="campanha-info">
-              <div class="info-item" v-if="campanha.dataInicioCampanha">
-                <span class="icon">📅</span>
-                <span>{{ campanha.dataInicioCampanha }} até {{ campanha.dataFimCampanha }}</span>
-              </div>
-              <div class="info-item" v-if="campanha.horarioCampanha">
-                <span class="icon">🕐</span>
-                <span>{{ campanha.horarioCampanha }}</span>
-              </div>
-              <div class="info-item" v-if="campanha.localCampanha">
-                <span class="icon">📍</span>
-                <span>{{ campanha.localCampanha }}</span>
-              </div>
-            </div>
-          </div>
+         <div class="card-content">
+  <h3>{{ getTitulo(campanha) }}</h3>
 
+  
+
+  <div class="campanha-info">
+    <div class="info-item" v-if="campanha.dataInicioCampanha">
+      <span class="icon">📅</span>
+      <span>{{ campanha.dataInicioCampanha }} até {{ campanha.dataFimCampanha }}</span>
+    </div>
+
+    <div class="info-item" v-if="campanha.horarioCampanha">
+      <span class="icon">🕐</span>
+      <span>{{ campanha.horarioCampanha }}</span>
+    </div>
+
+    <div class="info-item" v-if="campanha.localCampanha">
+      <span class="icon">📍</span>
+      <span>{{ campanha.localCampanha }}</span>
+    </div>
+  </div>
+</div>
           <!-- Footer -->
           <div class="card-footer">
             <div class="meta-info">
@@ -122,7 +124,8 @@ const campanhasFiltradas = computed(() => {
     const termo = filtros.value.busca.toLowerCase()
     resultado = resultado.filter(campanha => {
       const titulo = getTitulo(campanha).toLowerCase()
-      return titulo.includes(termo)
+              return titulo.includes(termo) || resumo.includes(termo)
+
     })
   }
   
@@ -224,6 +227,12 @@ function aplicarFiltros() {
 
   
 }
+
+.resumo {
+    color: #64748b;
+    line-height: 1;
+    font-size: 1.5rem;
+  }
 
 .header-content h1 {
   font-size: 2.5rem;

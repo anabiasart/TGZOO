@@ -35,15 +35,23 @@ export function useEditais() {
     return itens.sort((a, b) => new Date(b.dataPublicacao || 0) - new Date(a.dataPublicacao || 0))
   })
 
-  const carregarTodos = async () => {
-    await Promise.all([
-      carregarNoticias(),
-      carregarCampanhas()
-    ])
+ const carregarTodos = async () => {
+  await Promise.all([
+    carregarNoticias(),
+    carregarCampanhas()
+  ])
 
-    noticias.value = noticias.value.map(n => ({ ...n, tipo: 'noticia' }))
-    campanhas.value = campanhas.value.map(c => ({ ...c, tipo: 'campanha' }))
-  }
+  noticias.value = noticias.value.map(n => ({
+    ...n,
+    tipo: n.tipo || 'noticia'
+  }))
+
+  campanhas.value = campanhas.value.map(c => ({
+    ...c,
+    tipo: c.tipo || 'campanha'
+  }))
+}
+
 
   const adicionarItem = async (itemForm) => {
     if (itemForm.tipo === 'campanha') {
