@@ -141,7 +141,7 @@
   .noticias-page {
     min-height: 100vh;
     background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  font-family: 'Helvetica', -apple-system, BlinkMacSystemFont;
   }
 .btn-voltar {
   background: #0ea5e9;
@@ -164,7 +164,7 @@
   .page-header {
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(10px);
-    padding: 2rem;
+    padding: 1rem;
     position: relative;
   border-radius: 0rem 10rem 0rem;
 

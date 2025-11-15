@@ -389,6 +389,7 @@ const cadastrar = async () => {
   min-height: 100vh;
   display: flex;
   justify-content: center;
+    font-family: 'Helvetica', -apple-system, BlinkMacSystemFont;
   align-items: center;
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
 }

@@ -189,7 +189,7 @@ function imprimir() {
 
 <style scoped>
 .edital-page {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Arial, sans-serif;
+  font-family: 'Helvetica', -apple-system, BlinkMacSystemFont;
   margin: 0;
   padding: 0;
   width: 100%;
@@ -224,13 +224,13 @@ function imprimir() {
 
 /* ========== HEADER ========== */
 .edital-header {
-  position: relative;
+  position: flex;
   background: rgba(255, 255, 255, 0.98);
   backdrop-filter: blur(10px);
   padding: 1.5rem 2rem 2rem;
   box-shadow: 0 2px 20px rgba(0, 0, 0, 0.08);
   border-radius: 0 0 24px 24px;
-  margin-bottom: 2rem;
+  margin-bottom: 1rem;
 }
 
 .btn-voltar {
@@ -240,7 +240,7 @@ function imprimir() {
  padding: 0.6rem 03rem 0rem;
   border-radius: 0rem 10rem 0rem;
   cursor: pointer;
-  font-size: 2rem;
+  font-size: 1.3rem;
   font-weight: 500;
   margin-bottom: 1.5rem;
   transition: all 0.3s ease;

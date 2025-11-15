@@ -340,7 +340,7 @@
   .admin-dashboard {
     min-height: 100vh;
     background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
-    font-family: 'Inter', sans-serif;
+  font-family: 'Helvetica', -apple-system, BlinkMacSystemFont;
   }
 
 .dashboard-header {
@@ -359,6 +359,7 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
+    
   }
   .dashboard-header h1 {
     font-size: 2.5rem;
@@ -390,7 +391,7 @@
     font-weight: 700;
   }
 
-  /* Search bar */
+  
   .controls-section {
     max-width: 1200px;
     margin: auto;

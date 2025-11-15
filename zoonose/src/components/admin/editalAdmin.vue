@@ -149,13 +149,9 @@
           <!-- Conteúdo Campanha -->
           <div v-if="noticia.tipo === 'campanha'" class="card-details campanha-details">
             <div class="detail-row" v-if="noticia.dataInicioCampanha">
-              <span class="detail-icon">📅</span>
               <span class="detail-text">{{formatDataBR(noticia.dataInicioCampanha) }} até {{ formatDataBR(noticia.dataFimCampanha) }}</span>
             </div>
-            <div class="detail-row" v-if="noticia.horarioCampanha">
-              <span class="detail-icon">🕐</span>
-              <span class="detail-text">{{formatHoraBR(noticia.horaInicioCampanha) }} às {{formatHoraBR(noticia.horaFimCampanha) }}</span>
-            </div>
+            
             
           </div>
 
@@ -806,7 +802,7 @@ onMounted(() => {
 .admin-dashboard {
   min-height: 100vh;
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  font-family: 'Helvetica', -apple-system, BlinkMacSystemFont;
 }
 
 .dashboard-header {

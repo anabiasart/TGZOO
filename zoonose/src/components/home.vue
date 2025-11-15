@@ -293,7 +293,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   padding: 1rem;
   width: 100%;
   margin-top: 30px;
-
+  font-family: Helvetica;
   max-width: 1900px;      /* segura tudo no centro */
   margin-left:auto;      /* centra */
   margin-right: auto;

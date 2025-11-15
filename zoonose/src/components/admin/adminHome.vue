@@ -186,6 +186,8 @@ onMounted(async () => {
 .adminHome {
   min-height: 100vh;
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+    font-family: 'Helvetica', -apple-system, BlinkMacSystemFont;
+
 }
 
 .container {
