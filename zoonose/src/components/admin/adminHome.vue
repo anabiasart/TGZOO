@@ -50,12 +50,10 @@
         </div>
       </div>
 
-      <!-- Lista de Usuários -->
       <section class="lista-usuarios" v-if="!carregando">
         <h2> Usuários Cadastrados</h2>
         
         <div class="usuarios-container">
-          <!-- Administradores -->
           <div class="usuarios-card">
             <div class="card-header admin-header">
               <h3> Administradores</h3>
@@ -78,14 +76,12 @@
                 <span class="usuario-badge admin">Admin</span>
               </div>
 
-              <!-- Mensagem se não houver administradores -->
               <div v-if="administradores.length === 0" class="empty-state">
                 <p>Nenhum administrador cadastrado</p>
               </div>
             </div>
           </div>
 
-          <!-- Usuários Comuns -->
           <div class="usuarios-card">
             <div class="card-header user-header">
               <h3> Usuários Comuns</h3>
@@ -108,7 +104,6 @@
                 <span class="usuario-badge user">Usuário</span>
               </div>
 
-              <!-- Mensagem se não houver usuários -->
               <div v-if="usuariosComuns.length === 0" class="empty-state">
                 <p>Nenhum usuário cadastrado</p>
               </div>
@@ -177,7 +172,7 @@ function formatarTelefone(telefone) {
 }
 
 onMounted(async () => {
-  console.log('🚀 AdminHome montado')
+  console.log('AdminHome montado')
   await carregarUsuarios()
 })
 </script>

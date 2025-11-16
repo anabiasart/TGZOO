@@ -23,7 +23,6 @@
         </div>
       </header>
 
-      <!-- Barra de busca -->
       <section class="controls-section">
         <div class="search-filters">
           <input
@@ -33,18 +32,16 @@
             class="search-input"
           />
           <button @click="abrirModal()" class="btn-secondary btn-sm">
-            ➕ Novo Animal
+             Novo Animal
           </button>
         </div>
       </section>
 
-      <!-- Loading -->
       <div v-if="carregando" class="loading-container">
         <div class="spinner"></div>
         <p>Carregando...</p>
       </div>
 
-      <!-- Lista -->
       <section v-if="!carregando" class="noticias-grid">
         <div
           v-for="a in animaisFiltrados"
@@ -84,18 +81,17 @@
           <div class="empty-content">
             <span class="empty-icon"></span>
             <h3>Nenhum animal encontrado</h3>
-            <button @click="abrirModal()" class="btn-primary">➕ Cadastrar Novo</button>
+            <button @click="abrirModal()" class="btn-primary">Cadastrar Novo</button>
           </div>
         </div>
       </section>
 
-      <!-- Modal -->
       <teleport to="body">
         <transition name="modal">
           <div v-if="mostrarModal" class="modal-overlay" @click.self="fecharModal">
             <div class="modal-content" @click.stop>
               <div class="modal-header">
-                <h2>{{ editando ? 'Editar Animal' : '➕ Novo Animal' }}</h2>
+                <h2>{{ editando ? 'Editar Animal' : ' Novo Animal' }}</h2>
                 <button @click="fecharModal" class="btn-close">✕</button>
               </div>
 

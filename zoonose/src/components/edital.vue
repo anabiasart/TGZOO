@@ -45,35 +45,35 @@
           <h2>Informações da Campanha</h2>
           <div class="grid-detalhes campanha-grid">
             <div v-if="item.nomeCampanha" class="detalhe-item destaque">
-              <strong>📋 Nome da Campanha</strong>
+              <strong> Nome da Campanha</strong>
               <span>{{ item.nomeCampanha }}</span>
             </div>
             <div v-if="item.dataInicioCampanha" class="detalhe-item">
-              <strong>📅 Data Início</strong>
+              <strong>Data Início</strong>
               <span>{{ item.dataInicioCampanha }}</span>
             </div>
             <div v-if="item.dataFimCampanha" class="detalhe-item">
-              <strong>📅 Data Fim</strong>
+              <strong> Data Fim</strong>
               <span>{{ item.dataFimCampanha }}</span>
             </div>
             <div v-if="item.horarioCampanha" class="detalhe-item">
-              <strong>🕐 Horário</strong>
+              <strong> Horário</strong>
               <span>{{ item.horarioCampanha }}</span>
             </div>
           </div>
         </section>
 
         <section v-else class="resumo">
-          <h2>📄 Conteúdo</h2>
+          <h2> Conteúdo</h2>
           <div class="conteudo-texto" v-html="formatarConteudo(item.resumo)"></div>
         </section>
 
         <section class="acoes">
           <button class="btn-compartilhar" @click="compartilhar">
-            📤 Compartilhar
+             Compartilhar
           </button>
           <button class="btn-imprimir" @click="imprimir">
-            🖨️ Imprimir
+             Imprimir
           </button>
         </section>
       </main>
@@ -82,10 +82,10 @@
     <!-- Item Não Encontrado -->
     <div v-else class="erro-container">
       <div class="erro-content">
-        <h2>😔 Item não encontrado</h2>
+        <h2> Item não encontrado</h2>
         <p>O item que você está procurando pode ter sido removido ou não existe.</p>
         <button class="btn-home" @click="$router.push('/')">
-          🏠 Voltar ao Início
+           Voltar ao Início
         </button>
       </div>
     </div>
@@ -197,7 +197,6 @@ function imprimir() {
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
 }
 
-/* ========== LOADING ========== */
 .loading-container {
   display: flex;
   flex-direction: column;
@@ -222,7 +221,6 @@ function imprimir() {
   100% { transform: rotate(360deg); }
 }
 
-/* ========== HEADER ========== */
 .edital-header {
   position: flex;
   background: rgba(255, 255, 255, 0.98);

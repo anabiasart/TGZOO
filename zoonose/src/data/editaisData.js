@@ -108,7 +108,7 @@ export function useEditais() {
 
       return null
     } catch (error) {
-      console.error('❌ Erro ao buscar item unificado:', error)
+      console.error('Erro ao buscar item unificado:', error)
       return null
     }
   }

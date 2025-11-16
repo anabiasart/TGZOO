@@ -68,7 +68,7 @@ export function useUsuarios() {
       
     } catch (error) {
       erro.value = `Erro ao carregar usuários: ${error.message}`
-      console.error('❌ Erro ao carregar usuários:', error)
+      console.error(' Erro ao carregar usuários:', error)
       usuarios.value = []
     } finally {
       carregando.value = false
@@ -114,7 +114,6 @@ export function useUsuarios() {
     return false
   }
 
-  // Obter string da role
   const getRoleString = (user) => {
     if (!user.roles || user.roles.length === 0) return 'ROLE_CUSTOMER'
     
@@ -127,14 +126,12 @@ export function useUsuarios() {
       if (firstRole.name) {
         return firstRole.name
       }
-      // Tentar converter para string
       return String(firstRole)
     }
     
     return 'ROLE_CUSTOMER'
   }
 
-  // Buscar usuário por ID
   const buscarUsuarioPorId = async (id) => {
     try {
       const response = await fetch(`${API_URL}/list/${id}`, {
@@ -165,7 +162,6 @@ export function useUsuarios() {
     }
   }
 
-  // Limpar erro
   const limparErro = () => {
     erro.value = null
   }

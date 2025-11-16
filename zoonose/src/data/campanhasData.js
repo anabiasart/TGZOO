@@ -22,7 +22,7 @@
     if (token) {
       headers['Authorization'] = token.startsWith('Bearer ') ? token : `Bearer ${token}`
     } else {
-      console.warn('⚠️ Nenhum token encontrado! Você precisa fazer login primeiro.')
+      console.warn(' Nenhum token encontrado! Você precisa fazer login primeiro.')
     }
     
     return headers
@@ -218,7 +218,7 @@ description: frontendCampaign.resumo || frontendCampaign.description || '',
         
       } catch (error) {
         erro.value = error.message
-        console.error('❌ Erro ao adicionar campanha:', error)
+        console.error(' Erro ao adicionar campanha:', error)
         throw error
       } finally {
         carregando.value = false

@@ -310,8 +310,7 @@ const cadastrar = async () => {
       name: form.name,
       cpf: cpfLimpo,       
       phone: telLimpo, 
-      sexo: form.sexo || undefined, //opcional
-      //campos opcionais
+      sexo: form.sexo || undefined,
       secundaryPhone: undefined,
       secundarEmail: undefined,
       address: undefined

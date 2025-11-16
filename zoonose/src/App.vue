@@ -6,7 +6,6 @@ import Footer from "@/components/Footer.vue"
   <div class="app-layout">
    
 
-    <!-- Conteúdo da página atual -->
     <router-view />
 
     <Footer/>

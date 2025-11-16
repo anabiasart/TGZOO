@@ -34,7 +34,6 @@ const mapBackendToFrontend = (backendNews) => {
     nomeNoticia: backendNews.title,
     urlImagemNoticia: backendNews.imageUrl,
     resumo: backendNews.content,
-    // Campos comuns
     titulo: backendNews.title, 
     categoria: 'geral',
     status: 'ativo',
@@ -121,7 +120,7 @@ export function useNoticias() {
       
     } catch (error) {
       erro.value = error.message
-      console.error('❌ Erro ao adicionar notícia:', error)
+      console.error(' Erro ao adicionar notícia:', error)
       throw error
     } finally {
       carregando.value = false
@@ -216,7 +215,7 @@ export function useNoticias() {
       
     } catch (error) {
       erro.value = error.message
-      console.error('❌ Erro ao remover notícia:', error)
+      console.error(' Erro ao remover notícia:', error)
       throw error
     } finally {
       carregando.value = false

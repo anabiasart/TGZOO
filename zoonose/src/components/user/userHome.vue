@@ -1,8 +1,31 @@
 <template>
   <div class="userHome">
+ <header class="header">
 
+    <div class="topbar">
+      <p class="bemvindo">Bem-vindo(a), {{ usuario }}</p>
+    </div>
+
+    <div class="navbar">
+      <div class="header-logo" @click="$router.push('/')">
+        <img :src="zoo" alt="Logo ZoonoSys" class="header-logo-img" />
+      </div>
+
+      <nav class="nav group">
+        <ul class="nav-links">
+          <li><router-link to="/">Página Inicial</router-link></li>
+          <li><router-link to="/edital/noticias">Notícias</router-link></li>
+          <li><router-link to="/edital/campanhas">Campanhas</router-link></li>
+          <li><router-link to="contato">Contato</router-link></li>
+
+       
+        </ul>
+
+      </nav>
+    </div>
+
+  </header>
     <div class="container">
-      <!-- Atalhos Rápidos -->
       <section class="atalhos-rapidos">
         <h2>Atalhos Rápidos</h2>
         <div class="cards-grid">
@@ -25,7 +48,6 @@
         </div>
       </section>
 
-      <!-- Resumo do Usuário -->
       <section class="resumo">
         <h2>Meu Resumo</h2>
         <div class="cards-grid">
@@ -44,18 +66,15 @@
         </div>
       </section>
 
-      <!-- Loading State -->
       <div v-if="carregando" class="loading-section">
         <div class="spinner"></div>
         <p>Carregando notícias...</p>
       </div>
 
-      <!-- Últimas Notícias e Campanhas -->
       <section class="noticias-campanhas" v-if="!carregando">
-        <h2>📰 Últimas Notícias e Campanhas</h2>
+        <h2> Últimas Notícias e Campanhas</h2>
         
         <div class="noticias-container">
-          <!-- Campanhas Ativas -->
           <div class="noticias-card campanhas-card">
             <div class="card-header campanhas-header">
               <h3>Campanhas Ativas</h3>
@@ -70,20 +89,18 @@
               >
                 <div class="noticia-info">
                   <p class="noticia-titulo">{{ campanha.titulo }}</p>
-                  <p class="noticia-data">📅 {{ formatarData(campanha.data) }}</p>
+                  <p class="noticia-data"> {{ formatarData(campanha.data) }}</p>
                   <p class="noticia-descricao">{{ campanha.descricao }}</p>
                 </div>
                 <span class="noticia-badge campanha-badge">Campanha</span>
               </div>
 
-              <!-- Mensagem se não houver campanhas -->
               <div v-if="campanhas.length === 0" class="empty-state">
                 <p>Nenhuma campanha ativa no momento</p>
               </div>
             </div>
           </div>
 
-          <!-- Notícias Recentes -->
           <div class="noticias-card">
             <div class="card-header noticias-header">
               <h3> Notícias Recentes</h3>
@@ -96,16 +113,15 @@
                 class="noticia-item"
                 @click="verDetalhes(noticia)"
               >
-                <div class="noticia-icon noticia-icon-news">📰</div>
+                <div class="noticia-icon noticia-icon-news"></div>
                 <div class="noticia-info">
                   <p class="noticia-titulo">{{ noticia.titulo }}</p>
-                  <p class="noticia-data">📅 {{ formatarData(noticia.data) }}</p>
+                  <p class="noticia-data"> {{ formatarData(noticia.data) }}</p>
                   <p class="noticia-descricao">{{ noticia.descricao }}</p>
                 </div>
                 <span class="noticia-badge noticia-badge-news">Notícia</span>
               </div>
 
-              <!-- Mensagem se não houver notícias -->
               <div v-if="noticias.length === 0" class="empty-state">
                 <p>Nenhuma notícia disponível</p>
               </div>
@@ -114,7 +130,6 @@
         </div>
       </section>
 
-      <!-- Acesso Rápido -->
       <section class="acesso-rapido">
         <h2> Links Úteis</h2>
         <div class="links-grid">
@@ -140,6 +155,8 @@
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import Header from '@/components/Header.vue'
+import zoo from "@/assets/img/zoo.png";
+
 
 const router = useRouter()
 const nomeUsuario = ref('Usuário')
@@ -176,6 +193,8 @@ onMounted(() => {
 .userHome {
   min-height: 100vh;
   background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd);
+    font-family: Helvetica;
+
 }
 
 .container {
@@ -188,9 +207,12 @@ section {
   margin-bottom: 3rem;
 }
 
+.header{
+ font-size: 1.5rem;
+}
 h2 {
   color: #0ea5e9;
-  font-size: 1.5rem;
+  font-size: 2.5rem;
   margin-bottom: 1.5rem;
   font-weight: 600;
 }

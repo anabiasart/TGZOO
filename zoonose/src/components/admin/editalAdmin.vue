@@ -1,6 +1,5 @@
 <template>
   <div class="admin-dashboard">
-    <!-- Header -->
     <header class="dashboard-header">
       <div class="header-content">
         <h1>
@@ -24,22 +23,20 @@
       </div>
     </header>
 
-    <!-- Toast Notification -->
     <transition name="toast">
       <div v-if="toast.mostrar" class="toast" :class="toast.tipo">
-        <span class="toast-icon">{{ toast.tipo === 'success' ? '✅' : '❌' }}</span>
+        <span class="toast-icon">{{ toast.tipo === 'success' ? 'SUCCESS' : 'ERROR' }}</span>
         <span class="toast-message">{{ toast.mensagem }}</span>
       </div>
     </transition>
 
-    <!-- Controles e Filtros -->
     <section class="controls-section">
       <div class="search-filters">
         <div class="search-box">
           <input 
             v-model="filtros.busca" 
             type="text"
-            placeholder="🔍 Buscar por título, autor..."
+            placeholder=" Buscar por título, autor..."
             @input="aplicarFiltros"
             class="search-input"
           />
@@ -62,9 +59,9 @@
             class="filter-select"
           >
             <option value="">Todos os status</option>
-            <option value="ativo">✅ Ativo</option>
-            <option value="rascunho">📝 Rascunho</option>
-            <option value="arquivado">📦 Arquivado</option>
+            <option value="ativo"> Ativo</option>
+            <option value="rascunho">Rascunho</option>
+            <option value="arquivado"> Arquivado</option>
           </select>
         </div>
 
@@ -72,19 +69,16 @@
           @click="abrirModalNoticia()" 
           class="btn-primary btn-add"
         >
-          <span>➕</span>
           Novo Item
         </button>
       </div>
     </section>
 
-    <!-- Loading State -->
     <div v-if="carregando" class="loading-container">
       <div class="spinner"></div>
       <p>Carregando...</p>
     </div>
 
-    <!-- Error State -->
     <div v-if="erro" class="error-container">
       <div class="error-content">
         <p>{{ erro }}</p>
@@ -92,7 +86,6 @@
       </div>
     </div>
 
-    <!-- Lista de Itens -->
     <section class="noticias-grid" v-if="!carregando">
       <div 
         v-for="noticia in noticiasFiltradas" 
@@ -103,7 +96,6 @@
           'status-arquivado': noticia.status === 'arquivado'
         }"
       >
-        <!-- Card Header -->
         <div class="card-header">
           <div class="card-badges">
             <span class="badge" :class="`badge-${noticia.tipo || 'noticia'}`">
@@ -118,35 +110,28 @@
           <div class="card-menu">
             <div v-if="menuAberto === noticia.id" class="dropdown-menu">
               <button @click="editarNoticia(noticia)">
-                <span class="menu-icon">✏️</span>
                 Editar
               </button>
               <button @click="duplicarNoticia(noticia)">
-                <span class="menu-icon">📋</span>
                 Duplicar
               </button>
               <button v-if="noticia.status === 'ativo'" @click="alterarStatus(noticia.id, 'arquivado')">
-                <span class="menu-icon">📦</span>
                 Arquivar
               </button>
               <button v-else @click="alterarStatus(noticia.id, 'ativo')">
-                <span class="menu-icon">✅</span>
                 Ativar
               </button>
               <hr>
               <button @click="confirmarExclusao(noticia)" class="btn-danger">
-                <span class="menu-icon">🗑️</span>
                 Excluir
               </button>
             </div>
           </div>
         </div>
 
-        <!-- Card Content -->
         <div class="card-content">
           <h3 class="card-title">{{ getTitulo(noticia) }}</h3>
           
-          <!-- Conteúdo Campanha -->
           <div v-if="noticia.tipo === 'campanha'" class="card-details campanha-details">
             <div class="detail-row" v-if="noticia.dataInicioCampanha">
               <span class="detail-text">{{formatDataBR(noticia.dataInicioCampanha) }} até {{ formatDataBR(noticia.dataFimCampanha) }}</span>
@@ -155,17 +140,14 @@
             
           </div>
 
-          <!-- Conteúdo Notícia / Campanha -->
 <p class="card-description" v-if="noticia.tipo === 'campanha' && noticia.resumo">
   {{ cortarTexto(noticia.resumo, 120) }}
 </p>          
-          <!-- Imagem Preview -->
           <div v-if="getImagem(noticia)" class="card-image">
             <img :src="getImagem(noticia)" :alt="getTitulo(noticia)" />
           </div>
         </div>
 
-        <!-- Card Footer -->
         <div class="card-footer">
           <div class="card-meta">
             <span class="meta-item">
@@ -194,7 +176,6 @@
         </div>
       </div>
 
-      <!-- Empty State -->
       <div v-if="noticiasFiltradas.length === 0" class="empty-state">
         <div class="empty-content">
           <span class="empty-icon"></span>
@@ -208,7 +189,6 @@
       </div>
     </section>
 
-    <!-- Modal de Criação/Edição -->
     <teleport to="body">
       <transition name="modal">
         <div v-if="modalAberto" class="modal-overlay" @click="fecharModal">
@@ -221,7 +201,6 @@
             </div>
 
             <div class="modal-body">
-              <!-- Seletor de Tipo -->
               <div class="form-section">
                 <h3> Tipo de Publicação</h3>
                 <div class="form-group">
@@ -248,7 +227,6 @@
                 </div>
               </div>
 
-              <!-- Formulário CAMPANHA -->
               <div v-if="noticiaForm.tipo === 'campanha'" class="form-section">
                 <h3> Dados da Campanha</h3>
                 
@@ -265,7 +243,6 @@
                   <small>{{ noticiaForm.nomeCampanha?.length || 0 }}/100 caracteres</small>
                 </div>
 
-                <!-- Campos de Data e Hora Início -->
 <div class="form-row">
   <div class="form-group">
     <label for="dataInicioCampanha">Data Início *</label>
@@ -288,7 +265,6 @@
   </div>
 </div>
 
-<!-- Campos de Data e Hora Fim -->
 <div class="form-row">
   <div class="form-group">
     <label for="dataFimCampanha">Data Fim *</label>
@@ -311,35 +287,32 @@
   </div>
 </div>
 
-                <div class="form-group">
-                  <label for="urlImagem">URL da Imagem</label>
-                  <input 
+ <div class="form-group">
+     <label for="urlImagem">URL da Imagem</label>
+              <input 
                     id="urlImagem"
                     v-model="noticiaForm.urlImagem" 
                     type="url"
                     placeholder="https://exemplo.com/imagem.jpg"
-                  />
+              />
 
-                  <textarea 
+ <textarea 
   id="resumo"
   v-model="noticiaForm.resumo"
   placeholder="Escreva um resumo da campanha"
   rows="4"
   maxlength="500"
   required
-></textarea>
-                </div>
+></textarea></div>
  
 <small>{{ noticiaForm.resumo?.length || 0 }}/500 caracteres</small>
-                <!-- Preview da Imagem -->
                 <div v-if="noticiaForm.urlImagem" class="image-preview">
                   <img :src="noticiaForm.urlImagem" alt="Preview" @error="imagemComErro = true" />
                   <p v-if="imagemComErro" class="error-text"> Não foi possível carregar a imagem</p>
                 </div>
               </div>
 
-              <!-- Formulário NOTÍCIA -->
-              <div v-else class="form-section">
+      <div v-else class="form-section">
                 <h3> Dados da Notícia</h3>
                 
                 <div class="form-group">
@@ -379,14 +352,12 @@
                   />
                 </div>
 
-                <!-- Preview da Imagem -->
                 <div v-if="noticiaForm.urlImagemNoticia" class="image-preview">
                   <img :src="noticiaForm.urlImagemNoticia" alt="Preview" @error="imagemComErro = true" />
                   <p v-if="imagemComErro" class="error-text"> Não foi possível carregar a imagem</p>
                 </div>
               </div>
 
-              <!-- Informações Adicionais -->
               <div class="form-section">
                 <h3>Informações Adicionais</h3>
                 
@@ -404,7 +375,7 @@
                   <div class="form-group">
                     <label for="status">Status</label>
                     <select id="status" v-model="noticiaForm.status">
-                      <option value="ativo">✅ Ativo</option>
+                      <option value="ativo"> Ativo</option>
                       <option value="rascunho">Rascunho</option>
                       <option value="arquivado">Arquivado</option>
                     </select>
@@ -412,7 +383,6 @@
                 </div>
               </div>
 
-              <!-- Actions -->
               <div class="modal-actions">
                 <div class="modal-actions-left">
                   <button 
@@ -440,7 +410,6 @@
       </transition>
     </teleport>
 
-    <!-- Modal de Confirmação de Exclusão -->
     <teleport to="body">
       <transition name="modal">
         <div v-if="modalExclusao.aberto" class="modal-overlay" @click="cancelarExclusao">
@@ -692,8 +661,8 @@ async function salvarNoticia() {
 
     fecharModal();
   } catch (error) {
-    console.error("❌ Erro ao salvar:", error);
-    mostrarToast("error", "❌ " + error.message);
+    console.error("Erro ao salvar:", error);
+    mostrarToast("error",  + error.message);
   } finally {
     salvando.value = false;
   }
@@ -725,7 +694,7 @@ async function alterarStatus(id, novoStatus) {
     mostrarToast('success', `Status: ${novoStatus}`)
     menuAberto.value = null
   } catch (err) {
-    mostrarToast('error', '❌ Falha ao mudar status')
+    mostrarToast('error', ' Falha ao mudar status')
   }
 }
 
@@ -749,7 +718,7 @@ async function confirmarExclusaoFinal() {
     await removerNoticiaPorId(modalExclusao.value.noticia.id)
     mostrarToast('success', 'Deletado!')
   } catch {
-    mostrarToast('error', '❌ Falha ao excluir!')
+    mostrarToast('error', ' Falha ao excluir!')
   } finally {
     cancelarExclusao()
     excluindo.value = false
@@ -770,7 +739,7 @@ function getTipoLabel(tipo) {
 
 function getStatusLabel(status) {
   const map = {
-    ativo: '✅ Ativo',
+    ativo: 'Ativo',
     rascunho: 'Rascunho',
     arquivado: ' Arquivado'
   }

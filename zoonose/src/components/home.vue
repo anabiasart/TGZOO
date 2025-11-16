@@ -126,7 +126,6 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   
   <li @click="router.push('/')">Início</li>
 
-  <!-- NOTÍCIAS -->
   <li class="relative group">
   <span
     class="cursor-pointer"
@@ -193,6 +192,7 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
 
   <li @click="router.push('/login')">Login</li>
   <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
+  
 </ul>
 
   <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>

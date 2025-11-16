@@ -1,14 +1,11 @@
 <template>
   <header class="header">
 
-    <!-- TOPBAR -->
     <div class="topbar">
       <p class="bemvindo">Bem-vindo(a), {{ usuario }}</p>
     </div>
 
-    <!-- NAVBAR -->
     <div class="navbar">
-      <!-- LOGO DENTRO DA NAVBAR -->
       <div class="header-logo" @click="$router.push('/')">
         <img :src="zoo" alt="Logo ZoonoSys" class="header-logo-img" />
       </div>

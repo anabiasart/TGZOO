@@ -45,10 +45,9 @@
         </div>
       </main>
 
-      <!--  Detalhes animal -->
 <div v-if="selected" class="modal-overlay" @click.self="closeModal">
   <div class="modal">
-    <button class="close" @click="closeModal">×</button>
+    <button class="close" @click="closeModal"></button>
 
     <div class="modal-body">
       <img :src="selected.imageUrl || placeholder" :alt="selected.name" />
@@ -78,7 +77,6 @@
     </div>
   </div>
 </div>
-<!-- Modal de Confirmação para adotar -->
 <div v-if="showConfirm" class="confirm-overlay" @click.self="closeConfirm">
   <div class="confirm-box">
     <h3>Confirmar adoção</h3>
@@ -96,7 +94,6 @@
 </div>
 
     </section>
-    <!-- Toast-->
 <div v-if="showToast" class="toast">
   {{ toastMessage }}
 </div>
@@ -154,7 +151,6 @@ function traduzirGenero(v) {
   return mapa[v] || 'Indefinido'
 }
 
-// carregar animais do backend
 async function carregarAnimais() {
   try {
     const res = await fetch('/api/animals/adocao', { headers: { Accept: 'application/json' } })

@@ -56,17 +56,14 @@
 
   <div class="campanha-info">
     <div class="info-item" v-if="campanha.dataInicioCampanha">
-      <span class="icon">📅</span>
       <span>{{ campanha.dataInicioCampanha }} até {{ campanha.dataFimCampanha }}</span>
     </div>
 
     <div class="info-item" v-if="campanha.horarioCampanha">
-      <span class="icon">🕐</span>
       <span>{{ campanha.horarioCampanha }}</span>
     </div>
 
     <div class="info-item" v-if="campanha.localCampanha">
-      <span class="icon">📍</span>
       <span>{{ campanha.localCampanha }}</span>
     </div>
   </div>
@@ -75,11 +72,9 @@
           <div class="card-footer">
             <div class="meta-info">
               <span class="meta-item">
-                <span class="icon">👤</span>
                 {{ campanha.autor || 'Sistema' }}
               </span>
               <span class="meta-item">
-                <span class="icon">📅</span>
                 {{ formatarData(campanha.dataPublicacao) }}
               </span>
             </div>

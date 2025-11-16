@@ -142,7 +142,7 @@ export function useAnimais() {
 
     } catch (e) {
       erro.value = e.message
-      console.error('❌ Erro ao atualizar animal:', e)
+      console.error('Erro ao atualizar animal:', e)
       throw e
     } finally {
       carregando.value = false
@@ -167,7 +167,7 @@ export function useAnimais() {
       animais.value = animais.value.filter(a => a.id !== id)
     } catch (e) {
       erro.value = e.message
-      console.error('❌ Erro ao remover animal:', e)
+      console.error('Erro ao remover animal:', e)
       throw e
     } finally {
       carregando.value = false

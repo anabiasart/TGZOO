@@ -30,7 +30,6 @@ api.interceptors.request.use(
   }
 );
 
-// Interceptor de Response
 api.interceptors.response.use(
   (response) => {
     
@@ -54,7 +53,7 @@ api.interceptors.response.use(
         window.location.href = '/login';
       }
     } else {
-      console.error("🌐 Erro de rede:", error.message);
+      console.error("Erro de rede:", error.message);
     }
     
     return Promise.reject(error);

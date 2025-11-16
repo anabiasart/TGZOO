@@ -23,7 +23,7 @@ const routes = [
   { path: '/adocao', name: 'Adocao', component: Adocao },
   { path: '/footer', component: Footer },
 
-  // Rotas de edital (ordem importa!)
+  // Rotas de edital 
   {
     path: '/edital/noticias',
     name: 'edital-noticias',
@@ -37,7 +37,7 @@ const routes = [
   {
     path: '/edital/adocao',
     name: 'edital-adocao-publica',
-    component: Adocao // 👈 agora esta rota existe e vem ANTES do coringa
+    component: Adocao 
   },
   {
     path: '/edital/:id',

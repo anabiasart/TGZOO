@@ -58,11 +58,9 @@
             <div class="card-footer">
               <div class="meta-info">
                 <span class="meta-item">
-                  <span class="icon">👤</span>
                   {{ noticia.autor || 'Sistema' }}
                 </span>
                 <span class="meta-item">
-                  <span class="icon">📅</span>  
                   {{ formatarData(noticia.dataPublicacao) }}
                 </span>
               </div>
