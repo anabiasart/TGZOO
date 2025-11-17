@@ -201,7 +201,7 @@ function aplicarFiltros() {
   background: #0ea5e9;
   color: white;
   border: none;
- padding: 0.166rem 05rem 0rem;
+ padding: 0.166rem 0rem 0rem;
   border-radius: 0rem 10rem 0rem;
   cursor: pointer;
   font-size: 1.3rem;

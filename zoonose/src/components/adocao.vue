@@ -1,5 +1,102 @@
 <template>
+  
+  <nav class="navbar">
+    <div class="navbar-logo" @click="router.push('/')">
+    <img :src="zoo" alt="ZoonoSys Logo" class="logo" />
+  </div>
+<ul class="navbar-links">
+  
+  <li @click="router.push('/')">Início</li>
+
+  <li class="relative group">
+  <span
+    class="cursor-pointer"
+    @click.stop="router.push('/edital/noticias')"
+  >
+    Notícias
+  </span>
+
+  <ul
+    class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
+           group-hover:opacity-100 group-hover:visible transition-all duration-200
+           transform group-hover:translate-y-1 z-50"
+  >
+    <li v-for="n in noticiasDropdown" :key="n.id">
+      <span
+        class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        @click="router.push(`/edital/${n.id}`)"
+      >
+        {{ n.nomeNoticia || n.titulo }}
+      </span>
+    </li>
+
+    <li
+      v-if="noticiasDropdown.length === 0"
+      class="px-4 py-2 text-gray-500 text-sm"
+    >
+      Nenhuma notícia encontrada
+    </li>
+  </ul>
+</li>
+
+
+  <!-- CAMPANHAS -->
+<li class="relative group">
+  <span
+    class="cursor-pointer"
+    @click.stop="router.push('/edital/campanhas')"
+  >
+    Campanhas
+  </span>
+
+  <ul
+    class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
+           group-hover:opacity-100 group-hover:visible transition-all duration-200
+           transform group-hover:translate-y-1 z-50"
+  >
+    <li v-for="c in campanhasAtivasDropdown" :key="c.id">
+      <span
+        class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+        @click="router.push(`/edital/${c.id}`)"
+      >
+        {{ c.nomeCampanha || c.titulo }}
+      </span>
+    </li>
+
+    <li
+      v-if="campanhasAtivasDropdown.length === 0"
+      class="px-4 py-2 text-gray-500 text-sm"
+    >
+      Nenhuma campanha encontrada
+    </li>
+  </ul>
+</li>
+
+  <li @click="router.push('/login')">Login</li>
+  <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
+  
+</ul>
+
+  <button class="navbar-toggle" @click="menuAberto = !menuAberto">☰</button>
+
+  <ul v-if="menuAberto" class="navbar-mobile">
+    <li @click="router.push('/')">Início</li>
+    <li @click="router.push('/edital/noticias')">Notícias</li> 
+    <li @click="router.push('/edital/campanhas')">Campanhas</li>
+    <li @click="router.push('/login')">Login</li>
+    <li @click="router.push('/contato')">Contato</li>
+  </ul>
+</nav>
   <div class="adocao-page">
+      
+      <div class="header-content">
+        <h1>Animais para adoção:</h1>
+        <p>Confira os animais disponíveis</p>
+        <button class="btn-voltar" @click="$router.go(-1)">
+        ← Voltar
+      </button>
+      </div>
+
     <section class="adoption-list">
       <header class="controls">
         <h2>Animais disponíveis para adoção</h2>
@@ -102,7 +199,16 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { Syringe, User, Calendar } from 'lucide-vue-next'
+import vete from "../assets/img/vete.jpg"
+import pata from "../assets/img/pata.jpg"
+import zoo from "../assets/img/zoo.png"
+import { useEditais } from "@/data/editaisData.js"
+
+const { todosItens: todasNoticias, carregarTodos: carregarNoticias } = useEditais()
+
 const showToast = ref(false)
 const toastMessage = ref('')
 const q = ref('')
@@ -110,28 +216,35 @@ const filterType = ref('')
 const selected = ref(null)
 const animais = ref([])
 const placeholder = '/src/assets/img/vete.jpg'
+const showConfirm = ref(false)
+const animalToConfirm = ref(null)
+
+const router = useRouter()
+
+const campanhasAtivasDropdown = computed(() => {
+  return todasNoticias.value
+    .filter(i => i.tipo?.toLowerCase() === 'campanha')
+})
+
+const noticiasDropdown = computed(() => {
+  return todasNoticias.value
+    .filter(i => i.tipo?.toLowerCase() === 'noticia')
+})
 
 function toast(msg) {
   toastMessage.value = msg
   showToast.value = true
-  setTimeout(() => {
-    showToast.value = false
-  }, 3000) 
+  setTimeout(() => (showToast.value = false), 3000)
 }
-
-const showConfirm = ref(false)
-const animalToConfirm = ref(null)
 
 function openConfirm(a) {
   animalToConfirm.value = a
   showConfirm.value = true
 }
-
 function closeConfirm() {
   showConfirm.value = false
   animalToConfirm.value = null
 }
-
 function sendAdoption() {
   toast(`Pedido de adoção enviado com sucesso para ${animalToConfirm.value.name}!`)
   closeConfirm()
@@ -153,7 +266,9 @@ function traduzirGenero(v) {
 
 async function carregarAnimais() {
   try {
-    const res = await fetch('/api/animals/adocao', { headers: { Accept: 'application/json' } })
+    const res = await fetch('/api/animals/adocao', {
+      headers: { Accept: 'application/json' }
+    })
     if (!res.ok) throw new Error(`Erro HTTP ${res.status}`)
     const data = await res.json()
     animais.value = data.content || data
@@ -162,13 +277,24 @@ async function carregarAnimais() {
   }
 }
 
-onMounted(carregarAnimais)
+onMounted(async () => {
+  await carregarNoticias()   
+  await carregarAnimais()    
+})
 
 const filteredAnimals = computed(() => {
   const term = q.value.trim().toLowerCase()
   return animais.value.filter(a => {
-    const matchesQuery = !term || [a.name, a.description, traduzirEspecie(a.species)].join(' ').toLowerCase().includes(term)
-    const matchesType = !filterType.value || traduzirEspecie(a.species) === filterType.value
+    const matchesQuery =
+      !term ||
+      [a.name, a.description, traduzirEspecie(a.species)]
+        .join(' ')
+        .toLowerCase()
+        .includes(term)
+
+    const matchesType =
+      !filterType.value || traduzirEspecie(a.species) === filterType.value
+
     return matchesQuery && matchesType
   })
 })
@@ -178,252 +304,235 @@ function truncate(text, n) {
   return text.length > n ? text.slice(0, n) + '...' : text
 }
 
-function openModal(animal) {
-  selected.value = animal
-}
-function closeModal() {
-  selected.value = null
-}
-
-
+/* MODAL */
+function openModal(animal) { selected.value = animal }
+function closeModal() { selected.value = null }
 </script>
 
 <style scoped>
+/* ======= LAYOUT BASE ======= */
+
 .adocao-page {
   background: linear-gradient(135deg, #effff7, #cffaff, #93c5fd);
-  display: flex;
   min-height: 100vh;
+  width: 100%;
+  padding-top: 140px; /* espaço da navbar fixa */
+  padding-bottom: 40px;
 }
+
+/* ======= HEADER ======= */
+
+.header-content {
+  text-align: center;
+  margin-bottom: 40px;
+  position: relative;
+  padding-bottom: 20px;
+}
+
+.header-content h1 {
+  font-size: 2.8rem;
+  color: #0ea5e9;
+  margin-bottom: 8px;
+}
+
+.header-content p {
+  font-size: 1.4rem;
+  color: #64748b;
+  margin: 0 auto;
+}
+
+/* ======= BOTÃO VOLTAR ======= */
+
+.btn-voltar {
+  position: absolute;
+  left: 20px;
+  top: 0;
+  transform: translateY(-50%);
+  background: transparent;
+  border: none;
+  color: #0ea5e9;
+  cursor: pointer;
+  font-size: 1.3rem;
+  padding: 4px 8px;
+}
+
+.btn-voltar:hover {
+  color: #0284c7;
+}
+
+
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
+  backdrop-filter: blur(10px);
+  background: rgba(255,255,255,0.85);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 3rem;
+  box-shadow: 0 5px 10px rgba(0,0,0,0.08);
+  z-index: 200;
+}
+
+.navbar-logo .logo {
+  height: 250px;
+  width: auto;
+    transition: transform 0.3s ease;
+
+}
+
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 24px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li {
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+  font-size: 1.4rem;
+
+}
+
+.navbar-links li:hover {
+  color: #0ea5e9;
+  transform: translateY(-2px);
+}
+
+.navbar-toggle {
+  display: none;
+}
+
+@media (max-width: 768px) {
+  .navbar-links { display: none; }
+  .navbar-toggle { display: block; }
+}
+
+
 .adoption-list {
-  max-width: 1100px;
-  margin: auto;
+  max-width: 1200px;
+  margin: 0 auto;
   padding: 0 10px;
-  font-family: system-ui, -apple-system, 'Segoe UI', Roboto;
 }
+
 .controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
+
 .controls h2 {
   margin: 0;
-  background: linear-gradient(135deg, #b0d5ff, #cffaff, #93c5fd);
-  border-radius: 12px;
   padding: 6px 12px;
+  border-radius: 8px;
+  background: linear-gradient(135deg, #b0d5ff, #cffaff, #93c5fd);
 }
+
 .search-area {
   display: flex;
-  gap: 8px;
+  gap: 10px;
 }
-.search-area input {
-  padding: 8px 10px;
-  border-radius: 6px;
-  border: 1px solid #26cdf7;
-  min-width: 160px;
-}
+
+.search-area input,
 .search-area select {
-  padding: 10px;
-  border-radius: 6px;
+  padding: 8px 12px;
+  border-radius: 8px;
   border: 1px solid #26cdf7;
 }
+
+
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 20px;
+  gap: 22px;
 }
+
+
 .card {
-  display: flex;
-  flex-direction: column;
-  background: #fff;
+  background: white;
   border-radius: 12px;
   overflow: hidden;
-  box-shadow: 0 20px 18px rgba(0, 0, 0, 0.06);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 20px 20px rgba(0,0,0,0.07);
+  transition: transform .2s, box-shadow .2s;
 }
+
 .card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  transform: translateY(-6px);
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
 }
-.thumb {
-  height: 200px;
-  overflow: hidden;
-}
+
 .thumb img {
   width: 100%;
-  height: 100%;
+  height: 200px;
   object-fit: cover;
 }
-.thumb:hover img {
-  transform: scale(1.05);
-}
+
 .info {
-  padding: 10px 14px;
-  font-size: 14px;
+  padding: 14px;
+  font-size: 15px;
 }
+
 .info h3 {
-  margin: 0 0 6px;
-  font-size: 20px;
+  font-size: 1.25rem;
   display: flex;
-  align-items: center;
-  gap: 10px;
-}
-.badge {
-  background: #d6d6d6;
-  padding: 2px 8px;
-  border-radius: 999px;
-  font-size: 12px;
-}
-.meta {
-  color: #555;
-  font-size: 13px;
+  justify-content: space-between;
   margin-bottom: 6px;
 }
+
+.badge {
+  font-size: 0.75rem;
+  background: #d6d6d6;
+  padding: 2px 8px;
+  border-radius: 20px;
+}
+
+.meta {
+  font-size: 0.86rem;
+  color: #555;
+  margin-bottom: 6px;
+}
+
 .desc {
-  font-size: 14px;
+  font-size: 0.9rem;
   color: #333;
   margin-bottom: 10px;
 }
+
 .actions {
   display: flex;
-  gap: 5px;
+  gap: 8px;
 }
+
 .btn {
-  padding: 8px 12px;
-  border-radius: 8px;
   background: #93c5fd;
-  color: #fff;
+  color: white;
   border: none;
+  padding: 6px 10px;
+  border-radius: 8px;
   cursor: pointer;
 }
-.btn:hover {
-  background: #16a34a;
-}
+
 .btn.primary {
   background: #bed6fc;
   color: #4195da;
 }
+
+.btn:hover {
+  background: #16a34a;
+}
+
 .btn.primary:hover {
   background: #98b9f7;
 }
-.empty {
-  text-align: center;
-  color: #666;
-  padding: 40px;
-}
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 20px;
-  z-index: 60;
-}
-.modal {
-  background: #fff;
-  border-radius: 12px;
-  max-width: 900px;
-  width: 100%;
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-  position: relative;
-}
-.modal .close {
-  position: absolute;
-  right: 10px;
-  top: 6px;
-  border: none;
-  background: transparent;
-  font-size: 26px;
-  cursor: pointer;
-}
-.modal-body {
-  display: flex;
-  gap: 18px;
-  padding: 18px;
-}
-.modal-body img {
-  width: 48%;
-  height: 320px;
-  object-fit: cover;
-  border-radius: 8px;
-}
-.detail {
-  flex: 1;
-}
-.modal-actions {
-  margin-top: 12px;
-  display: flex;
-  gap: 8px;
-}
-/**confirmar adoção */
-.toast {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  background: #4ade80;
-  color: #063e1e;
-  padding: 12px 20px;
-  border-radius: 10px;
-  font-weight: 600;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
-  animation: fade-in 0.3s ease;
-  z-index: 9999;
-}
 
-.confirm-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.55);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 80;
-}
-
-.confirm-box {
-  width: 90%;
-  max-width: 380px;
-  background: #fff;
-  padding: 22px;
-  border-radius: 14px;
-  text-align: center;
-  box-shadow: 0 20px 50px rgba(0,0,0,0.25);
-  animation: scaleIn .3s ease;
-}
-
-.confirm-box h3 {
-  margin-top: 0;
-  color: #2563eb;
-}
-
-.confirm-actions {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  margin-top: 16px;
-}
-
-@keyframes scaleIn {
-  from { transform: scale(0.9); opacity: 0; }
-  to   { transform: scale(1); opacity: 1; }
-}
-
-
-@keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
-}
-
-@media (max-width: 720px) {
-  .modal-body {
-    flex-direction: column;
-  }
-  .modal-body img {
-    width: 100%;
-    height: 220px;
-  }
-}
 </style>
