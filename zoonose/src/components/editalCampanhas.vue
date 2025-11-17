@@ -1,25 +1,94 @@
 <template>
+  <nav class="navbar">
+    <div class="navbar-logo" @click="router.push('/')">
+      <img :src="zoo" alt="ZoonoSys Logo" class="logo" />
+    </div>
+
+    <ul class="navbar-links">
+      <li @click="router.push('/')">Início</li>
+
+      <!-- NOTÍCIAS -->
+      <li class="relative group">
+        <span class="cursor-pointer" @click.stop="router.push('/edital/noticias')">
+          Notícias
+        </span>
+
+        <ul
+          class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
+                 group-hover:opacity-100 group-hover:visible transition-all duration-200
+                 transform group-hover:translate-y-1 z-50"
+        >
+          <li v-for="n in noticiasDropdown" :key="n.id">
+            <span 
+              class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+             style="font-size: 1.2rem"
+
+              @click="router.push(`/edital/${n.id}`)"
+            >
+              {{ n.nomeNoticia || n.titulo }}
+            </span>
+          </li>
+
+          <li v-if="noticiasDropdown.length === 0" class="px-4 py-2 text-gray-500 text-sm">
+            Nenhuma notícia encontrada
+          </li>
+        </ul>
+      </li>
+
+      <!-- CAMPANHAS -->
+      <li class="relative group">
+        <span class="cursor-pointer" @click.stop="router.push('/edital/campanhas')">
+          Campanhas
+        </span>
+
+        <ul
+          class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
+                 group-hover:opacity-100 group-hover:visible transition-all duration-200
+                 transform group-hover:translate-y-1 z-50"
+        >
+          <li v-for="c in campanhasAtivasDropdown" :key="c.id">
+            <span 
+              class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+             style="font-size: 1.2rem"
+
+              @click="router.push(`/edital/${c.id}`)"
+            >
+              {{ c.nomeCampanha || c.titulo }}
+            </span>
+          </li>
+
+          <li v-if="campanhasAtivasDropdown.length === 0" class="px-4 py-2 text-gray-500 text-sm">
+            Nenhuma campanha encontrada
+          </li>
+        </ul>
+      </li>
+
+      <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
+      <li @click="router.push('/login')">Login</li>
+
+    </ul>
+  </nav>
+
   <div class="campanhas-page">
-    <header class="page-header">
-      <button class="btn-voltar" @click="$router.go(-1)">
-        ← Voltar
-      </button>
+
+    <div class="page-header">
       <div class="header-content">
         <h1>Campanhas</h1>
         <p>Confira todas as campanhas ativas e programadas</p>
       </div>
-    </header>
+    </div>
+   <button class="btn-voltar" @click="$router.go(-1)">
+      ← Voltar
+    </button>
 
     <section class="filtros-section">
       <div class="filtros-container">
-        <div class="search-box">
-          <input 
-            v-model="filtros.busca" 
-            type="text"
-            placeholder="Buscar campanhas..."
-            @input="aplicarFiltros"
-          />
-        </div>
+        <input
+          v-model="filtros.busca"
+          type="text"
+          class="search-input"
+          placeholder="Buscar campanhas..."
+        />
       </div>
     </section>
 
@@ -31,57 +100,46 @@
     <main class="campanhas-container" v-else>
       <div v-if="campanhasFiltradas.length === 0" class="empty-state">
         <h3>Nenhuma campanha encontrada</h3>
-        <p>Não há campanhas ativas no momento. Volte mais tarde!</p>
+        <p>Tente ajustar os filtros ou volte mais tarde.</p>
       </div>
 
       <div v-else class="campanhas-grid">
-        <article 
-          v-for="campanha in campanhasFiltradas" 
+        <article
+          v-for="campanha in campanhasFiltradas"
           :key="campanha.id"
           class="campanha-card"
           @click="verCampanha(campanha.id)"
         >
           <div class="card-badge">
-            <span class="badge-campanha"> Campanha</span>
+            <span class="badge-campanha">Campanha</span>
           </div>
 
           <div class="card-image">
-            <img :src="getImagem(campanha)" :alt="getTitulo(campanha)" />
+            <img :src="getImagem(campanha)" />
           </div>
 
-         <div class="card-content">
-  <h3>{{ getTitulo(campanha) }}</h3>
+          <div class="card-content">
+            <h3>{{ getTitulo(campanha) }}</h3>
+            <p class="resumo">{{ getResumo(campanha) }}</p>
 
-  
+            <div class="campanha-info">
+              <div class="info-item" v-if="campanha.dataInicioCampanha">
+                <span>{{ campanha.dataInicioCampanha }} até {{ campanha.dataFimCampanha }}</span>
+              </div>
 
-  <div class="campanha-info">
-    <div class="info-item" v-if="campanha.dataInicioCampanha">
-      <span>{{ campanha.dataInicioCampanha }} até {{ campanha.dataFimCampanha }}</span>
-    </div>
+              <div class="info-item" v-if="campanha.horarioCampanha">
+                <span>{{ campanha.horarioCampanha }}</span>
+              </div>
 
-    <div class="info-item" v-if="campanha.horarioCampanha">
-      <span>{{ campanha.horarioCampanha }}</span>
-    </div>
-
-    <div class="info-item" v-if="campanha.localCampanha">
-      <span>{{ campanha.localCampanha }}</span>
-    </div>
-  </div>
-</div>
-          <!-- Footer -->
-          <div class="card-footer">
-            <div class="meta-info">
-              <span class="meta-item">
-                {{ campanha.autor || 'Sistema' }}
-              </span>
-              <span class="meta-item">
-                {{ formatarData(campanha.dataPublicacao) }}
-              </span>
+              <div class="info-item" v-if="campanha.localCampanha">
+                <span>{{ campanha.localCampanha }}</span>
+              </div>
             </div>
-            
-            <button class="btn-ver-mais">
-              Ver detalhes →
-            </button>
+          </div>
+
+          <div class="card-footer">
+            <span>{{ campanha.autor || 'Sistema' }}</span>
+            <span>{{ formatarData(campanha.dataPublicacao) }}</span>
           </div>
         </article>
       </div>
@@ -89,12 +147,16 @@
   </div>
 </template>
 
+
+
 <script setup>
 import { formatDataBR, formatHoraBR } from '@/utils/datetime'
 
 import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useEditais } from '@/data/editaisData.js'
 import { useCampanhas } from '@/data/campanhasData.js'
+import zoo from '@/assets/img/zoo.png'
 import vete from '@/assets/img/vete.jpg'
 
 const router = useRouter()
@@ -103,14 +165,27 @@ const {
   carregando, 
   carregarCampanhas 
 } = useCampanhas()
+const { todosItens: todasNoticias, carregarTodos: carregarNoticiasEditais } = useEditais()
 
-const filtros = ref({
-  busca: ''
+
+const filtros = ref({ busca: '' })
+const menuAberto = ref(false)
+
+const campanhasAtivasDropdown = computed(() =>
+  todasNoticias.value.filter(i => i.tipo?.toLowerCase() === 'campanha')
+)
+
+const noticiasDropdown = computed(() =>
+  todasNoticias.value.filter(i => i.tipo?.toLowerCase() === 'noticia')
+)
+
+onMounted(async () => {
+  await Promise.all([
+    carregarNoticias(),
+    carregarNoticiasEditais()
+  ])
 })
 
-onMounted(() => {
-  carregarCampanhas()
-})
 
 const campanhasFiltradas = computed(() => {
   let resultado = [...campanhas.value] 
@@ -192,57 +267,178 @@ function aplicarFiltros() {
 
 <style scoped>
 .campanhas-page {
+  background: linear-gradient(135deg, #effff7, #cffaff, #93c5fd);
+  width: 100%;
+  margin-right: auto;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 20px;
+  max-width: 10000px;
+  flex: 1;
+  zoom: 1.1;
+  padding-top: 70px; /* espaço para a navbar */
   min-height: 100vh;
-  background: linear-gradient(135deg, #d1fae5, #a5f3fc, #93c5fd); 
-  font-family: 'Helvetica', -apple-system, BlinkMacSystemFont;
-}
-
-.btn-voltar {
-  background: #0ea5e9;
-  color: white;
-  border: none;
- padding: 0.166rem 0rem 0rem;
-  border-radius: 0rem 10rem 0rem;
-  cursor: pointer;
-  font-size: 1.3rem;
-  margin-bottom: 0rem;
-  transition: background 0.2s;
-}
-
-.btn-voltar:hover {
-  background: #0284c7;
-}
-
-.page-header {
-   background: rgba(255, 255, 255, 0.95);
-  backdrop-filter: blur(10px);
-  padding: 1rem;
-  position: relative;
-  border-radius: 0rem 10rem 0rem;
-
+  margin-left: auto;
   
 }
 
+.btn-voltar {
+  position: fixed;
+  top: 90px; 
+  left: 20px;
+  background: none;
+  border: none;
+  color: #0ea5e9;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  z-index: 500;
+}
+
+.btn-voltar:hover {
+  color: #0284c7;
+}
+.page-header {
+  text-align: center;
+  padding: 2rem 1rem;
+  border-radius: 0 60px 0 0;
+  margin-bottom: 30px;
+}
+.navbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 90px;
+  backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.85);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 3rem;
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
+  z-index: 200;
+
+}
+
+.navbar-logo .logo {
+  height: 180px;
+  width: auto;
+  transition: transform 0.3s ease;
+}
+
+.navbar-links {
+  list-style: none;
+  display: flex;
+  gap: 20px;
+  margin: 0;
+  padding: 0;
+}
+
+.navbar-links li {
+  cursor: pointer;
+  font-weight: 500;
+  color: #333;
+  transition: all 0.2s ease;
+ font-size: 1.4rem;
+  color: #64748b;
+  margin: 0 auto;}
+
+.navbar-links li:hover {
+  color: #0ea5e9;
+  transform: translateY(-2px);
+}
+
+.navbar-toggle {
+  display: none;
+  background: transparent;
+  color: #0ea5e9;
+  font-size: 28px;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar-mobile {
+  position: absolute;
+  top: 90px;
+  right: 0;
+  background: white;
+  color: #333;
+  width: 220px;
+  list-style: none;
+  padding: 12px;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-mobile li {
+  padding: 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.navbar-mobile li:hover {
+  background: #f1f5f9;
+}
+
+@media (max-width: 768px) {
+  .navbar-links {
+    display: none;
+  }
+  .navbar-toggle {
+    display: block;
+  }
+}
+.header-content {
+  text-align: center;
+  position: relative;
+  padding: 40px 20px 25px;
+  margin: 0 auto 40px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 1900px;
+  border-radius: 20px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+.header-content h1 {
+  font-size: 2.8rem;
+  color: #0ea5e9;
+  margin-bottom: 6px;
+}
+
+.header-content p {
+  font-size: 1.4rem;
+  color: #64748b;
+  margin: 0 auto;
+}
+
+
+.btn-voltar {
+  position: absolute;
+  left: 30px;
+  top: 100px;
+  background: transparent;
+  border: none;
+  color: #0ea5e9;
+  cursor: pointer;
+  font-size: 1.5rem;
+  padding: 6px 1px;
+  font-weight: 600;
+  z-index: 300;
+}
+
+.btn-voltar:hover {
+  color: #0284c7;
+}
 .resumo {
     color: #64748b;
     line-height: 1;
     font-size: 1.5rem;
   }
 
-.header-content h1 {
-  font-size: 2.5rem;
-  color: #0ea5e9;
-  margin: 0 1rem 0rem;
-  text-align: center;
-}
 
-.header-content p {
-  font-size: 1.5rem;
-  color: #64748b;
-  margin: 0;
-  text-align: center;
-
-}
 
 .filtros-section {
   padding: 2rem;

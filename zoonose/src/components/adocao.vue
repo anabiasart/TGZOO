@@ -17,13 +17,15 @@
   </span>
 
   <ul
-    class="absolute left-0 mt-2 w-56 bg-white shadow-lg rounded-md opacity-0 invisible
-           group-hover:opacity-100 group-hover:visible transition-all duration-200
+    class="absolute left-0 mt-2 w-50 bg-white shadow-lg rounded-md opacity-0 invisible
+           group-hover:opacity-300 group-hover:visible transition-all duration-200
            transform group-hover:translate-y-1 z-50"
   >
     <li v-for="n in noticiasDropdown" :key="n.id">
       <span
         class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+             style="font-size: 1.2rem"
+
         @click="router.push(`/edital/${n.id}`)"
       >
         {{ n.nomeNoticia || n.titulo }}
@@ -33,6 +35,7 @@
     <li
       v-if="noticiasDropdown.length === 0"
       class="px-4 py-2 text-gray-500 text-sm"
+
     >
       Nenhuma notícia encontrada
     </li>
@@ -57,6 +60,8 @@
     <li v-for="c in campanhasAtivasDropdown" :key="c.id">
       <span
         class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+             style="font-size: 1.2rem"
+
         @click="router.push(`/edital/${c.id}`)"
       >
         {{ c.nomeCampanha || c.titulo }}
@@ -72,8 +77,9 @@
   </ul>
 </li>
 
-  <li @click="router.push('/login')">Login</li>
   <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
+  <li @click="router.push('/login')">Login</li>
+
   
 </ul>
 
@@ -89,15 +95,15 @@
 </nav>
 
   <div class="adocao-page">
-       <button class="btn-voltar" @click="$router.go(-1)">
-        ← Voltar
-      </button>
+      
       <div class="header-content">
         <h1>Animais para adoção:</h1>
         <p>Confira os animais disponíveis</p>
         
       </div>
-     
+      <button class="btn-voltar" @click="$router.go(-1)">
+        ← Voltar
+      </button>
 
     <section class="adoption-list">
       <header class="controls">
@@ -209,6 +215,7 @@ import pata from "../assets/img/pata.jpg"
 import zoo from "../assets/img/zoo.png"
 import { useEditais } from "@/data/editaisData.js"
 
+
 const { todosItens: todasNoticias, carregarTodos: carregarNoticias } = useEditais()
 
 const showToast = ref(false)
@@ -306,6 +313,7 @@ function truncate(text, n) {
   return text.length > n ? text.slice(0, n) + '...' : text
 }
 
+
 function openModal(animal) { selected.value = animal }
 function closeModal() { selected.value = null }
 </script>
@@ -313,10 +321,20 @@ function closeModal() { selected.value = null }
 <style scoped>
 .adocao-page {
   background: linear-gradient(135deg, #effff7, #cffaff, #93c5fd);
-    width: 100%;
-    padding-top: 140px;
-    min-height: 100vh;
+  width: 100%;
+  margin-right: auto;
+  align-items: flex-start;
+  justify-content: center;
+  margin-top: 20px;
+  max-width: 10000px;
+  flex: 1;
+  zoom: 1.1;
+  padding-top: 100px; /* espaço para a navbar */
+  min-height: 100vh;
+  margin-left:auto;
+  
 }
+
 .navbar {
   position: fixed;
   top: 0;
@@ -324,27 +342,26 @@ function closeModal() { selected.value = null }
   width: 100%;
   height: 90px;
   backdrop-filter: blur(10px);
-  background: rgba(255,255,255,0.85);
+  background: rgba(255, 255, 255, 0.85);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0.5rem 3rem;
-  box-shadow: 0 5px 10px rgba(0,0,0,0.08);
+  box-shadow: 0 5px 10px rgba(0, 0, 0, 0.08);
   z-index: 200;
+
 }
 
 .navbar-logo .logo {
-  height: 250px;
+  height: 180px;
   width: auto;
-    transition: transform 0.3s ease;
-
+  transition: transform 0.3s ease;
 }
-
 
 .navbar-links {
   list-style: none;
   display: flex;
-  gap: 24px;
+  gap: 20px;
   margin: 0;
   padding: 0;
 }
@@ -354,8 +371,9 @@ function closeModal() { selected.value = null }
   font-weight: 500;
   color: #333;
   transition: all 0.2s ease;
-  font-size: 1.4rem;
-
+   font-size: 1.4rem;
+  color: #64748b;
+  margin: 0 auto;
 }
 
 .navbar-links li:hover {
@@ -365,26 +383,63 @@ function closeModal() { selected.value = null }
 
 .navbar-toggle {
   display: none;
+  background: transparent;
+  color: #0ea5e9;
+  font-size: 28px;
+  border: none;
+  cursor: pointer;
+}
+
+.navbar-mobile {
+  position: absolute;
+  top: 90px;
+  right: 0;
+  background: white;
+  color: #333;
+  width: 220px;
+  list-style: none;
+  padding: 12px;
+  border-radius: 0 0 12px 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.navbar-mobile li {
+  padding: 14px;
+  cursor: pointer;
+  border-bottom: 1px solid #eee;
+}
+
+.navbar-mobile li:hover {
+  background: #f1f5f9;
 }
 
 @media (max-width: 768px) {
-  .navbar-links { display: none; }
-  .navbar-toggle { display: block; }
+  .navbar-links {
+    display: none;
+  }
+  .navbar-toggle {
+    display: block;
+  }
 }
+
 
 .header-content {
   text-align: center;
-  margin-bottom: 40px;
   position: relative;
-  padding-bottom: 20px;
- background: rgba(255,255,255,0.85);
-
+  padding: 40px 20px 25px;
+  margin: 0 auto 40px;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  width: 100%;
+  max-width: 1900px;
+  border-radius: 20px;
+  box-shadow: 0 3px 10px rgba(0,0,0,0.08);
 }
 
 .header-content h1 {
   font-size: 2.8rem;
   color: #0ea5e9;
-  margin-bottom: 8px;
+  margin-bottom: 6px;
 }
 
 .header-content p {
@@ -392,24 +447,24 @@ function closeModal() { selected.value = null }
   color: #64748b;
   margin: 0 auto;
 }
-  .btn-voltar{
-  position: a bsolute;
-  left: 20px;
-  top: 0;
-  transform: translateY(-50%);
+
+.btn-voltar {
+  position: absolute;
+  left: 30px;
+  top: 100px; /* ↓ desce o botão */
   background: transparent;
   border: none;
   color: #0ea5e9;
   cursor: pointer;
-  font-size: 1.3rem;
-  padding: 4px 8px;
+  font-size: 1.5rem;
+  padding: 6px 1px;
+  font-weight: 600;
+  z-index: 300;
 }
 
 .btn-voltar:hover {
   color: #0284c7;
 }
-
-
 
 
 .adoption-list {
@@ -478,11 +533,11 @@ function closeModal() { selected.value = null }
 }
 .info {
   padding: 10px 14px;
-  font-size: 14px;
+  font-size: 1rem;
 }
 .info h3 {
   margin: 0 0 6px;
-  font-size: 20px;
+  font-size: 1.4rem;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -491,15 +546,15 @@ function closeModal() { selected.value = null }
   background: #d6d6d6;
   padding: 2px 8px;
   border-radius: 999px;
-  font-size: 12px;
+  font-size: 1rem;
 }
 .meta {
   color: #555;
-  font-size: 13px;
+  font-size: 1.2rem;
   margin-bottom: 6px;
 }
 .desc {
-  font-size: 14px;
+  font-size: 1.4rem;
   color: #333;
   margin-bottom: 10px;
 }
@@ -580,12 +635,13 @@ function closeModal() { selected.value = null }
 .toast {
   position: fixed;
   bottom: 20px;
-  right: 20px;
+  right: 50px;
   background: #4ade80;
   color: #063e1e;
   padding: 12px 20px;
   border-radius: 10px;
   font-weight: 600;
+  font-size: 1.4rem;
   box-shadow: 0 8px 22px rgba(0, 0, 0, 0.25);
   animation: fade-in 0.3s ease;
   z-index: 9999;
@@ -602,6 +658,7 @@ function closeModal() { selected.value = null }
 }
 
 .confirm-box {
+  font-size: 1.3rem;
   width: 90%;
   max-width: 380px;
   background: #fff;
@@ -621,6 +678,7 @@ function closeModal() { selected.value = null }
   display: flex;
   justify-content: center;
   gap: 12px;
+  
   margin-top: 16px;
 }
 

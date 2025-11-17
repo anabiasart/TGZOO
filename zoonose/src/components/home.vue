@@ -142,6 +142,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <li v-for="n in noticiasDropdown" :key="n.id">
       <span
         class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+             style="font-size: 1.2rem"
+
         @click="router.push(`/edital/${n.id}`)"
       >
         {{ n.nomeNoticia || n.titulo }}
@@ -175,6 +177,8 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <li v-for="c in campanhasAtivasDropdown" :key="c.id">
       <span
         class="block px-4 py-2 hover:bg-gray-100 cursor-pointer text-sm"
+             style="font-size: 1.2rem"
+
         @click="router.push(`/edital/${c.id}`)"
       >
         {{ c.nomeCampanha || c.titulo }}
@@ -190,8 +194,9 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   </ul>
 </li>
 
-  <li @click="router.push('/login')">Login</li>
   <li @click="router.push('/edital/adocao')">Adote um Amigo</li>
+  <li @click="router.push('/login')">Login</li>
+
   
 </ul>
 
@@ -201,8 +206,9 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
     <li @click="router.push('/')">Início</li>
     <li @click="router.push('/edital/noticias')">Notícias</li> 
     <li @click="router.push('/edital/campanhas')">Campanhas</li>
-    <li @click="router.push('/login')">Login</li>
     <li @click="router.push('/contato')">Contato</li>
+    <li @click="router.push('/login')">Login</li>
+
   </ul>
 </nav>
 
@@ -337,6 +343,10 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   gap: 20px;
   margin: 0;
   padding: 0;
+  font-size: 1.4rem;
+  color: #64748b;
+  margin: 0 70px;
+  
 }
 
 .navbar-links li {
@@ -344,6 +354,9 @@ function toggleFaq(index) { faq.value[index].aberto = !faq.value[index].aberto }
   font-weight: 500;
   color: #333;
   transition: all 0.2s ease;
+   font-size: 1.2rem;
+  color: #64748b;
+  margin: 0 auto;
 }
 
 .navbar-links li:hover {
